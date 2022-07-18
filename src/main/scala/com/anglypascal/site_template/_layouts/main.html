@@ -1,0 +1,30 @@
+---
+layout: default
+---
+<div class="home">
+  {{#page}}
+    <h1 class="page-heading">{{ title }}</h1>
+  {{/page}}
+
+  {{{ content }}}
+  
+  {{#page}}<h2 class="post-list-heading">{{ list_title }}</h2>{{/page}}
+
+  <ul class="post-list">
+  {{#posts}}
+    <li>
+      <span class="post-meta">{{ date }}</span>
+      <h3>
+        <a class="post-link" href="{{ url }}">
+          {{ title}}
+        </a>
+      </h3>
+      {{#site}}{{#show_excerpts}}{{{ excerpt }}}{{/show_excerpts}}{{/site}}
+    </li>
+
+    {{#site}}{{#paginate}}
+    <!--> will do this later, check the later part of minima</!-->
+    {{/paginate}}{{/site}}
+  {{/posts}}
+  </ul>
+</div>
