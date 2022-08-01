@@ -1,15 +1,16 @@
 package com.anglypascal.scalite.readers
 
 import java.io.File
-// import scala.collection.mutable.LinkedHashMap
 
-class DirectoryReader[A](directory: String):
-  /** */
+/** Trait to collect all the files in a directory in a map of specified objects
+  */
+trait DirectoryReader[A](directory: String):
+
+  /** Get the paths to the files inside this directory */
   def getListOfFiles(dir: String): Array[String] =
     val file = new File(dir)
     file.listFiles.filter(_.isFile).map(_.getPath)
 
+  /** Recover just the filename without the exteions from a file path */
   def getFileName(filename: String): String =
     filename.split("/").last.split(".").head
-
-  // def getObjectMap: Map[String, A]
