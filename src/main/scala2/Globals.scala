@@ -1,4 +1,4 @@
-package com.anglypascal.scalite
+// package com.anglypascal.scalite
 
 import com.rallyhealth.weejson.v1._
 import com.rallyhealth.weejson.v1.yaml.{FromYaml, ToYaml}
@@ -7,7 +7,7 @@ import java.io.File
 import scala.collection.mutable.LinkedHashMap
 
 object Globals {
-  val siteDir = "/home/ahsan/git/scalite/src/main/scala/com/anglypasal/site_template"
+  val siteDir = "/home/ahsan/git/scalite/src/main/scala/com/anglypascal/site_template"
   val postsDir = "/_posts"
   val layoutsDir = "/_layouts"
   val includesDir = "/_includes"
@@ -23,10 +23,8 @@ object Globals {
     "author" -> Obj(),
     "description" -> "blank description"
   )
-  val layouts = LinkedHashMap[String, Layout]()
-
+  val layouts = readLayouts()
   readConfig()
-  readLayouts()
 
   val partials = layouts.filter(p => List("head", "header", "footer").contains(p._1))
 
@@ -37,19 +35,18 @@ object Globals {
       siteObj(key) = data(key)
   }
 
-  private def readLayouts(): Unit = {
+  private def readLayouts(): List[Layout] = {
     def fileToLayout(file: File): (String, Layout) = {
       val ln = file.getPath().split("/").last.split('.').head
       (ln, new Layout(ln))
     }
     
-    layouts ++= 
-      List(layoutsDir, includesDir)
-        .map(x => new File(siteDir + x))
-        .filter(d => d.exists && d.isDirectory)
-        .map(_.listFiles.filter(_.isFile).toList)
-        .flatten
-        .map(fileToLayout)
+    List(layoutsDir, includesDir)
+      .map(x => new File(siteDir + x))
+      .filter(d => d.exists && d.isDirectory)
+      .map(_.listFiles.filter(_.isFile).toList)
+      .flatten
+      .map(fileToLayout)
   }
 
   private def readHeaderFooter(): Unit = {

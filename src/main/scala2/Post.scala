@@ -1,4 +1,4 @@
-package com.anglypascal.scalite
+// package com.anglypascal.scalite
 
 import com.anglypascal.mustache.Mustache
 import com.rallyhealth.weejson.v1._

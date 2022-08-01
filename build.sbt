@@ -1,24 +1,25 @@
-import Dependencies._
+val scala3Version = "3.1.3"
 
-ThisBuild / scalaVersion     := "2.13.8"
-ThisBuild / version          := "0.1.0-SNAPSHOT"
-ThisBuild / organization     := "com.anglypascal"
-ThisBuild / organizationName := "example"
-
-lazy val root = (project in file("."))
+lazy val root = project
+  .in(file("."))
   .settings(
-    name := "scalite",
-    libraryDependencies += scalaTest % Test,
-    libraryDependencies += "org.planet42" %% "laika-io" % "0.18.2",
-    libraryDependencies += "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
-    /* libraryDependencies += "io.circe" %% "circe-yaml" % "0.14.1", */
-    /* libraryDependencies += "io.circe" %% "circe-parser" % "0.14.1", */
-   libraryDependencies ++= Seq(
-     "com.rallyhealth" %% "weepickle-v1" % "1.7.2",
-     "com.rallyhealth" %% "weeyaml-v1" % "1.7.2"
-   ),
-   libraryDependencies += "com.anglypascal" %% "mustache" % "0.1.2-SNAPSHOT",
+    name         := "scalite",
+    version      := "0.1.1",
+    organization := "com.anglypascal",
+    scalaVersion := scala3Version,
+    libraryDependencies ++= Seq(
+      "org.scalameta" %% "munit"     % "0.7.29" % Test,
+      "org.scalatest" %% "scalatest" % "3.2.12"  % Test,
+      "com.rallyhealth" %% "weepickle-v1" % "1.7.2",
+      "com.rallyhealth" %% "weeyaml-v1" % "1.7.2",
+      "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
+      "org.planet42" %% "laika-io" % "0.18.2",
+    ),
+   libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.1.1",
   )
 
-scalacOptions += "-deprecation"
-// See https://www.scala-sbt.org/1.x/docs/Using-Sonatype.html for instructions on how to publish to Sonatype.
+scalacOptions ++= Seq(
+  "-deprecation",
+  "-feature"
+  /* "-explain" */
+)

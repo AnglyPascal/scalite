@@ -1,11 +1,9 @@
-package com.anglypascal.scalite
+// package com.anglypascal.scalite
 
 import com.anglypascal.mustache.Mustache 
 
 import java.nio.file.{Files, Path}
-import com.rallyhealth.weejson.v1.yaml.{FromYaml, ToYaml}
-// import com.rallyhealth.weepickle.v1.WeePickle._
-// import com.rallyhealth.weejson.v1.jackson._
+import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.rallyhealth.weejson.v1._
 
 import sttp.client3._
