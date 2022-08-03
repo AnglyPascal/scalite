@@ -21,3 +21,5 @@ case class LayoutRenderingException(log: String) extends ScaliteException(log)
   * Obj or a Map
   */
 case class YAMLParserException(log: String) extends ScaliteException(log)
+
+case class DateParserException(log: String) extends ScaliteException(log)

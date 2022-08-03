@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.readers
 
-import com.anglypascal.scalite.Layout
+import com.anglypascal.scalite.documents.Layout
 
 /** Reads and collects all the layouts in the _layouts directory */
 class LayoutsReader(directory: String)
@@ -11,7 +11,7 @@ class LayoutsReader(directory: String)
     */
   def getObjectMap: Map[String, Layout] =
     val files = getListOfFiles(directory)
-    val map = files.map(f => (getFileName(f), new Layout(f))).toMap
+    val map = files.map(f => (getFileName(f), Layout(f))).toMap
     for (s, l) <- map do l.set_parent(map)
     map
 

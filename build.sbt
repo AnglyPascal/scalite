@@ -14,6 +14,7 @@ lazy val root = project
       "com.rallyhealth" %% "weeyaml-v1" % "1.7.2",
       "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
       "org.planet42" %% "laika-io" % "0.18.2",
+      "com.github.nscala-time" %% "nscala-time" % "2.30.0",
     ),
    libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.1.1",
   )

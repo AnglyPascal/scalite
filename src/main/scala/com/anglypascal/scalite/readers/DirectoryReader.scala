@@ -3,6 +3,9 @@ package com.anglypascal.scalite.readers
 import java.io.File
 
 /** Trait to collect all the files in a directory in a map of specified objects
+ *
+ *  TODO: test the methods to see if some sort of filtering is required. Also symlinks
+ *  could cause problems. 
   */
 trait DirectoryReader[A](directory: String):
 

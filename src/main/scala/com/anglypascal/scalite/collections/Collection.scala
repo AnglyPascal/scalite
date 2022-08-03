@@ -1,4 +1,4 @@
-package com.anglypascal.scalite
+package com.anglypascal.scalite.collections
 
 import scala.collection.mutable.Set
 import com.rallyhealth.weejson.v1.Obj
@@ -21,3 +21,18 @@ trait Collection[A]:
 
   /** Add a new thing to this collection */
   def add(a: A) = things += a
+
+/** TODO: The collection name need to be specified in the _config.yml :
+  *
+  * collection:
+  *   - collection_name
+  *
+  * If the folder name is collection_name, then the content of that collection
+  * will belong to _collection_name. If needed to specify collection data, used
+  * as global while rendering the collection:
+  *
+  * collection: collection_name: tag: hello
+  *
+  * These collection names will be moved to the global data under the entry
+  * "collection_name"
+  */

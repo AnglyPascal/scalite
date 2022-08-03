@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.readers
 
-import com.anglypascal.scalite.{Post, Layout}
+import com.anglypascal.scalite.documents.{Post, Layout}
 import com.anglypascal.scalite.collections.Tag
 import com.anglypascal.scalite.converters.hasConverter
 import scala.collection.mutable.LinkedHashMap
@@ -14,11 +14,9 @@ class PostsReader(directory: String) extends DirectoryReader[Post](directory):
   def getObjectMap(layouts: Map[String, Layout]): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
-      val post = new Post(fn)
+      val post = Post(fn, layouts)
       (post.title, post)
-    val map = files.filter(hasConverter).map(f).toMap
-    for (s, p) <- map do p.set_parent(layouts)
-    map
+    files.filter(hasConverter).map(f).toMap
 
   /** Add each post to the Tag collections. If the Tag object for the tag name
     * doesn't exist, create it.
@@ -30,7 +28,7 @@ class PostsReader(directory: String) extends DirectoryReader[Post](directory):
     val posts = getObjectMap(layouts)
     for
       (s, p) <- posts
-      t <- p.obj("tags").arr
+      t <- p.front_matter("tags").arr
     do
       if tags.contains(t.str) then tags(t.str).add(p)
       else

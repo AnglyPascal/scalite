@@ -1,9 +1,11 @@
 package com.anglypascal.scalite
 
-import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import com.anglypascal.scalite.readers.*
-import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.utils.yamlParser
 import com.anglypascal.scalite.collections.Tag
+
+import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
+import scala.collection.mutable.LinkedHashMap
 
 object Globals:
   val site = Obj(
@@ -25,6 +27,7 @@ object Globals:
     )
   )
 
+  /** Support for data provided in _data folder. this will be in site("data") */
   private val config = yamlParser(site("base_dir").str + "/config.yml")
   for (key, value) <- config.obj do site(key) = value
 

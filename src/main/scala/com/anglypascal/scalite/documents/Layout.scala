@@ -1,4 +1,4 @@
-package com.anglypascal.scalite
+package com.anglypascal.scalite.documents
 
 import com.anglypascal.mustache.Mustache
 import com.rallyhealth.weejson.v1.Obj
@@ -12,12 +12,12 @@ import com.rallyhealth.weejson.v1.Obj
 class Layout(filename: String) extends Document(filename):
 
   /** The mustache object for this layout */
-  lazy val mustache = new Mustache(content)
+  lazy val mustache = new Mustache(main_matter)
 
-  /** Evaluate the template by rendering it with it's context and partials
-    *
-    * TODO: do we need the partials to be Map[String, Layout]?
-    */
-  def eval(context: Obj, partials: Map[String, Layout]): String =
+  /** Evaluate the template by rendering it with it's context and partials */
+  def render(context: Obj, partials: Map[String, Layout]): String = 
     val p = partials.map((s, l) => (s, l.mustache))
     mustache.render(context, p)
+
+object Layout:
+  def apply(filename: String) = new Layout(filename)

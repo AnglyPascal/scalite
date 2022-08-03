@@ -1,4 +1,6 @@
-package com.anglypascal.scalite
+package com.anglypascal.scalite.documents
+
+import com.anglypascal.scalite.utils.*
 
 import scala.io.Source
 import scala.util.matching.Regex
@@ -16,7 +18,7 @@ import _root_.com.rallyhealth.weejson.v1._
 trait Document(filename: String) extends Page:
 
   /** read the file and store into a Source */
-  private val src = readFile(filename)
+  private val src = readFile(filename).toString
 
   /** Regex to match the YAML front matter and the remaining content */
   private val yaml_regex = raw"\A---\n?([\s\S\n]*)---\n?([\s\S\n]*)".r
@@ -26,11 +28,10 @@ trait Document(filename: String) extends Page:
     * TODO: This is inefficient. write a custom parser that cuts the front
     * matter and returns the leftover source
     */
-  val (obj, content) =
-    val raw = src.toString
-    raw match
+  val (front_matter, main_matter) =
+    src match
       case yaml_regex(a, b) => (yamlParser(a), b)
-      case _                => (Obj(), raw)
+      case _                => (Obj(), src)
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -38,25 +39,8 @@ trait Document(filename: String) extends Page:
     * TODO: In the Posts class, check if layout is empty, and throw exception
     */
   val parent_name =
-    if obj.obj.contains("layout") then
-      obj("layout") match
+    if front_matter.obj.contains("layout") then
+      front_matter("layout") match
         case s: Str => s.str
         case _      => ""
     else ""
-
-  // need to add support for "visible"
-
-  /** First render this document, then send its content to be rendered with its
-    * parent
-    */
-  def render(context: Obj, partials: Map[String, Layout]): String =
-    val str = eval(context, partials)
-    parent match
-      case l: Layout =>
-        context("content") = str
-        l.render(context, partials)
-      case null => str
-
-  /** Method to specify how this document is going to be rendered
-    */
-  def eval(context: Obj, partials: Map[String, Layout]): String

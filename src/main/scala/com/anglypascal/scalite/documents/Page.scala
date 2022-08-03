@@ -1,4 +1,4 @@
-package com.anglypascal.scalite
+package com.anglypascal.scalite.documents
 
 import com.rallyhealth.weejson.v1.Obj
 
@@ -15,6 +15,10 @@ import com.rallyhealth.weejson.v1.Obj
   */
 trait Page:
 
+  /** TODO: take a paramenter? like Site with all the global variables, 
+   *  This could keep them loosely coupled
+   */
+
   /** Specify the parent template name */
   val parent_name: String
 
@@ -22,8 +26,8 @@ trait Page:
   def parent = _parent
 
   /** Search for the parent layout in the map holding layouts. */
-  def set_parent(map: Map[String, Layout]): Unit =
-    map.get(parent_name) match
+  def set_parent(layouts: Map[String, Layout]): Unit =
+    layouts.get(parent_name) match
       case Some(l) => _parent = l
       case _       => _parent = null
 
@@ -39,10 +43,11 @@ trait Page:
     * rendering mustache. This results in a HTML formatted string holding the
     * content of the page.
     *
-    * @param context
-    *   a weejson Obj containing the values for the tags in the templates
+    * @param globals
+    *   a weejson Obj containing the global values for site. It will also contain the
+    *   "content" tag that will be rendered as part of this document
     * @param partials
     *   contains Layouts in the _includes directory that will be used as
     *   mustache partials
     */
-  def render(context: Obj, partials: Map[String, Layout]): String
+  def render(globals: Obj, partials: Map[String, Layout]): String

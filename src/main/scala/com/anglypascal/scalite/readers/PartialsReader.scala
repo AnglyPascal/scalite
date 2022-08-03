@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.readers
 
-import com.anglypascal.scalite.Layout
+import com.anglypascal.scalite.documents.Layout
 
 /** Read the layouts in the _includes directory and mark them as partials
   */

@@ -1,4 +1,6 @@
-package com.anglypascal.scalite
+package com.anglypascal.scalite.converters
+
+import com.anglypascal.scalite.ConverterException
 
 import scala.util.matching.Regex
 
