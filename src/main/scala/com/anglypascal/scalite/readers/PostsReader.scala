@@ -48,6 +48,7 @@ object PostsReader:
   def apply(
       directory: String,
       layouts: Map[String, Layout],
-      tags: LinkedHashMap[String, Tag]
+      tags: LinkedHashMap[String, Tag],
+      globals: Obj
   ): Map[String, Post] =
-    (new PostsReader(directory)).getObjectMap(layouts, tags)
+    (new PostsReader(directory, globals)).getObjectMap(layouts, tags)

@@ -15,7 +15,7 @@ import _root_.com.rallyhealth.weejson.v1._
   * @param filename
   *   the name of the file
   */
-trait Document(filename: String, globals: Obj) extends Page:
+trait Document(filename: String) extends Page:
 
   /** read the file and store into a Source */
   private val src = readFile(filename).toString

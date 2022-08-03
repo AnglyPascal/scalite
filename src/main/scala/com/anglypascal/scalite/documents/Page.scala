@@ -13,7 +13,7 @@ import com.rallyhealth.weejson.v1.Obj
   * Pages that contain user given content are handled by the Document subtrait
   * of Page.
   */
-trait Page(globals: Obj):
+trait Page:
 
   /** Specify the parent template name */
   protected val parent_name: String
@@ -26,15 +26,6 @@ trait Page(globals: Obj):
     layouts.get(parent_name) match
       case Some(l) => _parent = l
       case _       => _parent = null
-
-  /** Some local variables need to access the globally set defaults. This is
-    * called during render time, so the same set of globals passed to render
-    * gets passed here.
-    *
-    * @param globals
-    *   a weejson Obj with the global variables
-    */
-  protected def setupLocals(globals: Obj): Obj
 
   /** Method to write the content of the page to the output file. Needs to be
     * abstract.

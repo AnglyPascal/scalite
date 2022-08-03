@@ -5,7 +5,10 @@ package com.anglypascal.scalite.converters
   */
 import com.anglypascal.scalite.{Converter, ConverterException}
 
-val converters = Array[Converter](Markdown)
+val converters =
+  Array[Converter](
+    Markdown
+  )
 
 def findConverter(ext: String): Option[Converter] =
   converters.filter(_.matches(ext)).headOption

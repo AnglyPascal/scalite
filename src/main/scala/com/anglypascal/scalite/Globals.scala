@@ -25,7 +25,7 @@ object Globals:
       "name" -> "author name",
       "email" -> "author email"
     ),
-    "date_format" -> "dd MMM, yyyy",
+    "date_format" -> "dd MMM, yyyy"
   )
 
   /** Support for data provided in _data folder. this will be in site("data") */
@@ -35,9 +35,19 @@ object Globals:
   val tags = LinkedHashMap[String, Tag]()
   val layouts = LayoutsReader(site("base_dir").str + site("layout_dir").str)
   val partials = PartialsReader(site("base_dir").str + site("static_dir").str)
-  val statics = PostsReader(site("base_dir").str, layouts, tags)
-  val posts =
-    PostsReader(site("base_dir").str + site("layout_dir").str, layouts, tags)
+
+  val statics = PostsReader(
+    site("base_dir").str,
+    layouts,
+    tags,
+    site
+  )
+  val posts = PostsReader(
+    site("base_dir").str + site("layout_dir").str,
+    layouts,
+    tags,
+    site
+  )
 
   /** If I want to allow for collections, these things need to go to a different
     * class? And the variables should be extensible

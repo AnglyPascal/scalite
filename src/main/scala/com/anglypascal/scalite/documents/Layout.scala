@@ -9,8 +9,8 @@ import com.rallyhealth.weejson.v1.Obj
   *
   * TODO: Layouts might have locally specified theme
   */
-class Layout(filename: String, globals: Obj)
-    extends Document(filename, globals):
+class Layout(filename: String)
+    extends Document(filename):
 
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)

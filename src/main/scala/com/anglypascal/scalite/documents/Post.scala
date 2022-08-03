@@ -6,13 +6,17 @@ import com.anglypascal.scalite.collections.*
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 
-import com.rallyhealth.weejson.v1.{Obj, Str, Bool}
+import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
 import scala.collection.mutable.LinkedHashMap
 
 /** Reads the content of a post file and prepares a Page object for that.
   *
   * @param filename
-  *   path to the post file
+  *   "path" to the post file
+  *
+  * TODO: Check that it's the path that's being pushed in, and not just the
+  * filename. The whole path is important as other than the _post suffix, all
+  * the other subfolders will be counted as categories for this post
   *
   * TODO: also what about posts inside a collection? those will have a slightly
   * different set locals, no?
@@ -21,7 +25,7 @@ import scala.collection.mutable.LinkedHashMap
   * into play. Give functions that lets us add a tag to this post.
   */
 class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
-    extends Document(filename, globals)
+    extends Document(filename)
     with Ordered[Post]:
 
   if parent_name == "" then
@@ -59,6 +63,10 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
   def date: String = _date
   private val _date = dataObj.getOrElse("date_string")("undated")
 
+  /** TODO: this hardcoding of tags and categories is not very nice, is it? Now
+    * if I want to add one more type of collection, I would have to add more
+    * blocks and logic and shit. how to avoid that?
+    */
   def tagNames: List[String] = _tagNames
   private val _tagNames =
     if front_matter.obj.contains("tags") then
@@ -68,9 +76,16 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
         case _      => List()
     else List()
 
+  /** TODO: maybe I don't need to store the whole tag, i'll store just the
+    * informations that's needed to publish on this post's page
+    */
   private val _tags: LinkedHashMap[String, Tag] = LinkedHashMap()
   def addTag(name: String, tag: Tag) = _tags(name) = tag
-  def tags: LinkedHashMap[String, Tag] = _tags
+
+  /** TODO: make a common class or someting that is added to this class which
+    * enables it to handle a new collection or something
+    */
+  def collectionNames(nameOfCollection: String): List[String] = ???
 
   /** Permalink of post TODO: more doc and check later
     */
@@ -80,9 +95,10 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
       globals.getOrElse("permalink")(filename)
     )
 
-  val url: String = URL("template goes here")(front_matter)
+  def url: String = _url
+  private val _url = URL("template goes here")(front_matter)
 
-  Obj(
+  private val locals = Obj(
     "title" -> title,
     "date" -> date
     /** also append all the other tags in front_matter
@@ -100,7 +116,6 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
     * TODO: there can be different types of exceptions
     */
   def render(partials: Map[String, Layout]): String =
-    val locals = setupLocals(globals)
 
     val str = convert(main_matter, filename) match
       case Right(s) => s
@@ -111,8 +126,6 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
         l.render(context, partials)
       case null => str
 
-  // def addToCollections: Unit = ???
-
   /** TODO: if show_excerpt is true, then create an excerpt object here? and add
     * the excerpt to the obj
     */
@@ -120,9 +133,6 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
   /** TODO: Related posts? Custom sorting?
     */
   def compare(that: Post) = this.date compare that.date
-
-  /** TODO: need to add support for "visible"
-    */
 
 object Post:
   def apply(
