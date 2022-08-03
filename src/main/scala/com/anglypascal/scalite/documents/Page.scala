@@ -13,23 +13,28 @@ import com.rallyhealth.weejson.v1.Obj
   * Pages that contain user given content are handled by the Document subtrait
   * of Page.
   */
-trait Page:
-
-  /** TODO: take a paramenter? like Site with all the global variables, 
-   *  This could keep them loosely coupled
-   */
+trait Page(globals: Obj):
 
   /** Specify the parent template name */
-  val parent_name: String
+  protected val parent_name: String
 
-  private var _parent: Layout = null
-  def parent = _parent
+  protected var _parent: Layout = null
+  protected def parent = _parent
 
   /** Search for the parent layout in the map holding layouts. */
-  def set_parent(layouts: Map[String, Layout]): Unit =
+  protected def setupParent(layouts: Map[String, Layout]): Unit =
     layouts.get(parent_name) match
       case Some(l) => _parent = l
       case _       => _parent = null
+
+  /** Some local variables need to access the globally set defaults. This is
+    * called during render time, so the same set of globals passed to render
+    * gets passed here.
+    *
+    * @param globals
+    *   a weejson Obj with the global variables
+    */
+  protected def setupLocals(globals: Obj): Obj
 
   /** Method to write the content of the page to the output file. Needs to be
     * abstract.
@@ -44,8 +49,8 @@ trait Page:
     * content of the page.
     *
     * @param globals
-    *   a weejson Obj containing the global values for site. It will also contain the
-    *   "content" tag that will be rendered as part of this document
+    *   a weejson Obj containing the global values for site. It will also
+    *   contain the "content" tag that will be rendered as part of this document
     * @param partials
     *   contains Layouts in the _includes directory that will be used as
     *   mustache partials

@@ -8,12 +8,17 @@ case class URL(str: String):
   /** */
   val template = new Mustache(str)
 
-  def render(placeholders: Obj): String = template.render(placeholders)
+  def apply(placeholders: Obj) =
+    template.render(placeholders, partials)
 
-  def apply(placeholders: Obj) = render(placeholders)
-
-  /** TODO: Define the partials here, that are the abbreviations
-   */
+  private val partials: Map[String, Mustache] =
+    Map(
+      "date" -> "/{{categories}}/{{year}}/{{month}}/{{day}}/{{title}}{{output_ext}}",
+      "pretty" -> "/{{categories}}/{{year}}/{{month}}/{{day}}/{{title}}",
+      "ordinal" -> "/{{categories}}/{{year}}/{{y_day}}/{{title}}{{output_ext}}",
+      "weekdate" -> "/{{categories}}/{{year}}/W{{week}}/{{short_day}}/{{title}}{{output_ext}}",
+      "none" -> "/{{categories}}/{{title}}{{output_ext}}"
+    ).map((s, m) => (s, new Mustache(m)))
 
 /** TODO: The permalink url will be given in form of an absolute link or a
   * mustache template with the placeholders from a list.
@@ -24,10 +29,4 @@ case class URL(str: String):
   * then individual posts might override the global setting.
   *
   * There are some rules that I need to flesh out still
-  */
-
-/** Where is the url creation done?
-  *
-  * I think it should be done by each page at render time, as the url will
-  * depend on the local data
   */

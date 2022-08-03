@@ -9,13 +9,14 @@ import com.rallyhealth.weejson.v1.Obj
   *
   * TODO: Layouts might have locally specified theme
   */
-class Layout(filename: String) extends Document(filename):
+class Layout(filename: String, globals: Obj)
+    extends Document(filename, globals):
 
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)
 
   /** Evaluate the template by rendering it with it's context and partials */
-  def render(context: Obj, partials: Map[String, Layout]): String = 
+  def render(context: Obj, partials: Map[String, Layout]): String =
     val p = partials.map((s, l) => (s, l.mustache))
     mustache.render(context, p)
 

@@ -24,7 +24,8 @@ object Globals:
     "author" -> Obj(
       "name" -> "author name",
       "email" -> "author email"
-    )
+    ),
+    "date_format" -> "dd MMM, yyyy",
   )
 
   /** Support for data provided in _data folder. this will be in site("data") */

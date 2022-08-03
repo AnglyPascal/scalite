@@ -2,51 +2,87 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.converters.convert
 import com.anglypascal.scalite.utils.*
-
-import com.rallyhealth.weejson.v1.{Obj, Str, Bool}
+import com.anglypascal.scalite.collections.*
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
+
+import com.rallyhealth.weejson.v1.{Obj, Str, Bool}
+import scala.collection.mutable.LinkedHashMap
 
 /** Reads the content of a post file and prepares a Page object for that.
   *
   * @param filename
   *   path to the post file
   *
-  * TODO: make it comparable, so that sorting is possible
+  * TODO: also what about posts inside a collection? those will have a slightly
+  * different set locals, no?
+  *
+  * TODO: add lists of tags and categories. Ok this is where collection comes
+  * into play. Give functions that lets us add a tag to this post.
   */
-class Post(filename: String, layouts: Map[String, Layout])
-    extends Document(filename)
+class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
+    extends Document(filename, globals)
     with Ordered[Post]:
 
   if parent_name == "" then
     throw NoLayoutException("No layout specified in the front matter")
 
-  set_parent(layouts)
+  setupParent(layouts)
 
   /** Get the title of the post from the front matter, defaulting back to the
-    * title parsed from the filename.
+    * title parsed from the filename. If the filename has no title given, simply
+    * name this post "untitled"
     */
-  val title: String =
+  def title: String = _title
+  private val _title: String =
     front_matter.getOrElse("title")(
       titleParser(filename).getOrElse("untitled")
     )
 
-  /** TODO: The date has to be more sophisticated. It should be a dict with each
-    * individual elements of the DateTime.
-    *
-    *   - dateString, year, month, date, week etc
-    *
-    * This extra information will be passed to the url creator, so the question
-    * is how do we do it.
-    *
-    * Here it should also check modified time
+  /** TODO: Here it should also check modified time, but that'd have to be
+    * checked by reading the file >.>
     */
-  val date: Option[String] =
-    front_matter.getOrElse("date")(
-      dateParser(filename).getOrElse("undated")
+  private val dataObj: Obj =
+    val dateString = front_matter.getOrElse("date")(filename)
+    val dateFormat = front_matter.getOrElse("date_format")(
+      globals.getOrElse("date_format")("yyyy-MM-dd")
+    )
+    val obj = dateParseObj(dateString, dateFormat)
+    obj("title") = title
+
+    obj
+
+  /** the date in front_matter have more information. like time and timezone.
+    * Nothing is necessary, but if date is being given, it has to be given in
+    * full, if time is given, it has to be given in full.
+    */
+  def date: String = _date
+  private val _date = dataObj.getOrElse("date_string")("undated")
+
+  def tagNames: List[String] = _tagNames
+  private val _tagNames =
+    if front_matter.obj.contains("tags") then
+      front_matter("tags") match
+        case s: Str => List(s.str)
+        case a: Arr => a.arr.toList.map(_.str)
+        case _      => List()
+    else List()
+
+  private val _tags: LinkedHashMap[String, Tag] = LinkedHashMap()
+  def addTag(name: String, tag: Tag) = _tags(name) = tag
+  def tags: LinkedHashMap[String, Tag] = _tags
+
+  /** Permalink of post TODO: more doc and check later
+    */
+  def permalink: String = _permalink
+  private val _permalink =
+    front_matter.getOrElse("permalink")(
+      globals.getOrElse("permalink")(filename)
     )
 
-  private val locals = Obj(
+  val url: String = URL("template goes here")(front_matter)
+
+  Obj(
     "title" -> title,
     "date" -> date
     /** also append all the other tags in front_matter
@@ -63,13 +99,8 @@ class Post(filename: String, layouts: Map[String, Layout])
     *
     * TODO: there can be different types of exceptions
     */
-  def render(globals: Obj, partials: Map[String, Layout]): String =
-    val permalink: String =
-      locals.getOrElse("permalink")(
-        globals.getOrElse("permalink")(filename)
-      )
-
-    val url: String = URL("template goes here")(locals)
+  def render(partials: Map[String, Layout]): String =
+    val locals = setupLocals(globals)
 
     val str = convert(main_matter, filename) match
       case Right(s) => s
@@ -94,5 +125,9 @@ class Post(filename: String, layouts: Map[String, Layout])
     */
 
 object Post:
-  def apply(filename: String, layouts: Map[String, Layout]): Post =
-    new Post(filename, layouts)
+  def apply(
+      filename: String,
+      layouts: Map[String, Layout],
+      globals: Obj
+  ): Post =
+    new Post(filename, layouts, globals)

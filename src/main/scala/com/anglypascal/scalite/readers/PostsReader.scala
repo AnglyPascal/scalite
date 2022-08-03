@@ -4,9 +4,10 @@ import com.anglypascal.scalite.documents.{Post, Layout}
 import com.anglypascal.scalite.collections.Tag
 import com.anglypascal.scalite.converters.hasConverter
 import scala.collection.mutable.LinkedHashMap
+import com.rallyhealth.weejson.v1.Obj
 
 /** Reads all the posts in _posts directory */
-class PostsReader(directory: String) extends DirectoryReader[Post](directory):
+class PostsReader(directory: String, globals: Obj) extends DirectoryReader[Post](directory):
 
   /** Just create the posts from the files in the directory, filtering out the
     * files not supported by the converters
@@ -14,7 +15,7 @@ class PostsReader(directory: String) extends DirectoryReader[Post](directory):
   def getObjectMap(layouts: Map[String, Layout]): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
-      val post = Post(fn, layouts)
+      val post = Post(fn, layouts, globals)
       (post.title, post)
     files.filter(hasConverter).map(f).toMap
 
@@ -28,12 +29,16 @@ class PostsReader(directory: String) extends DirectoryReader[Post](directory):
     val posts = getObjectMap(layouts)
     for
       (s, p) <- posts
-      t <- p.front_matter("tags").arr
+      t <- p.tagNames
     do
-      if tags.contains(t.str) then tags(t.str).add(p)
+      if tags.contains(t) then 
+        tags(t).add(p)
+        p.addTag(t, tags(t))
       else
-        tags += (t.str -> new Tag(t.str))
-        tags(t.str).add(p)
+        val tag = new Tag(t)
+        tag.add(p)
+        p.addTag(t, tag)
+        tags += (t -> tag)
     posts
 
 /** Companion object to allow PostsReader(dir, layouts, tags) to return the
