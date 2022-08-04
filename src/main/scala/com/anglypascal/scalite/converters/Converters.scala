@@ -3,7 +3,7 @@ package com.anglypascal.scalite.converters
 /** Not sure if this is good practice. Could these be moved to the companion
   * class for Converter?
   */
-import com.anglypascal.scalite.{Converter, ConverterException}
+import com.anglypascal.scalite.ConverterException
 
 val converters =
   Array[Converter](

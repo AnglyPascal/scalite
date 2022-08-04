@@ -2,7 +2,7 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.readers.*
 import com.anglypascal.scalite.utils.yamlParser
-import com.anglypascal.scalite.collections.Tag
+import com.anglypascal.scalite.bags.*
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
@@ -32,22 +32,14 @@ object Globals:
   private val config = yamlParser(site("base_dir").str + "/config.yml")
   for (key, value) <- config.obj do site(key) = value
 
-  val tags = LinkedHashMap[String, Tag]()
-  val layouts = LayoutsReader(site("base_dir").str + site("layout_dir").str)
-  val partials = PartialsReader(site("base_dir").str + site("static_dir").str)
-
-  val statics = PostsReader(
-    site("base_dir").str,
-    layouts,
-    tags,
-    site
-  )
-  val posts = PostsReader(
-    site("base_dir").str + site("layout_dir").str,
-    layouts,
-    tags,
-    site
-  )
+  val layouts =
+    LayoutsReader(site("base_dir").str + site("layout_dir").str, site)
+  val partials =
+    PartialsReader(site("base_dir").str + site("static_dir").str, site)
+  val statics =
+    PostsReader(site("base_dir").str, layouts, site)
+  val posts =
+    PostsReader(site("base_dir").str + site("layout_dir").str, layouts, site)
 
   /** If I want to allow for collections, these things need to go to a different
     * class? And the variables should be extensible

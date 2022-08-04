@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.converters
 
-import com.anglypascal.scalite.{Converter, ConverterException}
+import com.anglypascal.scalite.ConverterException
 
 import scala.util.matching.Regex
 import sttp.client3._

@@ -11,4 +11,8 @@ package com.anglypascal.scalite
  /** CRUCIAL TODO: need to check if the weejson support in Mustache works
   */
 
+/** CRUCIAL TODO: need to make a wrapper for the global value to make it immutable.
+ *  Only supply contains and get functions 
+ */
+
 case class Site(base_dir: String)

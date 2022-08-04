@@ -22,9 +22,13 @@ trait Page:
   protected def parent = _parent
 
   /** Search for the parent layout in the map holding layouts. */
-  protected def setupParent(layouts: Map[String, Layout]): Unit =
+  def setupParent(layouts: Map[String, Layout]): Unit =
     layouts.get(parent_name) match
       case Some(l) => _parent = l
+      /** TODO: for non layouts, this parent should default back to page, right?
+       *  Or maybe no. If we specify that for each collection there has to be a layout
+       *  of that collection, and each post should also have a specified parent layout
+       */
       case _       => _parent = null
 
   /** Method to write the content of the page to the output file. Needs to be
@@ -46,4 +50,4 @@ trait Page:
     *   contains Layouts in the _includes directory that will be used as
     *   mustache partials
     */
-  def render(globals: Obj, partials: Map[String, Layout]): String
+  def render(partials: Map[String, Layout]): String

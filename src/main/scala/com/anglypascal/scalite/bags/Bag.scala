@@ -1,7 +1,6 @@
-package com.anglypascal.scalite.collections
+package com.anglypascal.scalite.bags
 
 import scala.collection.mutable.Set
-import com.rallyhealth.weejson.v1.Obj
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -11,7 +10,7 @@ import com.rallyhealth.weejson.v1.Obj
   * A collection of posts will be in a separate folder in the home directory,
   * and will be handled separately.
   */
-trait Collection[A]:
+trait Bag[A]:
 
   /** Name of the collection */
   val name: String
@@ -36,3 +35,4 @@ trait Collection[A]:
   * These collection names will be moved to the global data under the entry
   * "collection_name"
   */
+

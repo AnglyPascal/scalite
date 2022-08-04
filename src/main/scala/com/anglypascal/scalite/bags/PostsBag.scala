@@ -1,9 +1,10 @@
-package com.anglypascal.scalite.collections
+package com.anglypascal.scalite.bags
 
 import com.anglypascal.scalite.documents.{Page, Post, Layout}
-import scala.collection.mutable.Set
-import com.rallyhealth.weejson.v1.{Obj, Arr}
 import com.anglypascal.scalite.NoLayoutException
+
+import com.rallyhealth.weejson.v1.{Obj, Arr}
+import scala.collection.mutable.Set
 
 /** Each CollectionOfPosts object represents a collection that posts can belong
   * to. Tag and Categories are the two sublcasses of this trait. A collection of
@@ -13,22 +14,25 @@ import com.anglypascal.scalite.NoLayoutException
   * @param name
   *   collection type name name
   */
-trait CollectionOfPosts(
+trait PostsBag(
     val ctype: String,
     val name: String,
-    globals: Obj // TODO: I'll think about it later
-) extends Collection[Post]
+    globals: Obj
+) extends Bag[Post]
     with Page:
+
+  /** TODO: Maybe we WILL need globals sent here as well, as we do want the user
+    * to be able to specify some stuff like url, or tag name and such
+    */
 
   /** Name layout to be used for rendering the Tag page. If not specified in the
     * global settings, this defaults back to "ctype"
     */
-  val parent_name =
-    if globals.obj.contains(ctype + "_layout") then
-      globals(ctype + "_layout").str
-    else "ctype"
+  val parent_name = ctype
 
   val things = Set[Post]()
+
+  def addItem(post: Post) = things.add(post)
 
   /** Helper method to convert a post to it's simplified representation. The
     * returned object should have
@@ -42,9 +46,9 @@ trait CollectionOfPosts(
     "title" -> name
   )
 
-  def render(site: Obj, partials: Map[String, Layout]): String =
+  def render(partials: Map[String, Layout]): String =
     val context = Obj(
-      "site" -> site,
+      "site" -> globals,
       "page" -> locals,
       "items" -> Arr(things.toList.map(postToItem))
     )

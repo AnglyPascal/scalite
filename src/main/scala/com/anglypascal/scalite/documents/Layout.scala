@@ -8,9 +8,12 @@ import com.rallyhealth.weejson.v1.Obj
   * post or a child layout from the context.
   *
   * TODO: Layouts might have locally specified theme
+  *
+  * TODO: FATAL Problem, the render function of Layout and the render for Post
+  * are totally different in function :(
   */
-class Layout(filename: String)
-    extends Document(filename):
+class Layout(filename: String, globals: Obj)
+    extends Document(filename, globals):
 
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)
@@ -20,5 +23,9 @@ class Layout(filename: String)
     val p = partials.map((s, l) => (s, l.mustache))
     mustache.render(context, p)
 
+  def render(partials: Map[String, Layout]): String =
+    val p = partials.map((s, l) => (s, l.mustache))
+    mustache.render(globals, p)
+
 object Layout:
-  def apply(filename: String) = new Layout(filename)
+  def apply(filename: String, globals: Obj) = new Layout(filename, globals)

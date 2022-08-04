@@ -2,12 +2,13 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.converters.convert
 import com.anglypascal.scalite.utils.*
-import com.anglypascal.scalite.collections.*
+import com.anglypascal.scalite.bags.{PostsBag, BagHandler}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 
 import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.{LinkedHashMap, Set}
+import com.rallyhealth.weejson.v1.Value
 
 /** Reads the content of a post file and prepares a Page object for that.
   *
@@ -18,14 +19,13 @@ import scala.collection.mutable.LinkedHashMap
   * filename. The whole path is important as other than the _post suffix, all
   * the other subfolders will be counted as categories for this post
   *
-  * TODO: also what about posts inside a collection? those will have a slightly
-  * different set locals, no?
-  *
-  * TODO: add lists of tags and categories. Ok this is where collection comes
-  * into play. Give functions that lets us add a tag to this post.
+  * TODO: Need to factor out layout form the pages as well. It has a
+  * fundamentally different render function, it needs to be anchored to by posts
+  * almost like tags, and there will be many of them, so treat it similarly to
+  * tags. This will also allow for a different layout implementation :0
   */
-class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
-    extends Document(filename)
+class Post(val filename: String, layouts: Map[String, Layout], globals: Obj)
+    extends Document(filename, globals)
     with Ordered[Post]:
 
   if parent_name == "" then
@@ -63,29 +63,28 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
   def date: String = _date
   private val _date = dataObj.getOrElse("date_string")("undated")
 
-  /** TODO: this hardcoding of tags and categories is not very nice, is it? Now
-    * if I want to add one more type of collection, I would have to add more
-    * blocks and logic and shit. how to avoid that?
+  /** Return the global settings for the collection-type ctype
     */
-  def tagNames: List[String] = _tagNames
-  private val _tagNames =
-    if front_matter.obj.contains("tags") then
-      front_matter("tags") match
-        case s: Str => List(s.str)
-        case a: Arr => a.arr.toList.map(_.str)
-        case _      => List()
-    else List()
+  def getBagsList(ctype: String): Value =
+    if front_matter.obj.contains(ctype) then front_matter(ctype)
+    else null
 
-  /** TODO: maybe I don't need to store the whole tag, i'll store just the
-    * informations that's needed to publish on this post's page
+  /** Adds the collection in the set of this collection-type
     */
-  private val _tags: LinkedHashMap[String, Tag] = LinkedHashMap()
-  def addTag(name: String, tag: Tag) = _tags(name) = tag
+  def addBag[A <: PostsBag](ctype: String)(a: A): Unit =
+    if bags.contains(ctype) then bags(ctype) += a
+    else bags += ctype -> Set(a)
 
-  /** TODO: make a common class or someting that is added to this class which
-    * enables it to handle a new collection or something
+  /** The map holding sets of collection-types
     */
-  def collectionNames(nameOfCollection: String): List[String] = ???
+  private val bags: LinkedHashMap[String, Set[PostsBag]] =
+    LinkedHashMap()
+
+  /** Processes the collections this post belongs to, for the collections
+    * specified in the list in CollectionsHandler companion object
+    */
+  def processBags(): Unit =
+    for bagObj <- BagHandler.availableBags do bagObj.addToBags(this, globals)
 
   /** Permalink of post TODO: more doc and check later
     */
@@ -116,7 +115,6 @@ class Post(filename: String, layouts: Map[String, Layout], globals: Obj)
     * TODO: there can be different types of exceptions
     */
   def render(partials: Map[String, Layout]): String =
-
     val str = convert(main_matter, filename) match
       case Right(s) => s
       case Left(e)  => throw e
