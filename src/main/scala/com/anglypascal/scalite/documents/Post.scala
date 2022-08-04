@@ -2,6 +2,7 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.converters.convert
 import com.anglypascal.scalite.utils.*
+import com.anglypascal.scalite.converters.hasConverter
 import com.anglypascal.scalite.bags.{PostsBag, BagHandler}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
@@ -24,14 +25,30 @@ import com.rallyhealth.weejson.v1.Value
   * almost like tags, and there will be many of them, so treat it similarly to
   * tags. This will also allow for a different layout implementation :0
   */
-class Post(val filename: String, layouts: Map[String, Layout], globals: Obj)
-    extends Document(filename, globals)
+class Post(val filename: String, globals: Obj)
+    extends Reader(filename)
+    with Page
     with Ordered[Post]:
 
-  if parent_name == "" then
-    throw NoLayoutException("No layout specified in the front matter")
+  /** Get the parent layout name, if it exists. Layouts might not have a parent
+    * layout, but each post needs to have one.
+    *
+    * TODO: In the Posts class, check if layout is empty, and throw exception
+    */
+  val parent_name =
+    if front_matter.obj.contains("layout") then
+      front_matter("layout") match
+        case s: Str => s.str
+        case _      => "post"
+    else "post"
 
-  setupParent(layouts)
+  /** Search for the parent layout in the map holding layouts.
+    *
+    * TODO: Make this one abstract as well
+    */
+  Layout.layouts.get(parent_name) match
+    case Some(l) => _parent = l
+    case _       => _parent = null
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filename. If the filename has no title given, simply
@@ -48,12 +65,12 @@ class Post(val filename: String, layouts: Map[String, Layout], globals: Obj)
     */
   private val dataObj: Obj =
     val dateString = front_matter.getOrElse("date")(filename)
-    val dateFormat = front_matter.getOrElse("date_format")(
-      globals.getOrElse("date_format")("yyyy-MM-dd")
-    )
+    val dateFormat =
+      front_matter.getOrElse("date_format")(
+        globals.getOrElse("date_format")("yyyy-MM-dd")
+      )
     val obj = dateParseObj(dateString, dateFormat)
     obj("title") = title
-
     obj
 
   /** the date in front_matter have more information. like time and timezone.
@@ -132,10 +149,20 @@ class Post(val filename: String, layouts: Map[String, Layout], globals: Obj)
     */
   def compare(that: Post) = this.date compare that.date
 
+
+/** Companion Object
+  */
 object Post:
-  def apply(
-      filename: String,
-      layouts: Map[String, Layout],
-      globals: Obj
-  ): Post =
-    new Post(filename, layouts, globals)
+
+  def posts = _posts
+  private var _posts: Map[String, Post] = _
+
+  def apply(directory: String, globals: Obj): Map[String, Post] =
+    val files = getListOfFiles(directory)
+    def f(fn: String) =
+      val post = new Post(fn, globals)
+      post.processBags()
+      (post.title, post)
+    _posts = files.filter(hasConverter).map(f).toMap
+
+    posts

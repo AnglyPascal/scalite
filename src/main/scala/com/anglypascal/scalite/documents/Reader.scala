@@ -15,7 +15,7 @@ import _root_.com.rallyhealth.weejson.v1._
   * @param filename
   *   the name of the file
   */
-trait Document(filename: String, globals: Obj) extends Page:
+trait Reader(filename: String):
 
   /** read the file and store into a Source */
   private val src = readFile(filename).toString
@@ -33,14 +33,3 @@ trait Document(filename: String, globals: Obj) extends Page:
       case yaml_regex(a, b) => (yamlParser(a), b)
       case _                => (Obj(), src)
 
-  /** Get the parent layout name, if it exists. Layouts might not have a parent
-    * layout, but each post needs to have one.
-    *
-    * TODO: In the Posts class, check if layout is empty, and throw exception
-    */
-  val parent_name =
-    if front_matter.obj.contains("layout") then
-      front_matter("layout") match
-        case s: Str => s.str
-        case _      => ""
-    else ""

@@ -18,18 +18,10 @@ trait Page:
   /** Specify the parent template name */
   protected val parent_name: String
 
+  /** Make it Option[Layout] and also remove redundancies
+   */
   protected var _parent: Layout = null
-  protected def parent = _parent
-
-  /** Search for the parent layout in the map holding layouts. */
-  def setupParent(layouts: Map[String, Layout]): Unit =
-    layouts.get(parent_name) match
-      case Some(l) => _parent = l
-      /** TODO: for non layouts, this parent should default back to page, right?
-       *  Or maybe no. If we specify that for each collection there has to be a layout
-       *  of that collection, and each post should also have a specified parent layout
-       */
-      case _       => _parent = null
+  def parent = _parent
 
   /** Method to write the content of the page to the output file. Needs to be
     * abstract.
@@ -51,3 +43,4 @@ trait Page:
     *   mustache partials
     */
   def render(partials: Map[String, Layout]): String
+

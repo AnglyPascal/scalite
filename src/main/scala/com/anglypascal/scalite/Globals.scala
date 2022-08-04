@@ -1,5 +1,6 @@
 package com.anglypascal.scalite
 
+import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.readers.*
 import com.anglypascal.scalite.utils.yamlParser
 import com.anglypascal.scalite.bags.*
@@ -32,14 +33,10 @@ object Globals:
   private val config = yamlParser(site("base_dir").str + "/config.yml")
   for (key, value) <- config.obj do site(key) = value
 
-  val layouts =
-    LayoutsReader(site("base_dir").str + site("layout_dir").str, site)
-  val partials =
-    PartialsReader(site("base_dir").str + site("static_dir").str, site)
-  val statics =
-    PostsReader(site("base_dir").str, layouts, site)
-  val posts =
-    PostsReader(site("base_dir").str + site("layout_dir").str, layouts, site)
+  val layouts = Layout(site("base_dir").str + site("layout_dir").str)
+  val partials = Partial(site("base_dir").str + site("static_dir").str)
+  val statics = Post(site("base_dir").str, site)
+  val posts = Post(site("base_dir").str + site("layout_dir").str, site)
 
   /** If I want to allow for collections, these things need to go to a different
     * class? And the variables should be extensible
