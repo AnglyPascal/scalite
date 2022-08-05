@@ -1,7 +1,6 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.*
-import com.anglypascal.scalite.readers.*
 import com.anglypascal.scalite.utils.yamlParser
 import com.anglypascal.scalite.bags.*
 
@@ -9,6 +8,7 @@ import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
 
 object Globals:
+
   val site = Obj(
     "base_dir" -> "/src/main/scala/site_template",
     "layout_dir" -> "/_layouts",
@@ -41,3 +41,26 @@ object Globals:
   /** If I want to allow for collections, these things need to go to a different
     * class? And the variables should be extensible
     */
+
+/** Should need to write the documentation for different options in the
+  * config.yml
+  *
+  * posts_visibility: render all posts by default?
+  *
+  * log_level: the level of log
+  *
+  * default_url_template: the template of url used by posts without a speficied
+  * template
+  */
+
+/** need to make a new list_map that will define the name of the list in yaml,
+  * and the value name to assign to each of it's value.
+  *
+  * For example, if the yaml is like
+  *
+  * authors: [a, b, c] list_map: authors: author
+  *
+  * then the yaml will be rendered as if it were
+  *
+  * authors: [author: a, author: b, author: c]
+  */

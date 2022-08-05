@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.bags
 
 import com.anglypascal.scalite.documents.Post
+import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
@@ -33,8 +34,8 @@ object Category extends BagHandler[Category]:
   def getNames(post: Post): Iterable[String] =
     val arr = post.filename.split("/").tail.init
     post.getBagsList("category") match
-      case s: Str => arr ++ s.str.split(" ")
-      case a: Arr => arr ++ a.arr.flatMap(s => s.str.split(" "))
+      case s: Str => arr ++ s.str.split(", ").map(slugify(_)) // more options?
+      case a: Arr => arr ++ a.arr.map(s => slugify(s.str)) // error-prone
       case _      => arr
 
   /** TODO: slugify the category names to uniformify them */

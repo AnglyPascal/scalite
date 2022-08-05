@@ -16,3 +16,7 @@ package com.anglypascal.scalite
  */
 
 case class Site(base_dir: String)
+
+
+/** Learn to control log level
+ */

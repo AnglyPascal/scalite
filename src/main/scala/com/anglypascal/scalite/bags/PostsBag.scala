@@ -60,3 +60,7 @@ trait PostsBag(
 
   /** needs its special url
     */
+
+/** TODO: Give a default generator that generates a PostsBag once given some
+  * values in the globals
+  */
