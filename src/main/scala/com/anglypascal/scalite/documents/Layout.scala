@@ -14,7 +14,7 @@ import scala.collection.mutable.LinkedHashMap
   */
 class Layout(val name: String, layoutPath: String) extends Reader(layoutPath):
   /** */
-  private var _parent: Option[Layout] = _
+  private var _parent: Option[Layout] = None
   def parent = _parent
 
   def setParent(layouts: Map[String, Layout]): Unit =
@@ -23,9 +23,7 @@ class Layout(val name: String, layoutPath: String) extends Reader(layoutPath):
         front_matter("layout") match
           case s: Str =>
             val pn = s.str
-            layouts.get(pn) match
-              case Some(s) => Some(s)
-              case _       => None
+            layouts.get(pn)
           case _ => None
       else None
 

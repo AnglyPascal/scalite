@@ -1,9 +1,8 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.converters.convert
+import com.anglypascal.scalite.converters.Converter
 import com.anglypascal.scalite.utils.*
-import com.anglypascal.scalite.converters.hasConverter
-import com.anglypascal.scalite.bags.{PostsBag, BagHandler}
+import com.anglypascal.scalite.bags.{PostsBag, Bag}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 
@@ -43,9 +42,7 @@ class Post(filepath: String, globals: Obj)
     *
     * TODO: Make this one abstract as well
     */
-  Layout.layouts.get(parent_name) match
-    case Some(l) => _parent = l
-    case _       => _parent = null
+  _parent = Layout.layouts.get(parent_name) 
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
@@ -106,18 +103,19 @@ class Post(filepath: String, globals: Obj)
     * TODO: need to change behavior when logger is implemented
     */
   def render(partials: Map[String, Layout]): String =
-    val str = convert(main_matter, filepath) match
+    val str = Converter.convert(main_matter, filepath) match
       case Right(s) => s
       case Left(e)  => throw e
     val context = Obj("site" -> globals, "post" -> locals, "content" -> str)
     parent match
-      case l: Layout =>
+      case Some(l) =>
         l.render(context, partials)
-      case null => str
+      case None => str
 
   /** TODO: if show_excerpt is true, then create an excerpt object here? and add
     * the excerpt to the obj
     */
+  def excerpt: String = ???
 
   /** TODO: Related posts? Custom sorting? */
   def compare(that: Post) = this.date compare that.date
@@ -140,7 +138,7 @@ class Post(filepath: String, globals: Obj)
     * specified in the list in CollectionsHandler companion object
     */
   def processBags(): Unit =
-    for bagObj <- BagHandler.availableBags do bagObj.addToBags(this, globals)
+    for bagObj <- Bag.availableBags do bagObj.addToBags(this, globals)
 
 /** Companion Object */
 object Post:
@@ -154,6 +152,6 @@ object Post:
       val post = new Post(fn, globals)
       post.processBags()
       (post.title, post)
-    _posts = files.filter(hasConverter).map(f).toMap
+    _posts = files.filter(Converter.hasConverter).map(f).toMap
 
     posts

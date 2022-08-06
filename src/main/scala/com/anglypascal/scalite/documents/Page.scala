@@ -20,7 +20,7 @@ trait Page:
 
   /** Make it Option[Layout] and also remove redundancies
    */
-  protected var _parent: Layout = null
+  protected var _parent: Option[Layout] = None
   def parent = _parent
 
   /** Method to write the content of the page to the output file. Needs to be

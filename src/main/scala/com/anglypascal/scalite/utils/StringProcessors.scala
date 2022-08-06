@@ -8,3 +8,9 @@ def slugify(
     cased: Boolean = false
 ): String =
   str.toLowerCase.replace(' ', '-')
+
+def prettify(
+    str: String,
+    modes: String = "default",
+    cased: Boolean = false
+): String = ???
