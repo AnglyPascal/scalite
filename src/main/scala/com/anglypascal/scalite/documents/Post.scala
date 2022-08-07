@@ -10,12 +10,33 @@ import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
 import scala.collection.mutable.{LinkedHashMap, Set}
 import com.rallyhealth.weejson.v1.Value
 
-/** Reads the content of a post file and prepares a Post object for that.
+/** Reads the content of a post file and prepares a Post object.
+  *
+  * In the front matter, the following entries are standard:
+  *   - '''title''': Name of the post. If unspecified, the title will be fetched
+  *     from the post filename
+  *   - '''date''': Date to be shown on the rendered post. If unspecified, the
+  *     date will be fetched from the post filename.
+  *   - '''date_format''': The date format specific to this post. If
+  *     unspecified, the globally specified format will be used. If that's not
+  *     specified either, the format US standard format, June 26, 2022, will be
+  *     used.
+  *   - '''visible''': Boolean value indicating whether this post should be
+  *     converted to a file. If unspecified, the global default, false will be
+  *     used, which can be modified globally through "_config.yml"
+  *   - '''permalink''': A mustache template inside quotations specifying the
+  *     url template for this post. For details about the format, TODO
+  *   - '''tags''': A space or comma separated string of tags, or a list of
+  *     tags.
+  *   - '''categories''': A comma separated string of categories, or a list of
+  *     them.
+  *   - any other tag will be passed in to the renderer directly unless support
+  *     through the plugin is added TODO
   *
   * @param filepath
   *   path to the post file
   * @param globals
-  *   a weejson object passed through the _config.yml file
+  *   a weejson object passed through the "_config.yml" file
   *
   * TODO: check differences between filepath and filename
   */
@@ -42,7 +63,7 @@ class Post(filepath: String, globals: Obj)
     *
     * TODO: Make this one abstract as well
     */
-  _parent = Layout.layouts.get(parent_name) 
+  _parent = Layout.layouts.get(parent_name)
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
@@ -84,12 +105,23 @@ class Post(filepath: String, globals: Obj)
 
   val url = URL(permalink)(urlObj)
 
-  private val locals = Obj(
-    "title" -> title,
-    "date" -> date,
-    "url" -> url
-    // also append all the other tags in front_matter
-  )
+  private val _locals =
+    val used =
+      List("title", "date", "layout", "tags", "categories", "permalink")
+    val obj = Obj()
+    for
+      (s, v) <- front_matter.obj
+      if !used.contains(s)
+    do obj(s) = v
+    obj.obj ++= List(
+      "title" -> title,
+      "date" -> date,
+      "url" -> url,
+      "excerpt" -> excerpt
+    )
+    obj
+
+  def locals = _locals.hardCopy
 
   /** Returns whether to render this post or not. Default is false. */
   val visible: Boolean =
@@ -98,7 +130,6 @@ class Post(filepath: String, globals: Obj)
     )
 
   /** Convert the contents of the post to HTML, throwing an exception on failure
-    * to do so
     *
     * TODO: need to change behavior when logger is implemented
     */
@@ -106,7 +137,7 @@ class Post(filepath: String, globals: Obj)
     val str = Converter.convert(main_matter, filepath) match
       case Right(s) => s
       case Left(e)  => throw e
-    val context = Obj("site" -> globals, "post" -> locals, "content" -> str)
+    val context = Obj("site" -> globals, "post" -> _locals, "content" -> str)
     parent match
       case Some(l) =>
         l.render(context, partials)
@@ -144,14 +175,28 @@ class Post(filepath: String, globals: Obj)
 object Post:
 
   def posts = _posts
-  private var _posts: Map[String, Post] = _
+  private var _posts: List[Post] = _
 
-  def apply(directory: String, globals: Obj): Map[String, Post] =
+  def apply(directory: String, globals: Obj): List[Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
       post.processBags()
-      (post.title, post)
-    _posts = files.filter(Converter.hasConverter).map(f).toMap
+      post
+    _posts = files.filter(Converter.hasConverter).map(f)
 
     posts
+
+/** TODO TODO TODO
+  *
+  * In jekyll posts are also collections. So if one wishes to turn down the
+  * posts output, they can do so by collections: posts: output: false.
+  *
+  * That means, a collection should have similar structure as the posts.
+  * Although the others might not be as elaborate as posts. For example what
+  * else would you include in a _staff_members collection, other than some basic
+  * things like title, url, date etc?
+  *
+  * Maybe, provide a public api that lets users define exactly how these
+  * collections should render
+  */

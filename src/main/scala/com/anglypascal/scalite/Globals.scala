@@ -7,40 +7,52 @@ import com.anglypascal.scalite.bags.*
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
 
+/** Defines the global variables and default configurations. Everything can be
+  * overwritten in "/\_config.yml" file
+  */
 object Globals:
 
-  val site = Obj(
-    "base_dir" -> "/src/main/scala/site_template",
+  private val dirs = Obj(
+    "destination" -> "/_site",
+    "base" -> "/src/main/scala/site_template",
     "layout_dir" -> "/_layouts",
     "post_dir" -> "/_posts",
-    "static_dir" -> "/_includes",
+    "includes_dir" -> "/_includes",
     "sass_dir" -> "/_sass",
-    "title" -> "site title",
+    "pluins_dir" -> "/_plugins"
+  )
+
+  private val reading = Obj(
+    "include" -> Arr(".htaccess"),
+    "exclude" -> Arr("build.sbt"),
+    "keep_files" -> Arr(".git", ".svn"),
+    "markdown_ext" -> "markdown,mkdown,mkdn,mkd,md",
+    "encoding" -> "utf-8"
+  )
+
+  private val site = Obj(
+    "title" -> "A Shiny New Website",
     "lang" -> "en",
-    "paginate" -> false,
-    "show_excerpts" -> true,
     "root_url" -> "/",
     "description" -> "site description",
-    "tag_layout" -> "tag",
     "author" -> Obj(
       "name" -> "author name",
       "email" -> "author email"
-    ),
+    )
+  )
+
+  private val defaults = Obj(
+    "paginate" -> false,
+    "show_excerpts" -> true,
+    "tag_layout" -> "tag",
     "date_format" -> "dd MMM, yyyy"
   )
 
+  val globals = dirs.obj ++ reading.obj ++ site.obj ++ defaults.obj
+
   /** Support for data provided in _data folder. this will be in site("data") */
-  private val config = yamlParser(site("base_dir").str + "/config.yml")
-  for (key, value) <- config.obj do site(key) = value
-
-  val layouts = Layout(site("base_dir").str + site("layout_dir").str)
-  val partials = Partial(site("base_dir").str + site("static_dir").str)
-  val statics = Post(site("base_dir").str, site)
-  val posts = Post(site("base_dir").str + site("layout_dir").str, site)
-
-  /** If I want to allow for collections, these things need to go to a different
-    * class? And the variables should be extensible
-    */
+  private val config = yamlParser(dirs("base_dir").str + "/config.yml")
+  for (key, value) <- config.obj do globals(key) = value
 
 /** Should need to write the documentation for different options in the
   * config.yml

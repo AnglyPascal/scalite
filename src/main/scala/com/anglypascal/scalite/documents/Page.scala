@@ -26,10 +26,10 @@ trait Page:
   /** Method to write the content of the page to the output file. Needs to be
     * abstract.
     *
-    * @param filename
+    * @param filepath
     *   path to the output file
     */
-  def write(filename: String): Unit = ???
+  def write(filepath: String): Unit = ???
 
   /** Renders the content of this page, converting the user provided content and
     * rendering mustache. This results in a HTML formatted string holding the

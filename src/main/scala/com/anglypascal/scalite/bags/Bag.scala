@@ -23,7 +23,7 @@ trait Bag(ctype: String):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  protected class BagType(name: String, globals: Obj)
+  abstract class BagType(name: String, globals: Obj)
       extends PostsBag(ctype, name, globals)
 
   /** Defines how posts add themselves to this bag type. Usually it's by a

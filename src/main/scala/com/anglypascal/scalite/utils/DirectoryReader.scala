@@ -9,9 +9,9 @@ import java.io.File
   */
 
 /** Get the paths to the files inside this directory */
-def getListOfFiles(dir: String): Array[String] =
+def getListOfFiles(dir: String): List[String] =
   val file = new File(dir)
-  file.listFiles.filter(_.isFile).map(_.getPath)
+  file.listFiles.filter(_.isFile).map(_.getPath).toList
 
 /** Recover just the filename without the exteions from a file path */
 def getFileName(filename: String): String =

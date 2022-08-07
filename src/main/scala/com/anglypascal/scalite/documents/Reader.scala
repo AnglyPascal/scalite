@@ -1,12 +1,11 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.*
+import com.anglypascal.scalite.utils.{readFile, yamlParser, dateToString}
 
 import scala.io.Source
 import scala.util.matching.Regex
-import _root_.com.rallyhealth.weejson.v1._
+import com.rallyhealth.weejson.v1._
 import java.nio.file.{Paths, Files}
-import com.anglypascal.scalite.utils.dateParseObj
 import org.joda.time.DateTime
 
 /** Document represents the pages of the site that are generated from the
@@ -21,7 +20,7 @@ import org.joda.time.DateTime
 trait Reader(val filepath: String):
 
   /** Strip the filepath to get the filename */
-  val filename: String = filepath.split("/").last.split(".").head
+  private val filename: String = filepath.split("/").last.split(".").head
 
   /** read the file and store into a Source */
   private val src = readFile(filepath).toString

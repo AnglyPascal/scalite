@@ -26,7 +26,13 @@ object Tag extends Bag("tag"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  type Tag = BagType
+  class Tag(name: String, globals: Obj) extends BagType(name, globals):
+    // define the abstract memebers 
+    override val locals: Obj = Obj (
+      "title" -> name,
+    )
+
+
 
   /** Map holding all the tags in this website */
   private val tags = LinkedHashMap[String, Tag]()

@@ -44,18 +44,17 @@ trait PostsBag(
     *   weeJson obj, with the required mappings for the rendering
     */
   protected def postToItem(post: Post): Obj =
-    Obj(
-      "post_title" -> post.title,
-      "post_date" -> post.date,
-      "post_url" -> post.url,
-      "post_excerpt" -> post.excerpt
-    )
+    post.locals match
+      case a: Obj => a
+      case _ => Obj()
 
   /** The local varibales that will be used to render the PostsBag page. */
-  private val locals: Obj =
-    Obj(
-      "title" -> prettify(name)
+  protected val locals: Obj = Obj (
+    "title" -> name,
     )
+
+  /** Should the tag be rendered in a separate page? */
+  protected val visible: Boolean = true
 
   /** Render the page of this PostsBag.
     *

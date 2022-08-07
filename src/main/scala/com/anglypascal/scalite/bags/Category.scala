@@ -28,7 +28,7 @@ object Category extends Bag("category"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  type Category = BagType
+  class Category(name: String, globals: Obj) extends BagType(name, globals)
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()
