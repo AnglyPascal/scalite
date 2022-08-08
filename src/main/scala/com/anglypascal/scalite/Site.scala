@@ -1,6 +1,8 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.*
+import com.anglypascal.scalite.collections.*
+import com.anglypascal.mustache.asts.CValue
 
 /** the main thing, anchor of this project
   */
@@ -10,15 +12,17 @@ import com.anglypascal.scalite.documents.*
   * be inspired from https://jekyllrb.com/docs/structure/
   */
 
- /** CRUCIAL TODO: need to check if the weejson support in Mustache works
+/** CRUCIAL TODO: need to check if the weejson support in Mustache works
   */
 
-/** CRUCIAL TODO: need to make a wrapper for the global value to make it immutable.
- *  Only supply contains and get functions 
- */
+/** CRUCIAL TODO: need to make a wrapper for the global value to make it
+  * immutable. Only supply contains and get functions
+  */
 
 case class Site(base_dir: String):
 
+  /** */
+  val c = CValue
   val globals = Globals.globals
 
   val layouts = Layout(globals("base").str + globals("layout_dir").str)
@@ -26,8 +30,8 @@ case class Site(base_dir: String):
   val statics = Post(globals("base").str, globals)
   val posts = Post(globals("base").str + globals("layout_dir").str, globals)
 
-  /** site here controls the scoped defaults in config.yml. 
-   */
+  /** site here controls the scoped defaults in config.yml.
+    */
 
 /** Learn to control log level
- */
+  */

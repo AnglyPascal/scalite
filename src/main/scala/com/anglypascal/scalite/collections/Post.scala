@@ -1,13 +1,14 @@
-package com.anglypascal.scalite.documents
+package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.converters.Converter
 import com.anglypascal.scalite.utils.*
-import com.anglypascal.scalite.bags.{PostsBag, Bag}
+import com.anglypascal.scalite.groups.{PostsGroup, Group}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 
 import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
-import scala.collection.mutable.{LinkedHashMap, Set}
+import scala.collection.mutable.{LinkedHashMap}
 import com.rallyhealth.weejson.v1.Value
 
 /** Reads the content of a post file and prepares a Post object.
@@ -37,8 +38,6 @@ import com.rallyhealth.weejson.v1.Value
   *   path to the post file
   * @param globals
   *   a weejson object passed through the "_config.yml" file
-  *
-  * TODO: check differences between filepath and filename
   */
 class Post(filepath: String, globals: Obj)
     extends Reader(filepath)
@@ -152,40 +151,42 @@ class Post(filepath: String, globals: Obj)
   def compare(that: Post) = this.date compare that.date
 
   /** Return the global settings for the collection-type ctype */
-  def getBagsList(ctype: String): Value =
+  def getGroupsList(ctype: String): Value =
     if front_matter.obj.contains(ctype) then front_matter(ctype)
     else null
 
   /** Adds the collection in the set of this collection-type */
-  def addBag[A <: PostsBag](ctype: String)(a: A): Unit =
+  def addGroup[A <: PostsGroup](ctype: String)(a: A): Unit =
     if bags.contains(ctype) then bags(ctype) += a
     else bags += ctype -> Set(a)
 
   /** The map holding sets of collection-types */
-  private val bags: LinkedHashMap[String, Set[PostsBag]] =
+  private val bags: LinkedHashMap[String, Set[PostsGroup]] =
     LinkedHashMap()
 
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
-  def processBags(): Unit =
-    for bagObj <- Bag.availableBags do bagObj.addToBags(this, globals)
+  def processGroups(): Unit =
+    for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
 
 /** Companion Object */
-object Post:
+object Post extends Collection[Post]:
 
-  def posts = _posts
+  def things = _posts
   private var _posts: List[Post] = _
+
+  val name = "posts"
 
   def apply(directory: String, globals: Obj): List[Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
-      post.processBags()
+      post.processGroups()
       post
     _posts = files.filter(Converter.hasConverter).map(f)
 
-    posts
+    things
 
 /** TODO TODO TODO
   *

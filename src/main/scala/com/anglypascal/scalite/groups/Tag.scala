@@ -1,12 +1,12 @@
-package com.anglypascal.scalite.bags
+package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.documents.Post
+import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
 
-object Tag extends Bag("tag"):
+object Tag extends Group("tag"):
 
   /** Tag defines a group of posts. A post can have multiple tags, and each tag
     * can have multiple posts with this tag.
@@ -26,7 +26,7 @@ object Tag extends Bag("tag"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  class Tag(name: String, globals: Obj) extends BagType(name, globals):
+  class Tag(name: String, globals: Obj) extends GroupType(name, globals):
     // define the abstract memebers 
     override val locals: Obj = Obj (
       "title" -> name,
@@ -45,19 +45,19 @@ object Tag extends Bag("tag"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToBags(post: Post, globals: Obj): Unit =
+  def addToGroups(post: Post, globals: Obj): Unit =
     // names of tags this post has
-    val tagNames = getBagNames(post)
+    val tagNames = getGroupNames(post)
     // for each tag, add this post to it and add this tag back to the post
     for tag <- tagNames do
       tags.get(tag) match
         case Some(t) =>
           t.addPost(post)
-          post.addBag("tag")(t)
+          post.addGroup("tag")(t)
         case None =>
           val t = new Tag(tag, globals)
           tags(tag) = t
-          post.addBag("tag")(t)
+          post.addGroup("tag")(t)
 
   /** Process the names of the tags this post belongs to by examining it's tags
     * front matter entry. It also slugifies the category names to make it
@@ -68,9 +68,9 @@ object Tag extends Bag("tag"):
     * @return
     *   an iterator with all the names of the tags
     */
-  private def getBagNames(post: Post): Iterable[String] =
+  private def getGroupNames(post: Post): Iterable[String] =
     // check the entry in the front matter
-    val unslugged = post.getBagsList("tags") match
+    val unslugged = post.getGroupsList("tags") match
       case s: Str => s.str.split(" ").toList
       case a: Arr => a.arr.flatMap(s => s.str.split(" ")).toList
       case _      => List()

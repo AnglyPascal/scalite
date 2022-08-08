@@ -1,12 +1,12 @@
-package com.anglypascal.scalite.bags
+package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.documents.Post
+import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
 
-object Category extends Bag("category"):
+object Category extends Group("category"):
 
   /** Category defines a group of posts. A post can belong to multiple
     * categories, and each Category can have multiple posts belong to it.
@@ -28,7 +28,7 @@ object Category extends Bag("category"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  class Category(name: String, globals: Obj) extends BagType(name, globals)
+  class Category(name: String, globals: Obj) extends GroupType(name, globals)
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()
@@ -42,19 +42,19 @@ object Category extends Bag("category"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToBags(post: Post, globals: Obj): Unit =
+  def addToGroups(post: Post, globals: Obj): Unit =
     // names of categories this post belongs to
-    val catNames = getBagNames(post)
+    val catNames = getGroupNames(post)
     // for each category, add this post to it and add this category back to the post
     for cat <- catNames do
       categories.get(cat) match
         case Some(t) =>
           t.addPost(post)
-          post.addBag("category")(t)
+          post.addGroup("category")(t)
         case None =>
           val t = new Category(cat, globals)
           categories(cat) = t
-          post.addBag("category")(t)
+          post.addGroup("category")(t)
 
   /** Process the names of the categories this post belongs to by examining it's
     * categories front matter entry and it's filepath. It also slugifies the
@@ -65,11 +65,11 @@ object Category extends Bag("category"):
     * @return
     *   an iterator with all the names of the categories
     */
-  private def getBagNames(post: Post): Iterable[String] =
+  private def getGroupNames(post: Post): Iterable[String] =
     // process the filepath first
     val arr = post.filepath.split("/").tail.init
     // check the entry in the front matter
-    val unslugged = post.getBagsList("categories") match
+    val unslugged = post.getGroupsList("categories") match
       case s: Str => arr ++ s.str.split(", ") // more options?
       case a: Arr => arr ++ a.arr.map(s => s.str) // error-prone
       case _      => arr

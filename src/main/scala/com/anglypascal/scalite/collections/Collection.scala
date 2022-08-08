@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.collections
 
-import scala.collection.mutable.Set
+import scala.collection.mutable.Map
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -16,10 +16,9 @@ trait Collection[A]:
   val name: String
 
   /** Set of posts or other elements for use in context for rendering pages. */
-  val things: Set[A]
+  def things: List[A]
 
-  /** Add a new thing to this collection */
-  def add(a: A) = things += a
+  Collection.addToCollection(this)
 
 /** TODO: The collection name need to be specified in the _config.yml :
   *
@@ -36,3 +35,28 @@ trait Collection[A]:
   * "collection_name"
   */
 
+/** Companion object holding set of all collections this site will render. Each
+  * Collection itself is a companion object or something else of another class
+  * that defines the behaviour of the elemnts of this collection. Posts is a
+  * predefined example of this. DraftsPost is also defined and can be turned on
+  * by adding collections: drafts: true option.
+  */
+object Collection:
+
+  private val collections = Map[String, Collection[_]]()
+
+  def addToCollection(col: Collection[_]) = collections += (col.name -> col)
+
+/** Extra collections can be put in a separate folder defined by
+  * collections_dir, which is by default base_dir
+  *
+  * they items inside a collection will be under _collection_name folder inside
+  * the collections_dir. They will be defined by a generic handler like post,
+  * but if provided a custom handler by inserting a Collection object with the
+  * name inside collections, it will be rendered differently.
+  *
+  * Posts is rendered in this way. This is different from jekyll which handles
+  * all the collections other than posts in the same way :DD
+  *
+  * figure out the custom tags that collections need to have
+  */
