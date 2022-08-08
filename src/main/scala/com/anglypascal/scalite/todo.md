@@ -1,6 +1,6 @@
 List of Things to do now
 
-- Write logic that adds support for Collections
+- Write hander for context specific to collections
 
 - Api for custom behaviour with custom entries in the front matter. 
     Make an api for the post or page or whatever that lets users add specific effects

@@ -40,7 +40,7 @@ import com.rallyhealth.weejson.v1.Value
   *   a weejson object passed through the "_config.yml" file
   */
 class Post(filepath: String, globals: Obj)
-    extends Reader(filepath)
+    extends Item(filepath, globals)
     with ReaderOps
     with Page
     with Ordered[Post]:
@@ -70,10 +70,10 @@ class Post(filepath: String, globals: Obj)
     */
   val title: String =
     front_matter.getOrElse("title")(
-      titleParser(filepath).getOrElse("untitled")
-    )
+      titleParser(filepath).getOrElse("untitled" + this.toString)
+    ) // so that titles are always different for different posts
 
-  /** The date in front_matter have more information. like time and timezone.
+  /** The date in front_matter have more information. Like time and time-zone.
     * Nothing is necessary, but if date is being given, it has to be given in
     * full, if time is given, it has to be given in full.
     */
@@ -120,7 +120,7 @@ class Post(filepath: String, globals: Obj)
     )
     obj
 
-  def locals = _locals.hardCopy
+  def locals = _locals.hardCopy.asInstanceOf[Obj]
 
   /** Returns whether to render this post or not. Default is false. */
   val visible: Boolean =
@@ -174,17 +174,17 @@ class Post(filepath: String, globals: Obj)
 object Post extends Collection[Post]:
 
   def things = _posts
-  private var _posts: List[Post] = _
+  private var _posts: Map[String, Post] = _
 
   val name = "posts"
 
-  def apply(directory: String, globals: Obj): List[Post] =
+  def apply(directory: String, globals: Obj): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
       post.processGroups()
-      post
-    _posts = files.filter(Converter.hasConverter).map(f)
+      (post.title, post)
+    _posts = files.filter(Converter.hasConverter).map(f).toMap
 
     things
 

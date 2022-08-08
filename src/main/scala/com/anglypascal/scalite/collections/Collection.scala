@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.collections
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.LinkedHashMap
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -16,7 +16,7 @@ trait Collection[A]:
   val name: String
 
   /** Set of posts or other elements for use in context for rendering pages. */
-  def things: List[A]
+  def things: Map[String, A]
 
   Collection.addToCollection(this)
 
@@ -43,7 +43,7 @@ trait Collection[A]:
   */
 object Collection:
 
-  private val collections = Map[String, Collection[_]]()
+  private val collections = LinkedHashMap[String, Collection[_]]()
 
   def addToCollection(col: Collection[_]) = collections += (col.name -> col)
 

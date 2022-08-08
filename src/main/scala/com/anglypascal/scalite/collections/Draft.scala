@@ -16,16 +16,16 @@ class Draft(filename: String, globals: Obj)
 object Draft extends Collection[Post]:
 
   def things = _drafts
-  private var _drafts: List[Post] = _
+  private var _drafts: Map[String, Post] = _
 
   val name = "drafts"
 
-  def apply(directory: String, globals: Obj): List[Post] =
+  def apply(directory: String, globals: Obj): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
       post.processGroups()
-      post
-    _drafts = files.filter(Converter.hasConverter).map(f)
+      (post.title, post)
+    _drafts = files.filter(Converter.hasConverter).map(f).toMap
 
     things
