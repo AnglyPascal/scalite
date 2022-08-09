@@ -11,7 +11,7 @@ abstract class Item(filepath: String, globals: Obj) extends Reader(filepath):
   /** */
   def locals: Obj
 
-  def render(partials: Map[String, Layout]): String
+  def render: String
 
   /** TODO: Custom sorting is specified by the "sort_by" entry inside the global
     * option for this collection. Custom ordering should also be avaiable.
@@ -47,15 +47,14 @@ class GenericItem(val name: String, filepath: String, globals: Obj)
   /** TODO: Also provide support for forced conversion. In the globals, a user
     * should be able to say, convert: true to force this conversion here.
     */
-  def render(partials: Map[String, Layout]): String =
+  def render: String =
     if front_matter == Obj() then main_matter
-    else
-      Converter.convert(main_matter, filepath) match
-        case Right(s) => s
-        case Left(e)  => throw e
+    else Converter.convert(main_matter, filepath)
 
   def compare(that: Post): Int = ???
 
+/** Defines the collection of generic item
+ */
 object GenericItem extends Collection[Item]:
 
   def things = _items
@@ -72,4 +71,4 @@ object GenericItem extends Collection[Item]:
 
     things
 
-  def render(globals: Obj): Unit = ???
+  def render: Unit = ???

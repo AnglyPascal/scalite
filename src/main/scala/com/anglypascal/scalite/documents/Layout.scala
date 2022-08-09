@@ -14,11 +14,13 @@ abstract class Layout(val name: String, layoutPath: String)
     extends Reader(layoutPath):
 
   /** render function */
-  def render(context: DObj, partials: Map[String, Layout]): String
+  def render(context: DObj): String
 
   def parent: Option[Layout]
 
   def setParent(layouts: Map[String, Layout]): Unit
 
   def matches: Boolean = ???
+
+  protected val partials = Partial.partials
   // this will tell whether this filetype is compatible with this renderer.

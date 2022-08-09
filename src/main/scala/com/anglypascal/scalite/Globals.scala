@@ -2,7 +2,7 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.utils.yamlParser
-import com.anglypascal.scalite.bags.*
+import com.anglypascal.scalite.groups.*
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap

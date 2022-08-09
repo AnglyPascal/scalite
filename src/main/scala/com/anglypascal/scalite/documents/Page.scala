@@ -42,5 +42,5 @@ trait Page:
     *   contains Layouts in the _includes directory that will be used as
     *   mustache partials
     */
-  def render(partials: Map[String, Layout]): String
+  def render: String
 

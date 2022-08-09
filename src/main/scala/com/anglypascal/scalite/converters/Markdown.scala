@@ -44,7 +44,7 @@ object Markdown extends Converter:
 
   def convert(str: String): String = convert(str, "string input")
 
-  @main
+  // @main
   def markdownTest =
     val md = """
       hello this is a test for scala code

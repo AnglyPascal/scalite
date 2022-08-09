@@ -132,14 +132,14 @@ class Post(filepath: String, globals: Obj)
     *
     * TODO: need to change behavior when logger is implemented
     */
-  def render(partials: Map[String, Layout]): String =
+  def render: String =
     val str = Converter.convert(main_matter, filepath)
     val m = Obj("site" -> globals, "post" -> _locals, "content" -> str)
     val context = DObj(m)
 
     parent match
       case Some(l) =>
-        l.render(context, partials)
+        l.render(context)
       case None => str
 
   /** TODO: if show_excerpt is true, then create an excerpt object here? and add
@@ -190,4 +190,4 @@ object Post extends Collection[Post]:
   /** sorts out the posts, renders them with the globals, and writes them to the
     * disk
     */
-  def render(globals: Obj): Unit = ???
+  def render: Unit = ???

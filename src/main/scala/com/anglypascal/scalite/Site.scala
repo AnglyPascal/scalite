@@ -2,7 +2,7 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.collections.*
-import com.anglypascal.mustache.asts.CValue
+import com.anglypascal.scalite.utils.DataAST
 
 /** the main thing, anchor of this project
   */
@@ -22,7 +22,7 @@ import com.anglypascal.mustache.asts.CValue
 case class Site(base_dir: String):
 
   /** */
-  val c = CValue
+  val c = DataAST
   val globals = Globals.globals
 
   val layouts = MustacheLayout(globals("base").str + globals("layout_dir").str)

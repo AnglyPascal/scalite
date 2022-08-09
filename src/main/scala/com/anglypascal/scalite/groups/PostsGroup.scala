@@ -64,7 +64,7 @@ trait PostsGroup(
     * @return
     *   the rendered page string
     */
-  def render(partials: Map[String, Layout]): String =
+  def render: String =
     val m = Obj(
       "site" -> globals,
       "page" -> locals,
@@ -73,7 +73,7 @@ trait PostsGroup(
     val context = DObj(m)
     parent match
       case Some(l) =>
-        l.render(context, partials)
+        l.render(context)
       case None =>
         throw NoLayoutException(s"No layout found for $ctype collections")
 

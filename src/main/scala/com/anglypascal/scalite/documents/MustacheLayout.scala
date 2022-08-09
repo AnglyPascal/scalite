@@ -67,7 +67,7 @@ class MustacheLayout(name: String, layoutPath: String)
     * @return
     *   the string returned by the mustache after rendering
     */
-  def render(context: DObj, partials: Map[String, Layout]): String =
+  def render(context: DObj): String =
     def filter(data: Map[String, Layout])(implicit
         ev: ClassTag[MustacheLayout]
     ) = data collect { case (s, t): (String, MustacheLayout) => (s, t) }
@@ -78,7 +78,7 @@ class MustacheLayout(name: String, layoutPath: String)
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
         context.content = str
-        p.render(context, partials)
+        p.render(context)
       case _ => str
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory

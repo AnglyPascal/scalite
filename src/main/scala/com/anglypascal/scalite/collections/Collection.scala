@@ -23,7 +23,7 @@ trait Collection[A]:
     *
     * This sorts out the items, renders them, and writes them to the disk
     */
-  def render(globals: Obj): Unit
+  def render: Unit
 
   Collection.addToCollection(this)
 

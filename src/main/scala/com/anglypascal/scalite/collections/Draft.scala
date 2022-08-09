@@ -30,4 +30,5 @@ object Draft extends Collection[Post]:
 
     things
 
-  def render(globals: Obj): Unit = ???
+  def render: Unit = ???
+
