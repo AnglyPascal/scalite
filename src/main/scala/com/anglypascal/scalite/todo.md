@@ -1,6 +1,6 @@
 List of Things to do now
 
-- Write hander for context specific to collections
+- Write handler for context specific to collections
 
 - Api for custom behaviour with custom entries in the front matter. 
     Make an api for the post or page or whatever that lets users add specific effects
@@ -42,3 +42,6 @@ List of Things to do now
     Testing
 
 - How do I do testing??
+
+- String processors :
+    need to write the slugify and prettify functions. 

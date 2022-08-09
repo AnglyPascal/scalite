@@ -1,10 +1,7 @@
 package com.anglypascal.scalite.utils
 
-import scala.io.Source
 import com.rallyhealth.weejson.v1.{Value, Obj, Str, Bool, Num, Arr}
 import com.rallyhealth.weejson.v1.Value
-
-def readFile(filename: String): Source = Source.fromFile(filename)
 
 extension (data: Obj)
   def getOrElse(key: String)(default: String): String =

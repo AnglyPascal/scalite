@@ -60,7 +60,7 @@ class Post(filepath: String, globals: Obj)
 
   /** Search for the parent layout in Layout.layouts
     *
-    * TODO: Make this one abstract as well
+    * TODO: Make this one abstract as well, also change it to the generic Layout
     */
   _parent = MustacheLayout.layouts.get(parent_name)
 
@@ -133,14 +133,8 @@ class Post(filepath: String, globals: Obj)
     * TODO: need to change behavior when logger is implemented
     */
   def render(partials: Map[String, Layout]): String =
-    val str = Converter.convert(main_matter, filepath) match
-      case Right(s) => s
-      case Left(e)  => throw e
-    val m = Obj(
-      "site" -> globals,
-      "post" -> _locals,
-      "content" -> str
-    )
+    val str = Converter.convert(main_matter, filepath)
+    val m = Obj("site" -> globals, "post" -> _locals, "content" -> str)
     val context = DObj(m)
 
     parent match

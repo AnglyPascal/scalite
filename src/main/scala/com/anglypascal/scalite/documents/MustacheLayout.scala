@@ -8,6 +8,7 @@ import scala.collection.mutable.LinkedHashMap
 import com.anglypascal.scalite.utils.Data
 import com.anglypascal.scalite.utils.DObj
 import scala.reflect.ClassTag
+import com.typesafe.scalalogging.Logger
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/_includes" folder, the contents from any document with this
@@ -21,13 +22,15 @@ import scala.reflect.ClassTag
   *
   * TODO: Layouts might have locally specified theme
   */
-class MustacheLayout(name: String, layoutPath: String) extends 
-  Layout(name, layoutPath):
+class MustacheLayout(name: String, layoutPath: String)
+    extends Layout(name, layoutPath):
 
   /** Set the parent layout if it's specified in the front matter
     */
   private var _parent: Option[Layout] = None
   def parent = _parent
+
+  private val logger = Logger("Mustache Layout")
 
   /** Take a list of layouts, and find the parent layout
     */
@@ -36,10 +39,18 @@ class MustacheLayout(name: String, layoutPath: String) extends
       if front_matter.obj.contains("layout") then
         front_matter("layout") match
           case s: Str =>
+            logger.debug(s"This layout has a parent layout named $s")
             val pn = s.str
             layouts.get(pn)
-          case _ => None
-      else None
+          case _ =>
+            logger.error(
+              "The specified layout doesn't exist, " +
+                "or the specified value couldn't be interpretted as a string"
+            )
+            None
+      else
+        logger.debug("This layout doesn't have a specified parent layout")
+        None
 
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)
@@ -57,14 +68,15 @@ class MustacheLayout(name: String, layoutPath: String) extends
     *   the string returned by the mustache after rendering
     */
   def render(context: DObj, partials: Map[String, Layout]): String =
-    def filter[T, T2](data: Map[String, T2])(implicit ev: ClassTag[T]) = 
-      data collect {
-        case (s, t): (String, T) => (s, t)
-      }
-    val p = filter[MustacheLayout, Layout](partials).map((s, l) => (s, l.mustache))
+    def filter(data: Map[String, Layout])(implicit
+        ev: ClassTag[MustacheLayout]
+    ) = data collect { case (s, t): (String, MustacheLayout) => (s, t) }
+    // TODO: potentially might not work :p will have to test intensively
+    val p = filter(partials).map((s, l) => (s, l.mustache))
     val str = mustache.render(context, p)
     parent match
       case Some(p) =>
+        logger.debug("Rendering the parent layout now.")
         context.content = str
         p.render(context, partials)
       case _ => str
@@ -73,10 +85,11 @@ class MustacheLayout(name: String, layoutPath: String) extends
   */
 object MustacheLayout:
 
-  /** prevents the call of layouts before doing the apply
-    */
+  /** prevents the call of layouts before doing the apply */
   private var _layouts: Map[String, Layout] = _
   def layouts = _layouts
+
+  private val logger = Logger("MustacheLayout companion object")
 
   /** Process all the layouts in "/\_layouts" directory. This is done in two
     * passes. The first pass creates the layouts without specifying the parents.
@@ -92,6 +105,7 @@ object MustacheLayout:
       })
       .toMap
 
+    logger.debug("Got the layouts: " + ls.map(_._2.name).mkString(", "))
     ls.map((s, l) => l.setParent(ls))
     _layouts = ls.toMap
     layouts

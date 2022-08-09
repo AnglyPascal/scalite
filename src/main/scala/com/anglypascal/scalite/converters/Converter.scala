@@ -4,6 +4,7 @@ import com.anglypascal.scalite.ConverterException
 
 import scala.collection.mutable.Set
 import scala.util.matching.Regex
+import com.typesafe.scalalogging.Logger
 
 /** Converter provides the support to convert files matching the extension regex
   * to html files. Can be extended to provide support for arbitrary language.
@@ -28,7 +29,7 @@ trait Converter:
     *   - Left(e) where e is a ConverterException, or
     *   - Right(s) where s is the converted string.
     */
-  def convert(str: String): Either[ConverterException, String]
+  def convert(str: String, filepath: String): String
 
   /** Add the newly defined converter object to Converter.converters */
   Converter.addConverter(this)
@@ -42,6 +43,8 @@ object Converter:
     * Converter trait, it gets added to this set.
     */
   val converters = Set[Converter]()
+
+  private val logger = Logger("Converter")
 
   /** Private method that finds the correct converter for a given file
     *
@@ -61,7 +64,16 @@ object Converter:
     *   true if there's a converter accepting this ext; false otherwise
     */
   def hasConverter(ext: String): Boolean =
-    findConverter(ext) != None
+    findConverter(ext) match
+      case None =>
+        logger.warn(s"Converter could not be found for file $ext.")
+        false
+      case Some(conv) =>
+        logger.debug(
+          s"Converter object {} found for file $ext.",
+          conv.getClass.getName
+        )
+        true
 
   /** Convert a given filepath with an appropriate converter if it exists
     *
@@ -77,10 +89,16 @@ object Converter:
   def convert(
       str: String,
       filepath: String
-  ): Either[ConverterException, String] =
+  ): String =
     findConverter(filepath) match
-      case Some(converter) => converter.convert(str)
-      case None => Left(ConverterException("No converter defined for filetype"))
+      case Some(converter) =>
+        converter.convert(str, filepath)
+      case None =>
+        logger.warn(
+          "Converter could not be found, " +
+            s"so no conversion was made for file $filepath."
+        )
+        str
 
   /** Method to add a new converter to the converters set. */
   def addConverter(conv: Converter): Unit = converters += conv

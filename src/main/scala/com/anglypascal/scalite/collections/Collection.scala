@@ -20,9 +20,9 @@ trait Collection[A]:
   def things: Map[String, A]
 
   /** TODO: Need to change this to accept the immutable version of Obj
-   *
-   *  This sorts out the items, renders them, and writes them to the disk
-   */
+    *
+    * This sorts out the items, renders them, and writes them to the disk
+    */
   def render(globals: Obj): Unit
 
   Collection.addToCollection(this)
@@ -54,16 +54,25 @@ object Collection:
 
   def addToCollection(col: Collection[_]) = collections += (col.name -> col)
 
-/** Extra collections can be put in a separate folder defined by
+  /** TODO: add method that takes the globals.collection object and prepares all
+    * the collections, taking into account whether specific implementations for
+    * some collections are provided.
+    */
+
+/** TODO: Extra collections can be put in a separate folder defined by
   * collections_dir, which is by default base_dir
   *
-  * they items inside a collection will be under _collection_name folder inside
-  * the collections_dir. They will be defined by a generic handler like post,
-  * but if provided a custom handler by inserting a Collection object with the
-  * name inside collections, it will be rendered differently.
+  * the items inside a collection will be under _collection_name folder inside
+  * the collections_dir. They will be defined by a generic item object but if
+  * provided a custom handler by inserting a Collection object with the name
+  * inside collections, it will be rendered differently.
   *
   * Posts is rendered in this way. This is different from jekyll which handles
   * all the collections other than posts in the same way :DD
   *
   * figure out the custom tags that collections need to have
+  */
+
+/** TODO: Specify in the globals if there should be a designated site for this
+  * collection
   */

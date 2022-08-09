@@ -5,7 +5,10 @@ import scala.language.implicitConversions
 import com.anglypascal.mustache.AST
 import scala.collection.mutable
 
-/** TODO: This might become performance heavy :( idk, but let's keep going */
+/** TODO: This might become performance heavy :( idk, but let's keep going. Also
+  * is this a good api? I'm extending AST, which the other user shouldn't have
+  * to :/
+  */
 sealed trait Data extends AST
 
 /** Wrapper for Obj and mutable maps for use in the context */

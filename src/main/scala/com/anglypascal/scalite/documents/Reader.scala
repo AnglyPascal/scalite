@@ -22,7 +22,7 @@ trait Reader(val filepath: String):
   /** Strip the filepath to get the filename */
   private val filename: String = filepath.split("/").last.split(".").head
 
-  /** read the file and store into a Source */
+  /** read the file and get the string from it */
   private val src = readFile(filepath).toString
 
   /** Regex to match the YAML front matter and the remaining content */

@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.utils.{getListOfFiles, getFileName}
+import com.typesafe.scalalogging.Logger
 
 /** Defines methods to process the partial layouts in "/\_includes" folder
   */
@@ -10,6 +11,8 @@ object Partial:
     */
   private var _partials: Map[String, Layout] = _
   def partials = _partials
+
+  private val logger = Logger("Partial object")
 
   /** Process all the partials in "/\_partials" directory. This is done in two
     * passes. The first pass creates the partials without specifying the
@@ -25,6 +28,7 @@ object Partial:
       })
       .toMap
 
+    logger.debug("Got the partials: " + ls.map(_._2.name).mkString(", "))
     ls.map((s, l) => l.setParent(ls))
     _partials = ls.toMap
     partials
