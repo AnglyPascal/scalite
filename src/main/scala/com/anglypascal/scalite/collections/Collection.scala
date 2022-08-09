@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
 import scala.collection.mutable.LinkedHashMap
+import com.rallyhealth.weejson.v1.Obj
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -17,6 +18,12 @@ trait Collection[A]:
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def things: Map[String, A]
+
+  /** TODO: Need to change this to accept the immutable version of Obj
+   *
+   *  This sorts out the items, renders them, and writes them to the disk
+   */
+  def render(globals: Obj): Unit
 
   Collection.addToCollection(this)
 

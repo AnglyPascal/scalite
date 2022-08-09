@@ -29,3 +29,5 @@ object Draft extends Collection[Post]:
     _drafts = files.filter(Converter.hasConverter).map(f).toMap
 
     things
+
+  def render(globals: Obj): Unit = ???

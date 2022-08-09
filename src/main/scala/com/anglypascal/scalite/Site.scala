@@ -25,7 +25,7 @@ case class Site(base_dir: String):
   val c = CValue
   val globals = Globals.globals
 
-  val layouts = Layout(globals("base").str + globals("layout_dir").str)
+  val layouts = MustacheLayout(globals("base").str + globals("layout_dir").str)
   val partials = Partial(globals("base").str + globals("includes_dir").str)
   val statics = Post(globals("base").str, globals)
   val posts = Post(globals("base").str + globals("layout_dir").str, globals)

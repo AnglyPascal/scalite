@@ -62,7 +62,7 @@ class Post(filepath: String, globals: Obj)
     *
     * TODO: Make this one abstract as well
     */
-  _parent = Layout.layouts.get(parent_name)
+  _parent = MustacheLayout.layouts.get(parent_name)
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
@@ -136,7 +136,13 @@ class Post(filepath: String, globals: Obj)
     val str = Converter.convert(main_matter, filepath) match
       case Right(s) => s
       case Left(e)  => throw e
-    val context = Obj("site" -> globals, "post" -> _locals, "content" -> str)
+    val m = Obj(
+      "site" -> globals,
+      "post" -> _locals,
+      "content" -> str
+    )
+    val context = DObj(m)
+
     parent match
       case Some(l) =>
         l.render(context, partials)
@@ -147,7 +153,6 @@ class Post(filepath: String, globals: Obj)
     */
   def excerpt: String = ???
 
-  /** TODO: Related posts? Custom sorting? */
   def compare(that: Post) = this.date compare that.date
 
   /** Return the global settings for the collection-type ctype */
@@ -188,16 +193,7 @@ object Post extends Collection[Post]:
 
     things
 
-/** TODO TODO TODO
-  *
-  * In jekyll posts are also collections. So if one wishes to turn down the
-  * posts output, they can do so by collections: posts: output: false.
-  *
-  * That means, a collection should have similar structure as the posts.
-  * Although the others might not be as elaborate as posts. For example what
-  * else would you include in a _staff_members collection, other than some basic
-  * things like title, url, date etc?
-  *
-  * Maybe, provide a public api that lets users define exactly how these
-  * collections should render
-  */
+  /** sorts out the posts, renders them with the globals, and writes them to the
+    * disk
+    */
+  def render(globals: Obj): Unit = ???

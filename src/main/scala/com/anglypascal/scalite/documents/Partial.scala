@@ -21,7 +21,7 @@ object Partial:
     val ls = files
       .map(f => {
         val fn = getFileName(f)
-        (fn, new Layout(getFileName(f), f))
+        (fn, new MustacheLayout(getFileName(f), f))
       })
       .toMap
 

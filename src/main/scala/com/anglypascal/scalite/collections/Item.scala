@@ -13,12 +13,22 @@ abstract class Item(filepath: String, globals: Obj) extends Reader(filepath):
 
   def render(partials: Map[String, Layout]): String
 
+  /** TODO: Custom sorting is specified by the "sort_by" entry inside the global
+    * option for this collection. Custom ordering should also be avaiable.
+    * Anything that does not match the filenames in the ordering, should come
+    * later
+    */
+  def compare(that: Post): Int // = this.date compare that.date
+
 class GenericItem(val name: String, filepath: String, globals: Obj)
     extends Item(filepath, globals):
 
+  /** */
   val title: String =
     front_matter.getOrElse("title")(
-      titleParser(filepath).getOrElse("untitled" + this.toString)
+      front_matter.getOrElse("name")(
+        titleParser(filepath).getOrElse("untitled" + this.toString)
+      )
     ) // so that titles are always different for different items
 
   /** check with jekyll if it needs more basic */
@@ -44,6 +54,8 @@ class GenericItem(val name: String, filepath: String, globals: Obj)
         case Right(s) => s
         case Left(e)  => throw e
 
+  def compare(that: Post): Int = ???
+
 object GenericItem extends Collection[Item]:
 
   def things = _items
@@ -59,3 +71,5 @@ object GenericItem extends Collection[Item]:
     _items = files.map(f).toMap
 
     things
+
+  def render(globals: Obj): Unit = ???

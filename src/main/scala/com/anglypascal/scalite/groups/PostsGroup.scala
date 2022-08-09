@@ -3,7 +3,7 @@ package com.anglypascal.scalite.groups
 import com.anglypascal.scalite.documents.{Page, Layout}
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.NoLayoutException
-import com.anglypascal.scalite.utils.{getOrElse, prettify}
+import com.anglypascal.scalite.utils.{getOrElse, prettify, DObj}
 
 import com.rallyhealth.weejson.v1.{Obj, Arr}
 import scala.collection.mutable.Set
@@ -47,7 +47,7 @@ trait PostsGroup(
   protected def postToItem(post: Post): Obj =
     post.locals match
       case a: Obj => a
-      case _ => Obj()
+      case null => Obj()
 
   /** The local varibales that will be used to render the PostsGroup page. */
   protected val locals: Obj = Obj (
@@ -65,11 +65,12 @@ trait PostsGroup(
     *   the rendered page string
     */
   def render(partials: Map[String, Layout]): String =
-    val context = Obj(
+    val m = Obj(
       "site" -> globals,
       "page" -> locals,
       "items" -> Arr(posts.toList.map(postToItem))
     )
+    val context = DObj(m)
     parent match
       case Some(l) =>
         l.render(context, partials)
