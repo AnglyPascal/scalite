@@ -5,6 +5,8 @@ import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.utils.DObj
+import com.anglypascal.scalite.utils.DStr
 
 object Tag extends Group("tag"):
 
@@ -26,10 +28,10 @@ object Tag extends Group("tag"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  class Tag(name: String, globals: Obj) extends GroupType(name, globals):
+  class Tag(name: String, globals: DObj) extends GroupType(name, globals):
     // define the abstract memebers 
-    override val locals: Obj = Obj (
-      "title" -> name,
+    override val locals: DObj = DObj (
+      "title" -> DStr(name),
     )
 
 
@@ -45,7 +47,7 @@ object Tag extends Group("tag"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToGroups(post: Post, globals: Obj): Unit =
+  def addToGroups(post: Post, globals: DObj): Unit =
     // names of tags this post has
     val tagNames = getGroupNames(post)
     // for each tag, add this post to it and add this tag back to the post

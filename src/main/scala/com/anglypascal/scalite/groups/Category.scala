@@ -5,6 +5,7 @@ import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.utils.DObj
 
 object Category extends Group("category"):
 
@@ -28,7 +29,7 @@ object Category extends Group("category"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  class Category(name: String, globals: Obj) extends GroupType(name, globals)
+  class Category(name: String, globals: DObj) extends GroupType(name, globals)
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()
@@ -42,7 +43,7 @@ object Category extends Group("category"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToGroups(post: Post, globals: Obj): Unit =
+  def addToGroups(post: Post, globals: DObj): Unit =
     // names of categories this post belongs to
     val catNames = getGroupNames(post)
     // for each category, add this post to it and add this category back to the post

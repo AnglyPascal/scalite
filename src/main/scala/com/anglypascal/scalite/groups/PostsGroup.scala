@@ -7,6 +7,8 @@ import com.anglypascal.scalite.utils.{getOrElse, prettify, DObj}
 
 import com.rallyhealth.weejson.v1.{Obj, Arr}
 import scala.collection.mutable.Set
+import com.anglypascal.scalite.utils.DStr
+import com.anglypascal.scalite.utils.DArr
 
 /** Each PostsGroup object represents a collection that posts can belong to. Tag
   * and Categories are the two pre-defined sublcasses of this trait.
@@ -21,7 +23,7 @@ import scala.collection.mutable.Set
 trait PostsGroup(
     val ctype: String,
     val name: String,
-    globals: Obj
+    globals: DObj
 ) extends Page:
 
   /** Set of posts that belong to this collection. */
@@ -30,8 +32,8 @@ trait PostsGroup(
   /** Add a new post to this collection */
   def addPost(post: Post) = posts += post
 
-  /** Name of the layout to be used for rendering the page for this PostsGroup. If
-    * not specified in the global settings, this defaults back to "ctype"
+  /** Name of the layout to be used for rendering the page for this PostsGroup.
+    * If not specified in the global settings, this defaults back to "ctype"
     */
   val parent_name = globals.getOrElse(ctype + "_layout")(ctype)
 
@@ -44,15 +46,15 @@ trait PostsGroup(
     * @return
     *   weeJson obj, with the required mappings for the rendering
     */
-  protected def postToItem(post: Post): Obj =
+  protected def postToItem(post: Post): DObj =
     post.locals match
-      case a: Obj => a
-      case null => Obj()
+      case a: DObj => a
+      case null    => DObj()
 
   /** The local varibales that will be used to render the PostsGroup page. */
-  protected val locals: Obj = Obj (
-    "title" -> name,
-    )
+  val locals: DObj = DObj(
+    "title" -> DStr(name)
+  )
 
   /** Should the tag be rendered in a separate page? */
   protected val visible: Boolean = true
@@ -65,12 +67,11 @@ trait PostsGroup(
     *   the rendered page string
     */
   def render: String =
-    val m = Obj(
+    val context = DObj(
       "site" -> globals,
       "page" -> locals,
-      "items" -> Arr(posts.toList.map(postToItem))
+      "items" -> DArr(posts.toList.map(postToItem))
     )
-    val context = DObj(m)
     parent match
       case Some(l) =>
         l.render(context)

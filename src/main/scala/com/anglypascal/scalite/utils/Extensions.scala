@@ -27,3 +27,18 @@ extension (data: Value)
       case a: Arr  => Arr(a.arr.map(_.hardCopy))
       case o: Obj  => Obj(o.obj.map((k, v) => (k, v.hardCopy)))
       case other   => other
+
+extension (data: DObj)
+  def getOrElse(key: String)(default: String): String =
+    if data.contains(key) then
+      data(key) match
+        case s: Str => s.str
+        case _      => default
+    else default
+
+  def getOrElse(key: String)(default: Boolean): Boolean =
+    if data.contains(key) then
+      data(key) match
+        case b: DBool => b.bool
+        case _       => default
+    else default

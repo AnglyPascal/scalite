@@ -1,12 +1,10 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.{getListOfFiles, getFileName}
+import com.anglypascal.scalite.utils.{getListOfFiles, getFileName, Data, DObj}
 
-import com.anglypascal.mustache.Mustache
 import com.rallyhealth.weejson.v1.{Obj, Str}
+import com.anglypascal.mustache.Mustache
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.utils.Data
-import com.anglypascal.scalite.utils.DObj
 import scala.reflect.ClassTag
 import com.typesafe.scalalogging.Logger
 
@@ -55,6 +53,7 @@ class MustacheLayout(name: String, layoutPath: String)
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)
 
+
   /** Evaluate the template by rendering it with it's context and partials
     *
     * @param context
@@ -68,12 +67,7 @@ class MustacheLayout(name: String, layoutPath: String)
     *   the string returned by the mustache after rendering
     */
   def render(context: DObj): String =
-    def filter(data: Map[String, Layout])(implicit
-        ev: ClassTag[MustacheLayout]
-    ) = data collect { case (s, t): (String, MustacheLayout) => (s, t) }
-    // TODO: potentially might not work :p will have to test intensively
-    val p = filter(partials).map((s, l) => (s, l.mustache))
-    val str = mustache.render(context, p)
+    val str = mustache.render(context, MustacheLayout.mustachePartials)
     parent match
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
@@ -90,6 +84,13 @@ object MustacheLayout:
   def layouts = _layouts
 
   private val logger = Logger("MustacheLayout companion object")
+
+  // TODO: potentially might not work :p will have to test intensively
+  val mustachePartials: Map[String, Mustache] =
+    def filter(data: Map[String, Layout])(implicit
+        ev: ClassTag[MustacheLayout]
+    ) = data collect { case (s, t): (String, MustacheLayout) => (s, t) }
+    filter(Partial.partials).map((s, l) => (s, l.mustache))
 
   /** Process all the layouts in "/\_layouts" directory. This is done in two
     * passes. The first pass creates the layouts without specifying the parents.

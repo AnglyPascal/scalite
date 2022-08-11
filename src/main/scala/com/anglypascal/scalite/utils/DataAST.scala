@@ -5,9 +5,8 @@ import com.anglypascal.mustache.Mustache
 import scala.language.implicitConversions
 // import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
 
-/** AST Support for the Data implementation to be used in Mustache
- */
-class DataAST(v: Data) extends AST:
+/** AST Support for the Data implementation to be used in Mustache */
+private[scalite] class DataAST(v: Data) extends AST:
 
   import DataAST.*
 
@@ -26,7 +25,7 @@ class DataAST(v: Data) extends AST:
       case boo: DBool => boo.bool
       case _          => None
 
-object DataAST extends ASTConverter:
+private[scalite] object DataAST extends ASTConverter:
 
   implicit def dataToAST(data: Data): AST = new DataAST(data)
 

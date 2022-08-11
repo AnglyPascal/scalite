@@ -1,47 +1,61 @@
-List of Things to do now
+# TODO List
 
-- Write handler for context specific to collections
+## Context Handler
 
-- Api for custom behaviour with custom entries in the front matter. 
-    Make an api for the post or page or whatever that lets users add specific effects
-    to the tags by providing a `() => String` function
+- Go around checking the model. Adding logs while you're at it. Attention:
+    - Effects of the immutable Data
 
-- Implement writers in the command pattern. Inside writers module there need to be a
-- file cleaner Make a cache system
+- Write the string handlers:
+    - `slugify()`: converts string into lower-case, hyphen seperated string. 
+        - challenge is to add customization. For now, copy jekyll
+    - `prettify():` takes a string, maybe slugified, and creates a nice english rep.
+        - again, challenge is to support customization.
+    - `excerpt()`: module for posts, that creates an excerpt of the post. Copy jekyll
+        for now.
 
-- Need to add the logger
+- Start with global settings handling. Write the specification for items
+    - We don't need many options to handle posts. Then check the code for posts, and
+        test a small case.
+    - Check url creation, that it words and the partials work.
+    - Then add the collection configurations in global settings.
+        - Collections can be specified to have a table of contents page. 
 
-- Write the main Site object? Or class? 
-    Decide how to go on about that global influence
+- Make a directory builder and file writer
+    - Inside collection items, define the output path. It should be defined by the url.
+    - Write a file copier that copies static files.
+    - While you're at it, look into the caching system.
 
-- Front matter documentation. 
-    The way to do this is to give an api for the front matter in a separate file like
-    Global
+- Write a Main object, with only one option for now: `build`. 
 
-- Command system, support for build, new, serve, clean
+- On the meantime, take care of sass rendering. I don't know how themeing will work, so
+    need to take a closer look.
+    - I think it's just compile everything in the `_sass` folder, and put everything
+        inside `/assets/css/style.css` file
 
-- Api for a custom tag. 
+- Front matter documentation, and other documentations. Work on this as you go.
+
+
+## A bit later
+
+- Give a API that allows a custom function mapped to a placeholder with signature maybe 
+    ``` scala
+    () => String
+    String => String
+    ```
+    which will be used when `{{function_key}}` is used in mustache layouts.
+
+- We can also allow for custom placeholder classes to be passed to the renderer via the
+    MustacheHelper trait. 
+
     For example, if someone wants to output the render time of the post, they will
     define an extension to the mustache helper (give it a different name) and simply
     define a function with the name `render()` and the output will be returnd by this
     funciton. More functionality can obviously be achieved by exploiting the behaviour
     of mustache library
 
-- Plugin class, that provides a public api to add plugins. 
-    Add support for plugins, converters, and such by adding a function in the
-    converters class that lets users to add a plugin without editing the source file.
-    Define the "addStuff" method
+- Write a public API named Plugin that will handle the object fetching from the
+    `_plugins` directory by adding them to the classpath. Also it will handle the
+    object initialization so that they are properly processed. Will need an API for
+    this as well.
 
-- Theme handler
-    Write class for handling themes, locally specified theme for layouts and pages.
-
-- Cacher. 
-    Will store metadata about posts, so that we don't render things already rendered.
-    Also store cached data of things.
-
-    Testing
-
-- How do I do testing??
-
-- String processors :
-    need to write the slugify and prettify functions. 
+- Localized theming for layouts? Is it possible?

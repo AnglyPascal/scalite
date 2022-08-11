@@ -22,5 +22,4 @@ abstract class Layout(val name: String, layoutPath: String)
 
   def matches: Boolean = ???
 
-  protected val partials = Partial.partials
   // this will tell whether this filetype is compatible with this renderer.

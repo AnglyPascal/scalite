@@ -6,6 +6,7 @@ import com.anglypascal.scalite.groups.*
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.utils.DObj
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -19,7 +20,7 @@ object Globals:
     "post_dir" -> "/_posts",
     "includes_dir" -> "/_includes",
     "sass_dir" -> "/_sass",
-    "pluins_dir" -> "/_plugins"
+    "plugins_dir" -> "/_plugins"
   )
 
   private val reading = Obj(
@@ -48,11 +49,14 @@ object Globals:
     "date_format" -> "dd MMM, yyyy"
   )
 
-  val globals = dirs.obj ++ reading.obj ++ site.obj ++ defaults.obj
+  private val glbsObj = dirs.obj ++ reading.obj ++ site.obj ++ defaults.obj
 
-  /** Support for data provided in _data folder. this will be in site("data") */
+  /** Support for data provided in _data folder. This will be in site("data") */
   private val config = yamlParser(dirs("base_dir").str + "/config.yml")
-  for (key, value) <- config.obj do globals(key) = value
+  for (key, value) <- config.obj do glbsObj(key) = value
+
+  val globals = DObj(Obj(glbsObj))
+
 
 /** Should need to write the documentation for different options in the
   * config.yml

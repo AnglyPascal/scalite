@@ -8,6 +8,7 @@ import com.anglypascal.scalite.collections.Post
 
 import scala.collection.mutable.{LinkedHashMap, Set}
 import com.rallyhealth.weejson.v1.Obj
+import com.anglypascal.scalite.utils.DObj
 
 /** Creates a new type of Group. Needs the implementation of addToGroups which
   * defines how a post is added to the Group.
@@ -28,7 +29,7 @@ trait Group(ctype: String):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  abstract class GroupType(name: String, globals: Obj)
+  abstract class GroupType(name: String, globals: DObj)
       extends PostsGroup(ctype, name, globals)
 
   /** Defines how posts add themselves to this group type. Usually it's by a
@@ -41,7 +42,7 @@ trait Group(ctype: String):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  def addToGroups(post: Post, globals: Obj): Unit
+  def addToGroups(post: Post, globals: DObj): Unit
 
   // add this Group to Group.availableGroups
   Group.addNewGroup(this)

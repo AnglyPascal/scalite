@@ -39,7 +39,7 @@ import com.rallyhealth.weejson.v1.Value
   * @param globals
   *   a weejson object passed through the "_config.yml" file
   */
-class Post(filepath: String, globals: Obj)
+class Post(filepath: String, globals: DObj)
     extends Item(filepath, globals)
     with ReaderOps
     with Page
@@ -85,7 +85,7 @@ class Post(filepath: String, globals: Obj)
     *
     * Maybe DraftPost will extend Post overriding this time handling thing
     */
-  private val urlObj: Obj =
+  private val urlObj: DObj =
     val dateString = front_matter.getOrElse("date")(filepath)
     val dateFormat =
       front_matter.getOrElse("date_format")(
@@ -94,7 +94,7 @@ class Post(filepath: String, globals: Obj)
     val obj = dateParseObj(dateString, dateFormat)
     obj("title") = title
     obj("modified_time") = lastModifiedTime(dateFormat)
-    obj
+    DObj(obj)
 
   /** Template for the permalink of the post */
   private val permalink =
@@ -104,7 +104,7 @@ class Post(filepath: String, globals: Obj)
 
   val url = URL(permalink)(urlObj)
 
-  private val _locals =
+  def locals =
     val used =
       List("title", "date", "layout", "tags", "categories", "permalink")
     val obj = Obj()
@@ -118,9 +118,7 @@ class Post(filepath: String, globals: Obj)
       "url" -> url,
       "excerpt" -> excerpt
     )
-    obj
-
-  def locals = _locals.hardCopy.asInstanceOf[Obj]
+    DObj(obj)
 
   /** Returns whether to render this post or not. Default is false. */
   val visible: Boolean =
@@ -134,8 +132,7 @@ class Post(filepath: String, globals: Obj)
     */
   def render: String =
     val str = Converter.convert(main_matter, filepath)
-    val m = Obj("site" -> globals, "post" -> _locals, "content" -> str)
-    val context = DObj(m)
+    val context = DObj("site" -> globals, "post" -> locals, "content" -> DStr(str))
 
     parent match
       case Some(l) =>
@@ -177,14 +174,13 @@ object Post extends Collection[Post]:
 
   val name = "posts"
 
-  def apply(directory: String, globals: Obj): Map[String, Post] =
+  def apply(directory: String, globals: DObj): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
       post.processGroups()
       (post.title, post)
     _posts = files.filter(Converter.hasConverter).map(f).toMap
-
     things
 
   /** sorts out the posts, renders them with the globals, and writes them to the

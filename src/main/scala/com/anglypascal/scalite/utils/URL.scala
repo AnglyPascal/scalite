@@ -2,13 +2,13 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.mustache.Mustache
-import com.rallyhealth.weejson.v1.Obj
+import com.anglypascal.scalite.utils.DObj
 
 case class URL(str: String):
   /** */
   val template = new Mustache(str)
 
-  def apply(placeholders: Obj) =
+  def apply(placeholders: DObj) =
     template.render(placeholders, partials)
 
   private val partials: Map[String, Mustache] =

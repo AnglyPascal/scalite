@@ -2,11 +2,11 @@ package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.utils.getListOfFiles
+import com.anglypascal.scalite.utils.DObj
 import com.anglypascal.scalite.converters.Converter
 
-import com.rallyhealth.weejson.v1.Obj
 
-class Draft(filename: String, globals: Obj)
+class Draft(filename: String, globals: DObj)
     extends Post(filename, globals) // except for the date
 
 /** TODO: Draft posts in _draft folder. These will be rendered in the drafts:
@@ -20,7 +20,7 @@ object Draft extends Collection[Post]:
 
   val name = "drafts"
 
-  def apply(directory: String, globals: Obj): Map[String, Post] =
+  def apply(directory: String, globals: DObj): Map[String, Post] =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
