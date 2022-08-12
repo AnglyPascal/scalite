@@ -10,6 +10,7 @@ import com.anglypascal.scalite.URL
 import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
 import scala.collection.mutable.{LinkedHashMap}
 import com.rallyhealth.weejson.v1.Value
+import cats.data.OpInstances0
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -42,8 +43,8 @@ import com.rallyhealth.weejson.v1.Value
 class Post(filepath: String, globals: DObj)
     extends Item(filepath, globals)
     with ReaderOps
-    with Page
-    with Ordered[Post]:
+    with Page:
+  // with Ordered[Post]:
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -167,25 +168,3 @@ class Post(filepath: String, globals: DObj)
   def processGroups(): Unit =
     for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
 
-/** Companion object that creates the Posts collection.
-  */
-object Post extends Collection[Post]:
-
-  def things = _posts
-  private var _posts: Map[String, Post] = _
-
-  val name = "posts"
-
-  def apply(directory: String, globals: DObj): Map[String, Post] =
-    val files = getListOfFiles(directory)
-    def f(fn: String) =
-      val post = new Post(fn, globals)
-      post.processGroups()
-      (post.title, post)
-    _posts = files.filter(Converter.hasConverter).map(f).toMap
-    things
-
-  /** sorts out the posts, renders them with the globals, and writes them to the
-    * disk
-    */
-  def render: Unit = ???

@@ -4,6 +4,7 @@
 
 - Go around checking the model. Adding logs while you're at it. Attention:
     - Effects of the immutable Data
+    - Before everything, make sure that the abstraction with collection works
 
 - Write the string handlers:
     - `slugify()`: converts string into lower-case, hyphen seperated string. 

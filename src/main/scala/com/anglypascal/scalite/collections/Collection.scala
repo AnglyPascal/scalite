@@ -28,7 +28,18 @@ trait Collection[A]: // TODO: need to supply some metadata
 
   def apply(directory: String, globals: DObj): Map[String, A]
 
+  private var _sortBy = "title"
+  def sortBy = _sortBy
+  def sortBy_=(key: String) = _sortBy = key
+
   // val pageOfCollection: Boolean
+  
+  /** TODO: Custom sorting is specified by the "sortBy" entry inside the global
+    * option for this collection. Custom ordering should also be avaiable.
+    * Anything that does not match the filenames in the ordering, should come
+    * later
+    */
+  def compare(fst: A, snd: A): Int // = this.date compare that.date
 
   Collection.addToCollection(this)
 
@@ -45,6 +56,7 @@ trait Collection[A]: // TODO: need to supply some metadata
   *     folder: col_folder
   *     directory: /path/to/custom/collection
   *     toc: true
+  *     sortBy: date
   *     ... anything else this collection specific
   * }}}
   * By default all items of a collection other than posts will be handled by the
@@ -78,7 +90,7 @@ object Collection:
           collections(key)
         else
           logger.debug(s"created new collection object for $key")
-          new GenericCollection(key)
+          new GenericItems(key)
 
       colData(key) match
         case cobj: DObj =>
@@ -107,6 +119,11 @@ object Collection:
               case Some(d): Some[DStr] => d.str + "/" + folder
               case _                   => colDir + s"/_$key"
             Col(dir, globals)
+
+            cobj.get("sortBy") match
+              case Some(v): Some[DStr] => Col.sortBy = v.str
+              case _                   => ()
+
         case cbool: DBool =>
           val dir = colDir + s"/_$key"
           Col(dir, globals)

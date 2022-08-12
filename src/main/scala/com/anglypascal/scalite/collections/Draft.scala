@@ -13,7 +13,7 @@ class Draft(filename: String, globals: DObj)
   * true option is set in the global settings. The time variable for these will
   * be the motified date collected from the file informations.
   */
-object Draft extends Collection[Post]:
+object Drafts extends Collection[Post]:
 
   def things = _drafts
   private var _drafts: Map[String, Post] = _
@@ -29,6 +29,8 @@ object Draft extends Collection[Post]:
     _drafts = files.filter(Converter.hasConverter).map(f).toMap
 
     things
+
+  def compare(fst: Post, snd: Post): Int = Posts.compare(fst, snd)
 
   def render: Unit = ???
 
