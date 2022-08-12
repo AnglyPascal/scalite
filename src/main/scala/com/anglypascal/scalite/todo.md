@@ -34,6 +34,8 @@
 
 - Front matter documentation, and other documentations. Work on this as you go.
 
+- Initializer. Somehow initializes all the objects
+
 
 ## A bit later
 

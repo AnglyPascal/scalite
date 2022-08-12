@@ -57,6 +57,10 @@ object Globals:
 
   val globals = DObj(Obj(glbsObj))
 
+  /** The values for collection will be separated here and sent to the constructor of
+   *  Collection object
+   */
+
 
 /** Should need to write the documentation for different options in the
   * config.yml

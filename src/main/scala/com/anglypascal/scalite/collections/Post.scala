@@ -132,7 +132,8 @@ class Post(filepath: String, globals: DObj)
     */
   def render: String =
     val str = Converter.convert(main_matter, filepath)
-    val context = DObj("site" -> globals, "post" -> locals, "content" -> DStr(str))
+    val context =
+      DObj("site" -> globals, "post" -> locals, "content" -> DStr(str))
 
     parent match
       case Some(l) =>
@@ -166,7 +167,8 @@ class Post(filepath: String, globals: DObj)
   def processGroups(): Unit =
     for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
 
-/** Companion Object */
+/** Companion object that creates the Posts collection.
+  */
 object Post extends Collection[Post]:
 
   def things = _posts

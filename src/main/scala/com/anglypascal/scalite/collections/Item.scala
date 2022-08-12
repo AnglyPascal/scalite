@@ -20,7 +20,7 @@ abstract class Item(filepath: String, globals: DObj) extends Reader(filepath):
     */
   def compare(that: Post): Int // = this.date compare that.date
 
-class GenericItem(val name: String, filepath: String, globals: DObj)
+class GenericItem(filepath: String, globals: DObj)
     extends Item(filepath, globals):
 
   /** */
@@ -51,22 +51,18 @@ class GenericItem(val name: String, filepath: String, globals: DObj)
 
   def compare(that: Post): Int = ???
 
-/** Defines the collection of generic item
- */
-object GenericItem extends Collection[Item]:
+/** Defines the collection of generic item */
+class GenericCollection(val name: String) extends Collection[Item]:
 
   def things = _items
-  private var _items: Map[String, Item] = _
+  private var _items: Map[String, Item] = Map()
 
-  val name = name // TODO: figure out naming convnetion
-
-  def apply(nm: String, directory: String, globals: DObj): Map[String, Item] =
+  def apply(directory: String, globals: DObj) =
     val files = getListOfFiles(directory)
     def f(fn: String) =
-      val post = new GenericItem(nm, fn, globals)
-      (post.title, post)
+      val item = new GenericItem(fn, globals)
+      (item.title, item)
     _items = files.map(f).toMap
-
     things
 
   def render: Unit = ???

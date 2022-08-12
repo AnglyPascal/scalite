@@ -2,11 +2,8 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.utils.{readFile, yamlParser, dateToString}
 
-import scala.io.Source
-import scala.util.matching.Regex
-import com.rallyhealth.weejson.v1._
+import com.rallyhealth.weejson.v1.Obj
 import java.nio.file.{Paths, Files}
-import org.joda.time.DateTime
 
 /** Document represents the pages of the site that are generated from the
   * templates and user created content files. This includes all mustache
@@ -38,7 +35,9 @@ trait Reader(val filepath: String):
 /** To provide support for extension methods on a Reader
   */
 trait ReaderOps extends Reader:
+  import org.joda.time.DateTime
 
+  /** Gets the last modified time of a file in the given date format */
   def lastModifiedTime(dateFormat: String): String =
     val path = Paths.get(filepath)
     val modTime =

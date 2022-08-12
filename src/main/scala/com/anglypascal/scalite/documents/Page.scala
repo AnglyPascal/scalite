@@ -1,7 +1,5 @@
 package com.anglypascal.scalite.documents
 
-import com.rallyhealth.weejson.v1.Obj
-
 /** Page represents a page of the website.
   *
   * The model used here assumes that each page has content file, typically in

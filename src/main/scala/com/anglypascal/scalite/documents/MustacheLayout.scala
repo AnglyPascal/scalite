@@ -1,24 +1,23 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.{getListOfFiles, getFileName, Data, DObj}
+import com.anglypascal.scalite.utils.{getListOfFiles, getFileName, DObj}
+import com.anglypascal.scalite.documents.Reader
 
 import com.rallyhealth.weejson.v1.{Obj, Str}
 import com.anglypascal.mustache.Mustache
-import scala.collection.mutable.LinkedHashMap
-import scala.reflect.ClassTag
 import com.typesafe.scalalogging.Logger
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
-  * from the "/_includes" folder, the contents from any document with this
+  * from the "/\_includes" folder, the contents from any document with this
   * layout as a parent, and the local and global variables, and renders the
   * template.
+  *
+  * TODO: Layouts might have locally specified theme
   *
   * @param name
   *   name of the layout, which will be refered by other documents
   * @param layoutPath
-  *   path to the layout file inside "/_layouts"
-  *
-  * TODO: Layouts might have locally specified theme
+  *   path to the layout file inside "/\_layouts"
   */
 class MustacheLayout(name: String, layoutPath: String)
     extends Layout(name, layoutPath):
@@ -30,8 +29,7 @@ class MustacheLayout(name: String, layoutPath: String)
 
   private val logger = Logger("Mustache Layout")
 
-  /** Take a list of layouts, and find the parent layout
-    */
+  /** Take a list of layouts, and find the parent layout */
   def setParent(layouts: Map[String, Layout]): Unit =
     _parent =
       if front_matter.obj.contains("layout") then
@@ -39,7 +37,12 @@ class MustacheLayout(name: String, layoutPath: String)
           case s: Str =>
             logger.debug(s"This layout has a parent layout named $s")
             val pn = s.str
-            layouts.get(pn)
+            layouts.get(pn) match
+              case Some(v) =>
+                v match
+                  case v: MustacheLayout => Some(v)
+                  case _                 => None
+              case None => None
           case _ =>
             logger.error(
               "The specified layout doesn't exist, " +
@@ -53,11 +56,10 @@ class MustacheLayout(name: String, layoutPath: String)
   /** The mustache object for this layout */
   lazy val mustache = new Mustache(main_matter)
 
-
   /** Evaluate the template by rendering it with it's context and partials
     *
     * @param context
-    *   a weejson object cointaing the following keys:
+    *   a Data object cointaing the following keys:
     *   - '''site''': global variables defined by "\_config.yml"
     *   - '''page''' of '''post''': page or post specific variables
     *   - '''content''': contents of the child file
@@ -67,7 +69,7 @@ class MustacheLayout(name: String, layoutPath: String)
     *   the string returned by the mustache after rendering
     */
   def render(context: DObj): String =
-    val str = mustache.render(context, MustacheLayout.mustachePartials)
+    val str = mustache.render(context, MustacheLayout.partials)
     parent match
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
@@ -77,7 +79,12 @@ class MustacheLayout(name: String, layoutPath: String)
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory
   */
-object MustacheLayout:
+object MustacheLayout extends LayoutObject:
+
+  /** The default mustache layout will only handle files with the .mustache
+    * extension
+    */
+  def ext = raw"(*.mustache|*.html)".r
 
   /** prevents the call of layouts before doing the apply */
   private var _layouts: Map[String, Layout] = _
@@ -85,28 +92,44 @@ object MustacheLayout:
 
   private val logger = Logger("MustacheLayout companion object")
 
-  // TODO: potentially might not work :p will have to test intensively
-  val mustachePartials: Map[String, Mustache] =
-    def filter(data: Map[String, Layout])(implicit
-        ev: ClassTag[MustacheLayout]
-    ) = data collect { case (s, t): (String, MustacheLayout) => (s, t) }
-    filter(Partial.partials).map((s, l) => (s, l.mustache))
-
   /** Process all the layouts in "/\_layouts" directory. This is done in two
     * passes. The first pass creates the layouts without specifying the parents.
     * The second pass assigns to each layout it's parent, if specified in the
     * front matter.
     */
-  def apply(directory: String): Map[String, Layout] =
-    val files = getListOfFiles(directory)
+  def createLayouts(
+      layoutsPath: String,
+      partialsPath: String
+  ): Map[String, Layout] =
+    val files = getListOfFiles(layoutsPath)
     val ls = files
+      .filter(matches(_))
       .map(f => {
         val fn = getFileName(f)
-        (fn, new MustacheLayout(getFileName(f), f))
+        (fn, new MustacheLayout(fn, f))
       })
       .toMap
 
+    _partials = getPartials(partialsPath)
     logger.debug("Got the layouts: " + ls.map(_._2.name).mkString(", "))
     ls.map((s, l) => l.setParent(ls))
     _layouts = ls.toMap
     layouts
+
+  private var _partials: Map[String, Mustache] = _
+  def partials = _partials
+
+  /** Process all the partials in "/\_partials" directory. */
+  private def getPartials(directory: String): Map[String, Mustache] =
+    val files = getListOfFiles(directory)
+    val ls = files
+      .filter(matches(_))
+      .map(f => {
+        object R extends Reader(f)
+        (getFileName(f), new Mustache(R.main_matter))
+      })
+      .toMap
+
+    logger.debug("Got the partials: " + ls.map(_._1).mkString(", "))
+    _partials = ls.toMap
+    partials
