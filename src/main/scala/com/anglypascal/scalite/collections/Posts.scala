@@ -1,7 +1,7 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.utils.{DObj, DStr, getListOfFiles}
-import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
 
 /** Companion object that creates the Posts collection.
   */
@@ -18,7 +18,7 @@ object Posts extends Collection[Post]:
       val post = new Post(fn, globals)
       post.processGroups()
       (post.title, post)
-    _posts = files.filter(Converter.hasConverter).map(f).toMap
+    _posts = files.filter(Converters.hasConverter).map(f).toMap
     things
 
   /** By default posts are sorted by date. But this can be changed by updating

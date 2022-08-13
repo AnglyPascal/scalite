@@ -7,27 +7,33 @@ import com.anglypascal.scalite.groups.*
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
 import com.anglypascal.scalite.utils.DObj
+import com.anglypascal.scalite.converters.Converters
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
   */
 object Globals:
 
+  private val glbsObj = Obj()
+
   private val dirs = Obj(
     "destination" -> "/_site",
     "base" -> "/src/main/scala/site_template",
-    "layout_dir" -> "/_layouts",
-    "post_dir" -> "/_posts",
-    "includes_dir" -> "/_includes",
-    "sass_dir" -> "/_sass",
-    "plugins_dir" -> "/_plugins"
+    "layoutDir" -> "/_layouts",
+    "postDir" -> "/_posts",
+    "includesDir" -> "/_includes",
+    "sassDir" -> "/_sass",
+    "pluginsDir" -> "/_plugins"
   )
 
+  /** This should be in a different section
+    */
   private val reading = Obj(
     "include" -> Arr(".htaccess"),
     "exclude" -> Arr("build.sbt"),
-    "keep_files" -> Arr(".git", ".svn"),
-    "markdown_ext" -> "markdown,mkdown,mkdn,mkd,md",
+    "keepFiles" -> Arr(".git", ".svn"),
+    "markdownExt" -> "markdown,mkdown,mkdn,mkd,md",
+    "textileExt" -> "textile",
     "encoding" -> "utf-8"
   )
 
@@ -49,18 +55,32 @@ object Globals:
     "date_format" -> "dd MMM, yyyy"
   )
 
-  private val glbsObj = dirs.obj ++ reading.obj ++ site.obj ++ defaults.obj
+  glbsObj.obj ++= dirs.obj
+  glbsObj.obj ++= reading.obj
+  glbsObj.obj ++= site.obj
+  glbsObj.obj ++= defaults.obj
 
   /** Support for data provided in _data folder. This will be in site("data") */
   private val config = yamlParser(dirs("base_dir").str + "/config.yml")
   for (key, value) <- config.obj do glbsObj(key) = value
 
-  val globals = DObj(Obj(glbsObj))
+  val globals = DObj(glbsObj)
 
-  /** The values for collection will be separated here and sent to the constructor of
-   *  Collection object
-   */
+  val extensions =
+    reading.obj
+      .filter((s, _) => s.endsWith("Ext"))
+      .map((s, v) => 
+          val ext = v match
+            case v: Str => v.str
+            case v: Arr => v.arr.map(_.str).mkString(",")
+            case _ => ""
+          (s.dropRight(3), ext))
 
+  Converters.modifyExtensions(extensions)
+
+  /** The values for collection will be separated here and sent to the
+    * constructor of Collection object
+    */
 
 /** Should need to write the documentation for different options in the
   * config.yml

@@ -3,7 +3,7 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.utils.getListOfFiles
 import com.anglypascal.scalite.utils.DObj
-import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
 
 
 class Draft(filename: String, globals: DObj)
@@ -26,7 +26,7 @@ object Drafts extends Collection[Post]:
       val post = new Post(fn, globals)
       post.processGroups()
       (post.title, post)
-    _drafts = files.filter(Converter.hasConverter).map(f).toMap
+    _drafts = files.filter(Converters.hasConverter).map(f).toMap
 
     things
 

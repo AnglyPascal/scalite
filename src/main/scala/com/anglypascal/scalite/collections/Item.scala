@@ -2,7 +2,7 @@ package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.utils.*
 import com.anglypascal.scalite.documents.{Reader, Layout}
-import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
 
 import com.rallyhealth.weejson.v1.Obj
 
@@ -38,5 +38,5 @@ class GenericItem(filepath: String, globals: DObj)
     */
   def render: String =
     if front_matter == Obj() then main_matter
-    else Converter.convert(main_matter, filepath)
+    else Converters.convert(main_matter, filepath)
 

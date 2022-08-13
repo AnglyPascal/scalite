@@ -10,7 +10,10 @@ import com.typesafe.scalalogging.Logger
   * TODO: what happens if a user wants to override this?
   */
 object Markdown extends Converter:
-  def ext: Regex = raw"*\.(md|markdown)".r
+  val fileType: String = "markdown"
+
+  setExt("md,markdown")
+
   def outputExt = ".html"
 
   private val logger = Logger("Markdown Converter")
@@ -58,3 +61,4 @@ object Markdown extends Converter:
       ```
       """
     println(Markdown.convert(md))
+

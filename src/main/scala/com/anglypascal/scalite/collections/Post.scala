@@ -1,7 +1,7 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.documents.*
-import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.utils.*
 import com.anglypascal.scalite.groups.{PostsGroup, Group}
 import com.anglypascal.scalite.NoLayoutException
@@ -132,7 +132,7 @@ class Post(filepath: String, globals: DObj)
     * TODO: need to change behavior when logger is implemented
     */
   def render: String =
-    val str = Converter.convert(main_matter, filepath)
+    val str = Converters.convert(main_matter, filepath)
     val context =
       DObj("site" -> globals, "post" -> locals, "content" -> DStr(str))
 
