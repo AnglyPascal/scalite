@@ -2,7 +2,7 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.collections.*
-import com.anglypascal.scalite.utils.DataAST
+import com.anglypascal.scalite.data.DataAST
 
 /** the main thing, anchor of this project
   */

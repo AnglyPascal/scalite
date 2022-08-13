@@ -5,10 +5,10 @@ package com.anglypascal.scalite.groups
   */
 
 import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.data.DObj
 
 import scala.collection.mutable.{LinkedHashMap, Set}
 import com.rallyhealth.weejson.v1.Obj
-import com.anglypascal.scalite.utils.DObj
 
 /** Creates a new type of Group. Needs the implementation of addToGroups which
   * defines how a post is added to the Group.

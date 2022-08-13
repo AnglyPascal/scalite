@@ -3,11 +3,12 @@ package com.anglypascal.scalite
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.utils.yamlParser
 import com.anglypascal.scalite.groups.*
+import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.converters.Converters
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.utils.DObj
-import com.anglypascal.scalite.converters.Converters
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -20,7 +21,7 @@ object Globals:
     "destination" -> "/_site",
     "base" -> "/src/main/scala/site_template",
     "layoutDir" -> "/_layouts",
-    "postDir" -> "/_posts",
+    "collectionsDir" -> "/src/main/scala/site_template",
     "includesDir" -> "/_includes",
     "sassDir" -> "/_sass",
     "pluginsDir" -> "/_plugins"
@@ -55,28 +56,61 @@ object Globals:
     "date_format" -> "dd MMM, yyyy"
   )
 
+
   glbsObj.obj ++= dirs.obj
   glbsObj.obj ++= reading.obj
   glbsObj.obj ++= site.obj
   glbsObj.obj ++= defaults.obj
 
   /** Support for data provided in _data folder. This will be in site("data") */
-  private val config = yamlParser(dirs("base_dir").str + "/config.yml")
-  for (key, value) <- config.obj do glbsObj(key) = value
+  private val configs = 
+    yamlParser(dirs("base_dir").str + "/config.yml")
+
+  // for (key, value) <- config.obj do glbsObj(key) = value
 
   val globals = DObj(glbsObj)
 
   val extensions =
     reading.obj
       .filter((s, _) => s.endsWith("Ext"))
-      .map((s, v) => 
-          val ext = v match
-            case v: Str => v.str
-            case v: Arr => v.arr.map(_.str).mkString(",")
-            case _ => ""
-          (s.dropRight(3), ext))
+      .map((s, v) =>
+        val ext = v match
+          case v: Str => v.str
+          case v: Arr => v.arr.map(_.str).mkString(",")
+          case _      => ""
+        (s.dropRight(3), ext)
+      )
 
   Converters.modifyExtensions(extensions)
+
+  private val collections = Obj(
+    "posts" -> Obj(
+      "output" -> true,
+      "folder" -> "/_posts",
+      "directory" -> dirs("collectionsDir").str,
+      "sortBy" -> "dates",
+      "toc" -> false
+    ),
+    "drafts" -> Obj(
+      "output" -> false,
+      "folder" -> "/_drafts",
+      "directory" -> dirs("collectionsDir").str,
+      "sortBy" -> "dates",
+      "toc" -> false
+    )
+  )
+
+  configs.obj.get("collections") match
+    case Some(colObj): Some[Obj] => 
+      if colObj.obj.contains("collectionsDir") then
+        dirs("collectionsDir") = colObj("collectionsDir").str
+
+      for (key, value) <- colObj.obj if key != "collectionsDir" do 
+        collections(key) = value
+    case _ => ()
+
+  Collections(dirs("collectionsDir").str, DObj(collections), globals)
+  
 
   /** The values for collection will be separated here and sent to the
     * constructor of Collection object

@@ -1,11 +1,11 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.utils.slugify
 
 import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.utils.DObj
 
 object Category extends Group("category"):
 

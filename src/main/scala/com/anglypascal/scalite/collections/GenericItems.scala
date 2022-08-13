@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.utils.{DObj, DStr, getListOfFiles}
+import com.anglypascal.scalite.data.{DObj, DStr}
+import com.anglypascal.scalite.utils.getListOfFiles
 
 /** Defines the collection of generic item */
 class GenericItems(val name: String) extends Collection[Item]:
@@ -18,4 +19,6 @@ class GenericItems(val name: String) extends Collection[Item]:
 
   def compare(fst: Item, snd: Item): Int = ???
 
-  def render: Unit = ???
+  def render: String = ???
+
+  def process: Unit = ???

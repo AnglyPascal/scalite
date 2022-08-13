@@ -3,12 +3,11 @@ package com.anglypascal.scalite.groups
 import com.anglypascal.scalite.documents.{Page, Layout}
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.NoLayoutException
-import com.anglypascal.scalite.utils.{getOrElse, prettify, DObj}
+import com.anglypascal.scalite.utils.{getOrElse, prettify}
+import com.anglypascal.scalite.data.{DObj, DStr, DArr}
 
 import com.rallyhealth.weejson.v1.{Obj, Arr}
 import scala.collection.mutable.Set
-import com.anglypascal.scalite.utils.DStr
-import com.anglypascal.scalite.utils.DArr
 
 /** Each PostsGroup object represents a collection that posts can belong to. Tag
   * and Categories are the two pre-defined sublcasses of this trait.

@@ -2,7 +2,7 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.mustache.Mustache
-import com.anglypascal.scalite.utils.DObj
+import com.anglypascal.scalite.data.DObj
 
 case class URL(str: String):
   /** */

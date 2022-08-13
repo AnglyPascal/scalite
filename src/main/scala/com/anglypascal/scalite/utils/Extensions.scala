@@ -1,5 +1,7 @@
 package com.anglypascal.scalite.utils
 
+import com.anglypascal.scalite.data.{DObj, DBool}
+
 import com.rallyhealth.weejson.v1.{Value, Obj, Str, Bool, Num, Arr}
 import com.rallyhealth.weejson.v1.Value
 

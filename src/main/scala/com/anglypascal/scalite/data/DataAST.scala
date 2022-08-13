@@ -1,4 +1,4 @@
-package com.anglypascal.scalite.utils
+package com.anglypascal.scalite.data
 
 import com.anglypascal.mustache.{AST, ASTConverter}
 import com.anglypascal.mustache.Mustache
@@ -18,7 +18,7 @@ private[scalite] class DataAST(v: Data) extends AST:
 
   def value: Any =
     v match
-      case obj: DObj  => obj.obj.toMap.map(p => (p._1, dataToAST(p._2)))
+      case obj: DObj  => obj._obj.toMap.map(p => (p._1, dataToAST(p._2)))
       case arr: DArr  => arr.arr.toSeq.map(dataToAST)
       case str: DStr  => str.str
       case num: DNum  => num.num

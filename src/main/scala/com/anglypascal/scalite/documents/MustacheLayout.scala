@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.{getListOfFiles, getFileName, DObj}
+import com.anglypascal.scalite.utils.{getListOfFiles, getFileName}
+import com.anglypascal.scalite.data.DObj 
 import com.anglypascal.scalite.documents.Reader
 
 import com.rallyhealth.weejson.v1.{Obj, Str}

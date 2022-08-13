@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.utils.{DObj, DStr, getListOfFiles}
+import com.anglypascal.scalite.utils.getListOfFiles
+import com.anglypascal.scalite.data.{DObj, DStr}
 import com.anglypascal.scalite.converters.Converters
 
 /** Companion object that creates the Posts collection.
@@ -54,4 +55,7 @@ object Posts extends Collection[Post]:
   /** sorts out the posts, renders them with the globals, and writes them to the
     * disk
     */
-  def render: Unit = ???
+  def process: Unit = ???
+
+  def render: String = ???
+

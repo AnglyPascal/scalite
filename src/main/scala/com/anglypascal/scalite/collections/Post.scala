@@ -3,6 +3,7 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.utils.*
+import com.anglypascal.scalite.data.*
 import com.anglypascal.scalite.groups.{PostsGroup, Group}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
@@ -63,7 +64,7 @@ class Post(filepath: String, globals: DObj)
     *
     * TODO: Make this one abstract as well, also change it to the generic Layout
     */
-  _parent = MustacheLayout.layouts.get(parent_name)
+  _parent = Layouts.layouts.get(parent_name)
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply

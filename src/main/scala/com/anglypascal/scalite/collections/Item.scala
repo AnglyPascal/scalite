@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.utils.*
+import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.documents.{Reader, Layout}
 import com.anglypascal.scalite.converters.Converters
 
@@ -39,4 +40,3 @@ class GenericItem(filepath: String, globals: DObj)
   def render: String =
     if front_matter == Obj() then main_matter
     else Converters.convert(main_matter, filepath)
-

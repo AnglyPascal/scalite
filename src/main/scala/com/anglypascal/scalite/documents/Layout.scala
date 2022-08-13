@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.DObj
+import com.anglypascal.scalite.data.DObj
 
 import scala.collection.mutable.Set
 import com.typesafe.scalalogging.Logger
@@ -34,7 +34,7 @@ abstract class Layout(val name: String, layoutPath: String)
   * with apply(), it fetches all the files in layoutPath and uses the
   * appropriate Layout constructor to create a layout representing that file.
   */
-object Layout:
+object Layouts:
 
   private val layoutConstructors: Set[LayoutObject] = Set()
 
@@ -61,7 +61,7 @@ object Layout:
 trait LayoutObject:
 
   /** Add this object to the layoutConstructors */
-  Layout.addEngine(this)
+  Layouts.addEngine(this)
 
   /** The extensions of the files this converter is able to convert */
   def ext: util.matching.Regex

@@ -2,7 +2,7 @@ package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.utils.getListOfFiles
-import com.anglypascal.scalite.utils.DObj
+import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.converters.Converters
 
 
@@ -32,5 +32,7 @@ object Drafts extends Collection[Post]:
 
   def compare(fst: Post, snd: Post): Int = Posts.compare(fst, snd)
 
-  def render: Unit = ???
+  def process: Unit = ???
+
+  def render: String = ???
 

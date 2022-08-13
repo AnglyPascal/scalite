@@ -1,4 +1,4 @@
-package com.anglypascal.scalite.utils
+package com.anglypascal.scalite.data
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
 import scala.language.implicitConversions
@@ -10,10 +10,13 @@ trait Data
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
-final class DObj(private val _obj: mutable.Map[String, Data]) extends Data:
+final class DObj(private[data] val _obj: mutable.Map[String, Data]) extends Data:
 
-  /** Returns the underlying mutable.Map[String, Data] */
-  def obj = _obj
+  def keys = _obj.keys
+  def remove(keys: List[String]): DObj = 
+    val obj = _obj.clone
+    for key <- keys do obj.remove(key)
+    DObj(obj)
 
   /** Returns a new DObj with the given mutable Map */
   def obj_=(o: mutable.Map[String, Data]) = DObj(o)
@@ -152,7 +155,7 @@ object DNull extends Data:
   */
 object DataImplicits:
 
-  implicit def dobjToObj(dobj: DObj): mutable.Map[String, Data] = dobj.obj
+  // implicit def dobjToObj(dobj: DObj): mutable.Map[String, Data] = dobj.obj
   implicit def dstrToString(dstr: DStr): String = dstr.str
   implicit def dnumToBigDecimal(dstr: DNum): BigDecimal = dstr.num
   implicit def dboolToBoolean(dbool: DBool): Boolean = dbool.bool

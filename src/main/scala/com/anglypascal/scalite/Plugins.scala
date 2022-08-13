@@ -3,7 +3,7 @@ package com.anglypascal.scalite
 import scala.collection.mutable.Set
 import com.anglypascal.scalite.documents.MustacheLayout
 import com.anglypascal.scalite.collections.Posts
-import com.anglypascal.scalite.utils.DataAST
+import com.anglypascal.scalite.data.DataAST
 
 object Plugins:
 
