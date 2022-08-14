@@ -7,6 +7,7 @@ import com.anglypascal.scalite.documents.Reader
 import com.rallyhealth.weejson.v1.{Obj, Str}
 import com.anglypascal.mustache.Mustache
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
@@ -80,7 +81,7 @@ class MustacheLayout(name: String, layoutPath: String)
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory
   */
-object MustacheLayout extends LayoutObject:
+object MustacheLayout extends LayoutObject with Plugin:
 
   /** The default mustache layout will only handle files with the .mustache
     * extension

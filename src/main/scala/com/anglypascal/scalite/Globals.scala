@@ -99,6 +99,7 @@ object Globals:
       "toc" -> false
     )
   )
+  // TODO collection templates
 
   configs.obj.get("collections") match
     case Some(colObj): Some[Obj] => 

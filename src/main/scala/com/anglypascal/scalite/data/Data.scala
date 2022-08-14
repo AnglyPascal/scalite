@@ -2,7 +2,7 @@ package com.anglypascal.scalite.data
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
 import scala.language.implicitConversions
-import scala.collection.mutable
+import com.typesafe.scalalogging.Logger
 
 /** Immutable wrapper around WeeJson Value AST */
 trait Data
@@ -10,63 +10,67 @@ trait Data
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
-final class DObj(private[data] val _obj: mutable.Map[String, Data]) extends Data:
+final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
 
   def keys = _obj.keys
-  def remove(keys: List[String]): DObj = 
-    val obj = _obj.clone
-    for key <- keys do obj.remove(key)
+  def remove(keys: List[String]): DObj =
+    val obj = _obj -- keys
     DObj(obj)
 
   /** Returns a new DObj with the given mutable Map */
-  def obj_=(o: mutable.Map[String, Data]) = DObj(o)
+  def obj_=(o: Map[String, Data]) = DObj(o)
 
   /** Returns a new DObj with the given Obj */
   def obj_=(o: Obj) = DObj(o)
 
   /** Returns the value stored against key in the underlying Map */
-  def contains(key: String) = _obj.contains(key: String)
+  def contains(key: String) =
+    _obj.contains(key: String) ||
+      (key == "content" && _content != None)
 
   /** Returns the value stored against key in the underlying Map */
-  def apply(key: String): Data = _obj(key)
+  def apply(key: String): Data =
+    if key != "content" then _obj(key)
+    else
+      _content match
+        case Some(c) => DStr(c)
+        case None =>
+          val a = this.toString
+          Logger("DObj exception").warn(s"content is not set in DObj $a")
+          DStr("")
 
   /** Returns the value stored against key in the underlying Map wrapped in
     * Option
     */
-  def get(key: String): Option[Data] = _obj.get(key)
+  def get(key: String): Option[Data] =
+    if key != "content" then _obj.get(key)
+    else _content.map(DStr(_))
 
   /** Return a new DObj object with the given pair added */
   def add(pair: (String, Data)): DObj =
-    val _nobj = _obj.clone()
-    _nobj += pair
+    val _nobj = _obj + pair
     DObj(_nobj)
 
-  /** Returns the value stored against the key "content" */
-  def content = _obj("content")
-
-  /** Update the value stored against the key "content" */
-  def content_=(c: String) = _obj("content") = DStr(c)
+  /** Store "content" separately rather than in _obj to allow overwrite */
+  def content: String = _content.getOrElse("")
+  def content_=(c: String) = _content = Some(c)
+  private var _content: Option[String] = None
 
   override def toString(): String = _obj.toString
 
 /** Companion object to provide factory constructors. */
 object DObj:
   /** Construct a DObj from a mutable Map */
-  def apply(_obj: mutable.Map[String, Data]) = new DObj(_obj)
+  def apply(_obj: Map[String, Data]) = new DObj(_obj)
 
-  def apply(pairs: Tuple2[String, Data]*) = new DObj(
-    mutable.Map(pairs: _*)
-  )
+  def apply(pairs: Tuple2[String, Data]*) = new DObj(Map(pairs: _*))
 
   /** Construct a DObj from an Obj */
   def apply(_obj: Obj) =
-    new DObj(_obj.obj.map((k, v) => (k, DataImplicits.valueToData(v))))
+    new DObj(_obj.obj.map((k, v) => (k, DataImplicits.valueToData(v))).toMap)
 
 /** Immutable wrapper around Arr */
-final class DArr(private val _arr: List[Data]) extends Data:
-
-  /** Get the underlying List[Data] */
-  def arr = _arr
+final class DArr(private[data] val _arr: List[Data]) extends Data:
 
   /** Return a new DArr with the new List[Data] */
   def arr_=(a: List[Data]) = DArr(a)

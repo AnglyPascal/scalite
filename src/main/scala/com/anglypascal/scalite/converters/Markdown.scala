@@ -3,13 +3,14 @@ package com.anglypascal.scalite.converters
 import scala.util.matching.Regex
 import sttp.client3.{HttpClientSyncBackend, basicRequest, UriContext}
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Basic markdown converter using the Github API for markdown to HTML
   * conversion.
   *
   * TODO: what happens if a user wants to override this?
   */
-object Markdown extends Converter:
+object Markdown extends Converter with Plugin:
   val fileType: String = "markdown"
 
   setExt("md,markdown")

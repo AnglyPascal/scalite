@@ -61,4 +61,14 @@
     object initialization so that they are properly processed. Will need an API for
     this as well.
 
+- Plugins: 
+    [This answer seems very promising](https://stackoverflow.com/questions/23874281/scala-how-to-compile-code-from-an-external-file-at-runtime)
 - Localized theming for layouts? Is it possible?
+
+- Generators: takes charge of automatically generated pages.
+
+- Hooks: fine grained control. These will be done much later
+    Hooks can be added via mixinx. There will be a Hooks object with all the hooks
+    available. A Hook class will be provided with a single method call(). Now in places
+    where Hooks need to be called, all the Hook objects in that array in Hooks will be
+    called sequentially. 

@@ -8,10 +8,8 @@ import com.anglypascal.scalite.groups.{PostsGroup, Group}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 
-import com.rallyhealth.weejson.v1.{Obj, Str, Arr, Bool}
+import com.rallyhealth.weejson.v1.{Value, Obj, Str, Arr, Bool}
 import scala.collection.mutable.{LinkedHashMap}
-import com.rallyhealth.weejson.v1.Value
-import cats.data.OpInstances0
 
 /** Reads the content of a post file and prepares a Post object.
   *

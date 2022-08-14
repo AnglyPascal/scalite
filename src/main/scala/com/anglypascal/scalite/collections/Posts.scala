@@ -3,10 +3,11 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.utils.getListOfFiles
 import com.anglypascal.scalite.data.{DObj, DStr}
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Companion object that creates the Posts collection.
   */
-object Posts extends Collection[Post]:
+object Posts extends Collection[Post] with Plugin:
 
   def things = _posts
   private var _posts: Map[String, Post] = _

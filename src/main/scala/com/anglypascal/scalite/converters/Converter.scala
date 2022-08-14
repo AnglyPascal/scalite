@@ -20,7 +20,7 @@ trait Converter:
   /** Set the extensions */
   def setExt(exts: String): Unit =
     val s = exts.split(",").mkString("|")
-    _ext = (raw"*\.(" + s + ")").r
+    _ext = (raw".*\.(" + s + ")").r
 
   /** Does this converter accepts the file? */
   def matches(filepath: String): Boolean =
