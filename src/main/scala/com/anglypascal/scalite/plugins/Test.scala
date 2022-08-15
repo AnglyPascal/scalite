@@ -4,6 +4,7 @@ import com.anglypascal.scalite.converters.Converter
 
 import java.io.File
 import java.net.{URL, URLClassLoader}
+import com.anglypascal.scalite.converters.Converters
 
 trait SomeTrait:
   def someMethod: String;
@@ -21,7 +22,10 @@ def pluginTest =
     Array[URL](new File(jarPathName).toURI.toURL),
     P.getClass.getClassLoader
   )
-  val classToLoad = classLoader.loadClass("com.anglypascal.scalite.plugins.PP")
-  classToLoad.getDeclaredConstructor().newInstance().asInstanceOf[Plugin].init
+  val classToLoad =
+    classLoader.loadClass("com.anglypascal.scalite.plugins.PPConverter$")
+  val a = classToLoad.getField("MODULE$").get(null).asInstanceOf[Converter]
+  Converters.addConverter(a)
+  Converters.hasConverter("haha.pp")
 
-  Plugins.listOfPlubins.map(_.getClass.getSimpleName).map(println(_))
+  // Plugins.listOfPlubins.map(_.getClass.getSimpleName).map(println(_))

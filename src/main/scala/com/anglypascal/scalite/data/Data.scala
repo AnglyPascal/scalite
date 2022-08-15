@@ -4,7 +4,11 @@ import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
 import scala.language.implicitConversions
 import com.typesafe.scalalogging.Logger
 
-/** Immutable wrapper around WeeJson Value AST */
+/** Immutable wrapper around WeeJson Value AST
+  *
+  * TODO: Need to add more methods in DObj and DArr. Look at Map and List
+  * methods
+  */
 trait Data
 
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
@@ -56,6 +60,8 @@ final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
   def content_=(c: String) = _content = Some(c)
   private var _content: Option[String] = None
 
+  def map[A, B >: Data](f: ((String, B)) => A): Iterable[A] = _obj.map(f)
+
   override def toString(): String = _obj.toString
 
 /** Companion object to provide factory constructors. */
@@ -83,6 +89,10 @@ final class DArr(private[data] val _arr: List[Data]) extends Data:
 
   def head: Data = _arr.head
   def tail: DArr = DArr(_arr.tail)
+
+  def map[A, B >: Data](f: B => A): List[A] = _arr.map(f)
+
+  def filter[B >: Data](f: B => Boolean): List[Data] = _arr.filter(f)
 
   override def toString(): String = _arr.mkString(", ")
 

@@ -1,9 +1,6 @@
 package com.anglypascal.scalite.converters
 
-import com.anglypascal.scalite.ConverterException
-
 import scala.util.matching.Regex
-import com.typesafe.scalalogging.Logger
 
 /** Converter provides the support to convert files matching the extension regex
   * to html files. Can be extended to provide support for arbitrary language.
@@ -15,7 +12,7 @@ trait Converter:
 
   /** The extensions of the files this converter is able to convert */
   private var _ext: Regex = _
-  def ext: Regex = ext
+  def ext: Regex = _ext
 
   /** Set the extensions */
   def setExt(exts: String): Unit =
@@ -40,4 +37,4 @@ trait Converter:
   def convert(str: String, filepath: String): String
 
   /** Add the newly defined converter object to Converter.converters */
-  Converters.addConverter(this)
+  // Converters.addConverter(this)
