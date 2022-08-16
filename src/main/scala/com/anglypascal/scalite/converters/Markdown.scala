@@ -5,10 +5,12 @@ import com.typesafe.scalalogging.Logger
 import sttp.client3.HttpClientSyncBackend
 import sttp.client3.UriContext
 import sttp.client3.basicRequest
+import com.anglypascal.scalite.data.Data
+import com.anglypascal.scalite.data.DObj
 
 /** Basic Markdown to HTML converter using the Github API */
 
-object Markdown extends Converter with Plugin:
+object Markdown extends Converter:
 
   val fileType: String = "markdown"
 
@@ -39,5 +41,3 @@ object Markdown extends Converter with Plugin:
       case Right(convertedText) =>
         logger.debug(s"Successfully converted $filepath")
         convertedText
-
-  def convert(str: String): String = convert(str, "string input")

@@ -73,7 +73,7 @@ object Collections:
                 case b: DBool => true
                 case _        => false
             else if key == "posts" then
-              logger.debug(s"posts are rendered by default")
+              logger.debug("posts are rendered by default")
               true
             else
               logger.debug(s"non posts collections are hidden by default: $key")

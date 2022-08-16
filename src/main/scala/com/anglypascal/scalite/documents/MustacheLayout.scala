@@ -2,7 +2,7 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.data.Data
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.getFileName
 import com.anglypascal.scalite.utils.getListOfFiles
@@ -87,11 +87,14 @@ object MustacheLayout extends LayoutObject with Plugin:
   /** The default mustache layout will only handle files with the .mustache
     * extension
     */
-  def ext = raw"(*.mustache|*.html)".r
+  def ext = "(*.mustache|*.html)".r
 
   /** prevents the call of layouts before doing the apply */
   private var _layouts: Map[String, Layout] = _
   def layouts = _layouts
+
+  private var _partials: Map[String, Mustache] = _
+  def partials = _partials
 
   private val logger = Logger("MustacheLayout companion object")
 
@@ -119,9 +122,6 @@ object MustacheLayout extends LayoutObject with Plugin:
     _layouts = ls.toMap
     layouts
 
-  private var _partials: Map[String, Mustache] = _
-  def partials = _partials
-
   /** Process all the partials in "/\_partials" directory. */
   private def getPartials(directory: String): Map[String, Mustache] =
     val files = getListOfFiles(directory)
@@ -134,5 +134,5 @@ object MustacheLayout extends LayoutObject with Plugin:
       .toMap
 
     logger.debug("Got the partials: " + ls.map(_._1).mkString(", "))
-    _partials = ls.toMap
-    partials
+    ls.toMap
+

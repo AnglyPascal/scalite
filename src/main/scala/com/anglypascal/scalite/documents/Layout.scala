@@ -4,6 +4,7 @@ import com.anglypascal.scalite.data.DObj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.Set
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Defines an abstract Layout.
   *
@@ -58,7 +59,7 @@ object Layouts:
   * match, and how it will create layouts from the files in the given
   * directories.
   */
-trait LayoutObject:
+trait LayoutObject extends Plugin:
 
   /** Add this object to the layoutConstructors */
   Layouts.addEngine(this)

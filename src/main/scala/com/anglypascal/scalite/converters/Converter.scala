@@ -1,11 +1,12 @@
 package com.anglypascal.scalite.converters
 
 import scala.util.matching.Regex
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Converter provides the support to convert files matching the extension regex
   * to html files. Can be extended to provide support for arbitrary language.
   */
-trait Converter:
+trait Converter extends Plugin:
 
   /** filetype that this converter handles */
   val fileType: String
@@ -39,5 +40,4 @@ trait Converter:
     *   - Right(s) where s is the converted string.
     */
   def convert(str: String, filepath: String): String
-
-
+  def convert(str: String): String = convert(str, "string input")

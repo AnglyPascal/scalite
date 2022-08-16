@@ -15,7 +15,7 @@ object SomeObject extends SomeTrait:
 
 object Plug extends Plugin
 
-@main
+// @main
 def pluginTest =
   val jarPathName = "/home/ahsan/git/scalite/PP.jar"
   object P extends Plugin

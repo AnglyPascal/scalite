@@ -5,13 +5,10 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.utils.getListOfFiles
 
-
 class Draft(filename: String, globals: DObj)
     extends Post(filename, globals) // except for the date
 
-/** TODO: Draft posts in _draft folder. These will be rendered in the drafts:
-  * true option is set in the global settings. The time variable for these will
-  * be the motified date collected from the file informations.
+/** TODO: date will be the motified date collected from the file informations.
   */
 object Drafts extends Collection[Post]:
 

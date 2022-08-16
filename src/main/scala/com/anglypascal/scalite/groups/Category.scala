@@ -2,7 +2,7 @@ package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.utils.slugify
+import com.anglypascal.scalite.utils.StringProcessors.*
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str

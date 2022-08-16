@@ -10,6 +10,7 @@ import com.anglypascal.scalite.documents.Page
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -19,7 +20,7 @@ import java.nio.file.Paths
   * A collection of posts will be in a separate folder in the home directory,
   * and will be handled separately.
   */
-trait Collection[A <: Item] extends Page:
+trait Collection[A <: Item] extends Plugin with Page:
 
   /** Name of the collection */
   val name: String

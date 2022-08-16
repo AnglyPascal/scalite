@@ -23,17 +23,16 @@ object Globals:
   private val glbsObj = Obj()
 
   private val dirs = Obj(
-    "destination" -> "/_site",
     "base" -> "/src/main/scala/site_template",
+    "destination" -> "/_site",
     "layoutDir" -> "/_layouts",
     "collectionsDir" -> "/src/main/scala/site_template",
     "includesDir" -> "/_includes",
     "sassDir" -> "/_sass",
+    "dataDir" -> "/_data",
     "pluginsDir" -> "/_plugins"
   )
 
-  /** This should be in a different section
-    */
   private val reading = Obj(
     "include" -> Arr(".htaccess"),
     "exclude" -> Arr("build.sbt"),
@@ -47,35 +46,21 @@ object Globals:
     "title" -> "A Shiny New Website",
     "lang" -> "en",
     "root_url" -> "/",
-    "description" -> "site description",
-    "author" -> Obj(
-      "name" -> "author name",
-      "email" -> "author email"
-    )
-  )
-
-  private val defaults = Obj(
+    "description" -> "generic site description",
+    "author" -> Obj(),
     "paginate" -> false,
     "show_excerpts" -> true,
-    "tag_layout" -> "tag",
     "date_format" -> "dd MMM, yyyy"
   )
-
 
   glbsObj.obj ++= dirs.obj
   glbsObj.obj ++= reading.obj
   glbsObj.obj ++= site.obj
-  glbsObj.obj ++= defaults.obj
 
   /** Support for data provided in _data folder. This will be in site("data") */
-  private val configs = 
-    yamlParser(dirs("base_dir").str + "/config.yml")
+  private val configs = yamlParser(dirs("base_dir").str + "/config.yml")
 
-  // for (key, value) <- config.obj do glbsObj(key) = value
-
-  val globals = DObj(glbsObj)
-
-  val extensions =
+  private val extensions =
     reading.obj
       .filter((s, _) => s.endsWith("Ext"))
       .map((s, v) =>
@@ -90,7 +75,7 @@ object Globals:
   // TODO collection templates
 
   configs.obj.remove("plugins") match
-    case Some(obj): Some[Obj] => 
+    case Some(obj): Some[Obj] =>
       PluginManager(dirs("pluginsDir").str, DObj(obj))
     case _ => ()
 
@@ -112,17 +97,28 @@ object Globals:
   )
 
   configs.obj.remove("collections") match
-    case Some(colObj): Some[Obj] => 
+    case Some(colObj): Some[Obj] =>
       colObj.obj.remove("collectionsDir") match
         case Some(s): Some[Str] => dirs("collectionsDir") = s.str
-        case _ => ()
+        case _                  => ()
 
-      for (key, value) <- colObj.obj do
-        collections(key) = value
+      for (key, value) <- colObj.obj do collections(key) = value
     case _ => ()
 
   Collections(dirs("collectionsDir").str, DObj(collections), globals)
-  
+
+  configs.obj.remove("default") match
+    case Some(colObj): Some[Obj] => ()
+    case _                       => ()
+
+  configs.obj.remove("groups") match
+    case Some(colObj): Some[Obj] => ()
+    case _                       => ()
+
+  for (key, value) <- configs.obj do glbsObj(key) = value
+
+  private val _globals = DObj(glbsObj)
+  def globals = _globals
 
   /** The values for collection will be separated here and sent to the
     * constructor of Collection object

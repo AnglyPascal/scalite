@@ -151,9 +151,13 @@ class Post(filepath: String, globals: DObj)
       case None => str
 
   /** TODO: if show_excerpt is true, then create an excerpt object here? and add
-    * the excerpt to the obj
+    * the excerpt to the obj. 
+    *
+    * For now, leave it simple like this
     */
-  def excerpt: String = ???
+  def excerpt: String = 
+    val head = StringProcessors.excerpt(main_matter, "separateor")
+    Converters.convert(head, filepath)
 
   def compare(that: Post) = this.date compare that.date
 

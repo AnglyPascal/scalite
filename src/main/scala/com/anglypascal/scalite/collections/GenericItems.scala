@@ -13,3 +13,4 @@ class GenericCollection(val name: String) extends Collection[Item]:
       val item = new GenericItem(fn, globals)
       (item.title, item)
     items = files.map(f).toMap
+
