@@ -14,9 +14,13 @@ trait Converter:
   private var _ext: Regex = _
   def ext: Regex = _ext
 
-  /** Set the extensions */
+  /** Set the extensions of this converter from the given string of extensions
+    *
+    * @param exts
+    *   comma separated list of extensions, like "markdown,md, mkd"
+    */
   def setExt(exts: String): Unit =
-    val s = exts.split(",").mkString("|")
+    val s = exts.split(",").map(_.trim).mkString("|")
     _ext = (raw".*\.(" + s + ")").r
 
   /** Does this converter accepts the file? */
@@ -36,5 +40,4 @@ trait Converter:
     */
   def convert(str: String, filepath: String): String
 
-  /** Add the newly defined converter object to Converter.converters */
-  // Converters.addConverter(this)
+

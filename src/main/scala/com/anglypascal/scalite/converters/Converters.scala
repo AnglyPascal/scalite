@@ -12,18 +12,18 @@ object Converters:
     * Converter trait, it gets added to this set.
     */
   private val _converters = Map[String, Converter]()
-  // def converters: Iterable[Converter] = _converters.map(_._2)
 
   private val logger = Logger("Converter")
 
   /** Find a converter by the given filetype */
-  private def findByFileType(ft: String): Option[Converter] = _converters.get(ft)
+  private def findByFileType(ft: String): Option[Converter] =
+    _converters.get(ft)
 
-  def modifyExtensions(exts: Map[String, String]): Unit = 
+  def modifyExtensions(exts: Map[String, String]): Unit =
     for (ft, ext) <- exts do
       findByFileType(ft) match
         case Some(conv) => conv.setExt(ext)
-        case None => ()
+        case None       => ()
 
   /** Private method that finds the correct converter for a given file
     *
@@ -79,7 +79,10 @@ object Converters:
         )
         str
 
-  /** Method to add a new converter to the converters set. */
+  /** The given converter to the converters set, mapped to its filetype. This
+    * overrides previously defined converter for this filetype.
+    */
   def addConverter(conv: Converter): Unit =
     _converters += ((conv.fileType, conv))
+
 
