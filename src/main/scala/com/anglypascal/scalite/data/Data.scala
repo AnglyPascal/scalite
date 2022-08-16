@@ -1,15 +1,18 @@
 package com.anglypascal.scalite.data
 
-import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
-import scala.language.implicitConversions
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Bool
+import com.rallyhealth.weejson.v1.Null
+import com.rallyhealth.weejson.v1.Num
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
+import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
-/** Immutable wrapper around WeeJson Value AST
-  *
-  * TODO: Need to add more methods in DObj and DArr. Look at Map and List
-  * methods
-  */
-trait Data
+import scala.Conversion
+
+/** Immutable wrapper around WeeJson Value AST */
+sealed trait Data
 
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
@@ -73,7 +76,11 @@ object DObj:
 
   /** Construct a DObj from an Obj */
   def apply(_obj: Obj) =
-    new DObj(_obj.obj.map((k, v) => (k, DataImplicits.valueToData(v))).toMap)
+    new DObj(
+      _obj.obj
+        .map((k, v) => (k, DataImplicits.given_Conversion_Value_Data(v)))
+        .toMap
+    )
 
 /** Immutable wrapper around Arr */
 final class DArr(private[data] val _arr: List[Data]) extends Data:
@@ -106,7 +113,7 @@ object DArr:
 
   /** Create a new DArr from an Arr */
   def apply(_arr: Arr) =
-    new DArr(_arr.arr.map(DataImplicits.valueToData).toList)
+    new DArr(_arr.arr.map(DataImplicits.given_Conversion_Value_Data).toList)
 
 /** Wrapper for Str */
 final class DStr(private val _str: String) extends Data:
@@ -116,6 +123,12 @@ final class DStr(private val _str: String) extends Data:
 
   /** Return a new DStr with the new string */
   def str_=(s: String) = DStr(s)
+
+  /** Add a string to this DStr */
+  def +(nstr: String) = DStr(_str + nstr)
+
+  /** Add the string of another DStr to this DStr */
+  def +(dstr: DStr) = DStr(_str + dstr.str)
 
   override def toString(): String = _str
 
@@ -172,12 +185,12 @@ object DNull extends Data:
 object DataImplicits:
 
   // implicit def dobjToObj(dobj: DObj): mutable.Map[String, Data] = dobj.obj
-  implicit def dstrToString(dstr: DStr): String = dstr.str
-  implicit def dnumToBigDecimal(dstr: DNum): BigDecimal = dstr.num
-  implicit def dboolToBoolean(dbool: DBool): Boolean = dbool.bool
+  given Conversion[DStr, String] = _.str
+  given Conversion[DNum, BigDecimal] = _.num
+  given Conversion[DBool, Boolean] = _.bool
 
-  implicit def valueToData(v: Value): Data =
-    v match
+  given Conversion[Value, Data] =
+    _ match
       case v: Obj  => DObj(v)
       case v: Arr  => DArr(v)
       case v: Str  => DStr(v)

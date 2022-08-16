@@ -4,6 +4,7 @@ import com.anglypascal.scalite.data.{DObj, DBool}
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Str, Bool, Num, Arr}
 import com.rallyhealth.weejson.v1.Value
+import com.anglypascal.scalite.data.DStr
 
 extension (data: Obj)
   def getOrElse(key: String)(default: String): String =
@@ -34,13 +35,13 @@ extension (data: DObj)
   def getOrElse(key: String)(default: String): String =
     if data.contains(key) then
       data(key) match
-        case s: Str => s.str
-        case _      => default
+        case s: DStr => s.str
+        case _       => default
     else default
 
   def getOrElse(key: String)(default: Boolean): Boolean =
     if data.contains(key) then
       data(key) match
         case b: DBool => b.bool
-        case _       => default
+        case _        => default
     else default

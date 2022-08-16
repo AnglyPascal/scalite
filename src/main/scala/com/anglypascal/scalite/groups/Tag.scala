@@ -33,6 +33,8 @@ object Tag extends Group("tag"):
       "title" -> DStr(name),
     )
 
+    def write(filepath: String): Unit = ???
+
 
 
   /** Map holding all the tags in this website */

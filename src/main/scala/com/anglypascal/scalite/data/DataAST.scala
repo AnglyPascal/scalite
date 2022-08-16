@@ -1,25 +1,27 @@
 package com.anglypascal.scalite.data
 
-import com.anglypascal.mustache.{AST, ASTConverter}
+import com.anglypascal.mustache.AST
+import com.anglypascal.mustache.ASTConverter
 import com.anglypascal.mustache.Mustache
+
 import scala.language.implicitConversions
-// import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str, Num, Bool, Null}
 
 /** AST Support for the Data implementation to be used in Mustache */
 private[scalite] class DataAST(v: Data) extends AST:
 
-  import DataAST.*
+  import DataAST.given_Conversion_Data_AST
 
   def findKey(key: String): Option[Any] =
     v match
-      case obj: DObj => obj.get(key).map(dataToAST)
+      case obj: DObj => obj.get(key).map(given_Conversion_Data_AST)
       case null      => None
       case other     => Some(value)
 
   def value: Any =
     v match
-      case obj: DObj  => obj._obj.toMap.map(p => (p._1, dataToAST(p._2)))
-      case arr: DArr  => arr._arr.toSeq.map(dataToAST)
+      case obj: DObj =>
+        obj._obj.toMap.map(p => (p._1, given_Conversion_Data_AST(p._2)))
+      case arr: DArr  => arr._arr.toSeq.map(given_Conversion_Data_AST)
       case str: DStr  => str.str
       case num: DNum  => num.num
       case boo: DBool => boo.bool
@@ -27,7 +29,7 @@ private[scalite] class DataAST(v: Data) extends AST:
 
 private[scalite] object DataAST extends ASTConverter:
 
-  implicit def dataToAST(data: Data): AST = new DataAST(data)
+  given Conversion[Data, AST] = new DataAST(_)
 
   def toAST(context: Any): Either[Any, AST] =
     context match
@@ -38,13 +40,3 @@ private[scalite] object DataAST extends ASTConverter:
     context match
       case c: Data => true
       case _       => false
-
-// object TestingData:
-
-//   @main
-//   def dataTest =
-//     val dd = DataAST
-//     val m = new Mustache("{{#name}}{{b}}{{/name}}")
-//     val d = DObj(Obj("name" -> Arr(Obj("b" -> "1"), Obj("b" -> "2"))))
-
-//     println(m.render(d))
