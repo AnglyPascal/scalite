@@ -1,9 +1,12 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.{readFile, yamlParser, dateToString}
-
+import com.anglypascal.scalite.utils.dateToString
+import com.anglypascal.scalite.utils.readFile
+import com.anglypascal.scalite.utils.yamlParser
 import com.rallyhealth.weejson.v1.Obj
-import java.nio.file.{Paths, Files}
+
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /** Document represents the pages of the site that are generated from the
   * templates and user created content files. This includes all mustache

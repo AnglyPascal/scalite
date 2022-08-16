@@ -1,9 +1,9 @@
 package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.data.DObj
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.Set
-import com.typesafe.scalalogging.Logger
 
 /** Defines an abstract Layout.
   *

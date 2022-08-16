@@ -3,8 +3,10 @@ package com.anglypascal.scalite.groups
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.utils.slugify
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
 
-import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
 
 object Category extends Group("category"):
@@ -29,7 +31,9 @@ object Category extends Group("category"):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  class Category(name: String, globals: DObj) extends GroupType(name, globals)
+  class Category(name: String, globals: DObj) extends GroupType(name, globals):
+    /** */
+    def write(filepath: String): Unit = ???
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()

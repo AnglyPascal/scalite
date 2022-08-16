@@ -1,13 +1,14 @@
 package com.anglypascal.scalite.documents
 
-import com.anglypascal.scalite.utils.{getListOfFiles, getFileName}
-import com.anglypascal.scalite.data.DObj 
-import com.anglypascal.scalite.documents.Reader
-
-import com.rallyhealth.weejson.v1.{Obj, Str}
 import com.anglypascal.mustache.Mustache
-import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.utils.getFileName
+import com.anglypascal.scalite.utils.getListOfFiles
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
+import com.typesafe.scalalogging.Logger
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this

@@ -1,9 +1,9 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.utils.getListOfFiles
-import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.utils.getListOfFiles
 
 /** Companion object that creates the Posts collection.
   */

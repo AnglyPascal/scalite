@@ -1,12 +1,17 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.documents.{Page, Layout}
-import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.NoLayoutException
-import com.anglypascal.scalite.utils.{getOrElse, prettify}
-import com.anglypascal.scalite.data.{DObj, DStr, DArr}
+import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.data.DArr
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.documents.Layout
+import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.utils.prettify
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Obj
 
-import com.rallyhealth.weejson.v1.{Obj, Arr}
 import scala.collection.mutable.Set
 
 /** Each PostsGroup object represents a collection that posts can belong to. Tag

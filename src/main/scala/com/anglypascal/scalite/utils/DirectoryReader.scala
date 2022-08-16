@@ -1,8 +1,9 @@
 package com.anglypascal.scalite.utils
 
+import com.typesafe.scalalogging.Logger
+
 import java.io.File
 import scala.io.Source
-import com.typesafe.scalalogging.Logger
 
 /** TODO: Symlinks? We could ask the user to specify if symlinks should be
   * followed. Test the methods to see if some sort of filtering is required.

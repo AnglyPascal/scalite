@@ -1,17 +1,21 @@
 package com.anglypascal.scalite.plugins
 
-import com.anglypascal.scalite.converters.{Converter, Converters}
-import com.anglypascal.scalite.collections.{Collection, Collections}
-import com.anglypascal.scalite.documents.{LayoutObject, Layouts}
-import com.anglypascal.scalite.utils.getListOfFiles
+import com.anglypascal.scalite.collections.Collection
+import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.documents.LayoutObject
+import com.anglypascal.scalite.documents.Layouts
+import com.anglypascal.scalite.utils.getListOfFiles
+import com.typesafe.scalalogging.Logger
 
 import java.io.File
-import java.net.{URL, URLClassLoader}
+import java.net.URL
+import java.net.URLClassLoader
 import scala.reflect.ClassTag
-import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DStr
 
 /** Object that is called with the plugins directory and the plugins data from
   * config.yml to add all the available plugins to runtime

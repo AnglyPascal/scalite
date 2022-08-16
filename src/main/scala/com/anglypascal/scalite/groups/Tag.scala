@@ -1,10 +1,13 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.utils.slugify
-import com.anglypascal.scalite.data.{DObj, DStr}
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
 
-import com.rallyhealth.weejson.v1.{Str, Arr, Obj}
 import scala.collection.mutable.LinkedHashMap
 
 object Tag extends Group("tag"):

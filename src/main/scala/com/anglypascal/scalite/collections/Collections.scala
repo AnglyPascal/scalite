@@ -1,9 +1,12 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.{DObj, DArr, DStr, DBool}
+import com.anglypascal.scalite.data.DArr
+import com.anglypascal.scalite.data.DBool
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.typesafe.scalalogging.Logger
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,

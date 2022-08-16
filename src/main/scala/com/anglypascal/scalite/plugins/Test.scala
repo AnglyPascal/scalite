@@ -1,10 +1,11 @@
 package com.anglypascal.scalite.plugins
 
 import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.Converters
 
 import java.io.File
-import java.net.{URL, URLClassLoader}
-import com.anglypascal.scalite.converters.Converters
+import java.net.URL
+import java.net.URLClassLoader
 
 trait SomeTrait:
   def someMethod: String;

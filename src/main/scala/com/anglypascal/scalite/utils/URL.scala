@@ -1,8 +1,8 @@
 package com.anglypascal.scalite
 
-import com.anglypascal.scalite.documents.Page
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.documents.Page
 
 case class URL(str: String):
   /** */

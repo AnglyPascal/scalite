@@ -1,9 +1,9 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.collections.Collection
-import com.anglypascal.scalite.utils.getListOfFiles
-import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.utils.getListOfFiles
 
 
 class Draft(filename: String, globals: DObj)

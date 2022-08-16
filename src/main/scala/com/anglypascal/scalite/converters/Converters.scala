@@ -1,7 +1,8 @@
 package com.anglypascal.scalite.converters
 
-import scala.collection.mutable.Map
 import com.typesafe.scalalogging.Logger
+
+import scala.collection.mutable.Map
 
 /** Companion object giving api to add new members to the set of converters
   * available to Post to render it's content

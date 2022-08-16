@@ -1,17 +1,24 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.documents.*
-import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.utils.*
-import com.anglypascal.scalite.data.*
-import com.anglypascal.scalite.groups.{PostsGroup, Group}
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
+import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.*
+import com.anglypascal.scalite.documents.*
+import com.anglypascal.scalite.groups.Group
+import com.anglypascal.scalite.groups.PostsGroup
+import com.anglypascal.scalite.utils.*
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Bool
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
+import com.rallyhealth.weejson.v1.Value
 
-import com.rallyhealth.weejson.v1.{Value, Obj, Str, Arr, Bool}
-import scala.collection.mutable.{LinkedHashMap}
-import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
+import scala.collection.mutable.LinkedHashMap
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -79,7 +86,8 @@ class Post(filepath: String, globals: DObj)
     * Nothing is necessary, but if date is being given, it has to be given in
     * full, if time is given, it has to be given in full.
     */
-  val date = urlObj.getOrElse("date_string")("undated")
+  val date = 
+    urlObj.getOrElse("date_string")("undated")
 
   /** TODO: Will later add support for getting the modified time values in the
     * case when the date/time is not specified in either the title name or the

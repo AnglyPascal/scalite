@@ -1,11 +1,15 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.{DObj, DStr, DNum}
-import com.anglypascal.scalite.documents.{Layouts, Page}
 import com.anglypascal.scalite.data.DArr
+import com.anglypascal.scalite.data.DNum
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.documents.Layouts
+import com.anglypascal.scalite.documents.Page
 
-import java.nio.file.{Paths, Files}
 import java.nio.charset.StandardCharsets
+import java.nio.file.Files
+import java.nio.file.Paths
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled

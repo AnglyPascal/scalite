@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.{DObj, DStr}
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.utils.getListOfFiles
 
 /** Defines the collection of generic item */

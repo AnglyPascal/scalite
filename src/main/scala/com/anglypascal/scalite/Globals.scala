@@ -1,14 +1,18 @@
 package com.anglypascal.scalite
 
-import com.anglypascal.scalite.documents.*
-import com.anglypascal.scalite.utils.yamlParser
-import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.collections.Collections
-import com.anglypascal.scalite.data.{DObj, DArr}
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DArr
+import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.documents.*
+import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.plugins.PluginManager
+import com.anglypascal.scalite.utils.yamlParser
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
+import com.rallyhealth.weejson.v1.Value
 
-import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
 
 /** Defines the global variables and default configurations. Everything can be

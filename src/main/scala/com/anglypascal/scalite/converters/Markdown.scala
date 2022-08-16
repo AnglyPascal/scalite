@@ -1,8 +1,10 @@
 package com.anglypascal.scalite.converters
 
-import sttp.client3.{HttpClientSyncBackend, basicRequest, UriContext}
-import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.plugins.Plugin
+import com.typesafe.scalalogging.Logger
+import sttp.client3.HttpClientSyncBackend
+import sttp.client3.UriContext
+import sttp.client3.basicRequest
 
 /** Basic Markdown to HTML converter using the Github API */
 
