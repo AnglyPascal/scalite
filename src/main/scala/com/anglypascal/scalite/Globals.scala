@@ -4,8 +4,9 @@ import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.utils.yamlParser
 import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.collections.Collections
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.{DObj, DArr}
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.plugins.PluginManager
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Arr, Str}
 import scala.collection.mutable.LinkedHashMap
@@ -82,6 +83,12 @@ object Globals:
       )
 
   Converters.modifyExtensions(extensions)
+  // TODO collection templates
+
+  configs.obj.remove("plugins") match
+    case Some(obj): Some[Obj] => 
+      PluginManager(dirs("pluginsDir").str, DObj(obj))
+    case _ => ()
 
   private val collections = Obj(
     "posts" -> Obj(
@@ -99,14 +106,14 @@ object Globals:
       "toc" -> false
     )
   )
-  // TODO collection templates
 
-  configs.obj.get("collections") match
+  configs.obj.remove("collections") match
     case Some(colObj): Some[Obj] => 
-      if colObj.obj.contains("collectionsDir") then
-        dirs("collectionsDir") = colObj("collectionsDir").str
+      colObj.obj.remove("collectionsDir") match
+        case Some(s): Some[Str] => dirs("collectionsDir") = s.str
+        case _ => ()
 
-      for (key, value) <- colObj.obj if key != "collectionsDir" do 
+      for (key, value) <- colObj.obj do
         collections(key) = value
     case _ => ()
 

@@ -10,6 +10,8 @@ import com.anglypascal.scalite.URL
 
 import com.rallyhealth.weejson.v1.{Value, Obj, Str, Arr, Bool}
 import scala.collection.mutable.{LinkedHashMap}
+import java.nio.file.{Paths, Files}
+import java.nio.charset.StandardCharsets
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -167,3 +169,6 @@ class Post(filepath: String, globals: DObj)
   def processGroups(): Unit =
     for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
 
+  def write(filepath: String): Unit =
+    if !visible then return
+    Files.write(Paths.get(filepath), render.getBytes(StandardCharsets.UTF_8))

@@ -27,18 +27,14 @@ trait Page:
     * @param filepath
     *   path to the output file
     */
-  def write(filepath: String): Unit = ???
+  def write(filepath: String): Unit
 
   /** Renders the content of this page, converting the user provided content and
     * rendering mustache. This results in a HTML formatted string holding the
     * content of the page.
     *
-    * @param globals
-    *   a weejson Obj containing the global values for site. It will also
-    *   contain the "content" tag that will be rendered as part of this document
-    * @param partials
-    *   contains Layouts in the _includes directory that will be used as
-    *   mustache partials
+    * @returns 
+    *   The html string of this page
     */
   def render: String
 

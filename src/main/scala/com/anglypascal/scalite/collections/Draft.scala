@@ -15,24 +15,12 @@ class Draft(filename: String, globals: DObj)
   */
 object Drafts extends Collection[Post]:
 
-  def things = _drafts
-  private var _drafts: Map[String, Post] = _
-
   val name = "drafts"
 
-  def apply(directory: String, globals: DObj): Map[String, Post] =
+  def apply(directory: String, globals: DObj) =
     val files = getListOfFiles(directory)
     def f(fn: String) =
       val post = new Post(fn, globals)
       post.processGroups()
       (post.title, post)
-    _drafts = files.filter(Converters.hasConverter).map(f).toMap
-
-    things
-
-  def compare(fst: Post, snd: Post): Int = Posts.compare(fst, snd)
-
-  def process: Unit = ???
-
-  def render: String = ???
-
+    items = files.filter(Converters.hasConverter).map(f).toMap

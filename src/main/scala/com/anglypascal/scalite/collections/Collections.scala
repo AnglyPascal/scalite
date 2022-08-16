@@ -11,16 +11,18 @@ import com.typesafe.scalalogging.Logger
   */
 object Collections:
 
-  /** Map of predefined collections that will later be populated "\_config.yml"
+  /** Map of predefined collections that will later be populated by
+    * "\_config.yml"
     */
-  private val collections = LinkedHashMap[String, Collection[_]]()
+  private val collections = LinkedHashMap[String, Collection[?]]()
 
-  def addToCollection(col: Collection[_]) = collections += (col.name -> col)
+  def addToCollection(col: Collection[?]): Unit =
+    collections += (col.name -> col)
 
   private val logger = Logger("Collection object")
 
   /** Processes all the collections that are set to output, with posts by
-    * default.
+    * default.bakira kichu
     * @param collectionsDir
     *   the root collection directory. All collections must be in this directory
     * @param collectionData
@@ -30,10 +32,12 @@ object Collections:
     */
   def apply(collectionsDir: String, collectionData: DObj, globals: DObj): Unit =
 
+    // override the collectionsDir if it's in collectionData
     val colsDir = collectionData.get("collectionsDir") match
       case Some(v): Some[DStr] => v.str
       case _                   => collectionsDir
 
+    // create the collection named "key" for each key in collecionsDir
     for key <- collectionData.keys if key != "collectionsDir" do
       val Col =
         if collections.contains(key) then
@@ -41,9 +45,24 @@ object Collections:
           collections(key)
         else
           logger.debug(s"created new collection object for $key")
-          new GenericItems(key)
+          new GenericCollection(key)
 
       collectionData(key) match
+        // collections:
+        //     drafts: true
+        case cbool: DBool if cbool.bool =>
+          logger.debug(s"rendering the collection $key")
+          val dir = colsDir + s"/_$key"
+          Col(dir, DObj(), globals)
+          addToCollection(Col)
+
+        // collections:
+        //     drafts: false
+        case cbool: DBool if !cbool.bool =>
+          logger.debug(s"won't process the collection $key")
+          collections.remove(key)
+
+        // full configuration
         case cobj: DObj =>
           val output =
             if cobj.contains("output") then
@@ -102,18 +121,16 @@ object Collections:
                     )
                     Col(dir, locals, globals)
 
-        case cbool: DBool if cbool.bool =>
-          logger.debug(s"rendering the collection $key")
-          val dir = colsDir + s"/_$key"
-          Col(dir, DObj(), globals)
-        case cbool: DBool if !cbool.bool =>
-          logger.debug(s"won't process the collection $key")
-          collections.remove(key)
+            // add this collection to the collections map
+            addToCollection(Col)
+
+        // wasn't mentioned in the configuration
         case _ =>
           logger.debug(s"provide the metadata in a table or boolean for $key")
           collections.remove(key)
 
     // If posts haven't been explicitely configured, render it by default
-    if collections.contains("posts") && !collectionData.contains("posts") then
+    if !collectionData.contains("posts") then
+      if !collections.contains("posts") then collections("posts") = Posts
       logger.debug("posts are being renderd by default")
       collections("posts")(colsDir + "/_posts", globals)

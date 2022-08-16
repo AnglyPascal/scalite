@@ -102,6 +102,8 @@ object DArr:
   /** Create a new DArr from a List[Data] */
   def apply(_arr: List[Data]) = new DArr(_arr)
 
+  def apply(_arr: Iterable[Data]) = new DArr(_arr.toList)
+
   /** Create a new DArr from an Arr */
   def apply(_arr: Arr) =
     new DArr(_arr.arr.map(DataImplicits.valueToData).toList)
