@@ -23,10 +23,8 @@ import scala.collection.mutable.LinkedHashMap
   */
 object Globals:
 
-  private val glbsObj = Obj()
-
-  private val dirs = Obj(
-    "base" -> "/src/main/scala/site_template",
+  /** Where stuff are */
+  private lazy val dirs = Obj(
     "destination" -> "/_site",
     "layoutDir" -> "/_layouts",
     "collectionsDir" -> "/src/main/scala/site_template",
@@ -36,7 +34,8 @@ object Globals:
     "pluginsDir" -> "/_plugins"
   )
 
-  private val reading = Obj(
+  /** Which files to read */
+  private lazy val reading = Obj(
     "include" -> Arr(".htaccess"),
     "exclude" -> Arr("build.sbt"),
     "keepFiles" -> Arr(".git", ".svn"),
@@ -45,7 +44,8 @@ object Globals:
     "encoding" -> "utf-8"
   )
 
-  private val site = Obj(
+  /** Details about this website */
+  private lazy val site = Obj(
     "title" -> "A Shiny New Website",
     "lang" -> "en",
     "root_url" -> "/",
@@ -53,36 +53,12 @@ object Globals:
     "author" -> Obj(),
     "paginate" -> false,
     "show_excerpts" -> true,
-    "date_format" -> "dd MMM, yyyy"
+    "date_format" -> "dd MMM, yyyy",
+    "url_template" -> "{{default}}"
   )
 
-  glbsObj.obj ++= dirs.obj
-  glbsObj.obj ++= reading.obj
-  glbsObj.obj ++= site.obj
-
-  /** Support for data provided in _data folder. This will be in site("data") */
-  private val configs = yamlParser(dirs("base_dir").str + "/config.yml")
-
-  private val extensions =
-    reading.obj
-      .filter((s, _) => s.endsWith("Ext"))
-      .map((s, v) =>
-        val ext = v match
-          case v: Str => v.str
-          case v: Arr => v.arr.map(_.str).mkString(",")
-          case _      => ""
-        (s.dropRight(3), ext)
-      )
-
-  Converters.modifyExtensions(extensions)
-  // TODO collection templates
-
-  configs.obj.remove("plugins") match
-    case Some(obj): Some[Obj] =>
-      PluginManager(dirs("pluginsDir").str, DObj(obj))
-    case _ => ()
-
-  private val collections = Obj(
+  /** Defaults of the `collection` section. */
+  private lazy val collections = Obj(
     "posts" -> Obj(
       "output" -> true,
       "folder" -> "/_posts",
@@ -99,60 +75,96 @@ object Globals:
     )
   )
 
-  configs.obj.remove("collections") match
-    case Some(colObj): Some[Obj] =>
-      colObj.obj.remove("collectionsDir") match
-        case Some(s): Some[Str] => dirs("collectionsDir") = s.str
-        case _                  => ()
+  private lazy val build = Obj(
+    "log_level" -> 1
+  )
 
-      for (key, value) <- colObj.obj do collections(key) = value
-    case _ => ()
-
-  Collections(dirs("collectionsDir").str, DObj(collections), globals)
-
-  configs.obj.remove("default") match
-    case Some(colObj): Some[Obj] => ()
-    case _                       => ()
-
-  configs.obj.remove("groups") match
-    case Some(colObj): Some[Obj] => ()
-    case _                       => ()
-
-  for (key, value) <- configs.obj do glbsObj(key) = value
-
-  private val _globals = DObj(glbsObj)
-  def globals = _globals
-
-
-  loadDefaultPlugins()
-  /** The values for collection will be separated here and sent to the
-    * constructor of Collection object
+  /** Load the configs from "/\_config.yml" file
+    *
+    * TODO: Support for data provided in _data folder. This will be in
+    * site("data")
     */
+  private lazy val configs =
+    yamlParser(dirs("base_dir").str + "/_config.yml")
 
-  private def loadDefaultPlugins(): Unit = 
+  /** Get the updated exteions for the converters. Will move this functionality
+    * later to the Converters section
+    */
+  private def extensions =
+    reading.obj
+      .filter((s, _) => s.endsWith("Ext"))
+      .map((s, v) =>
+        val ext = v match
+          case v: Str => v.str
+          case v: Arr => v.arr.map(_.str).mkString(",")
+          case _      => ""
+        (s.dropRight(3), ext)
+      )
+
+  /** Process the collections from the updated config */
+  private def processCollections() =
+    configs.obj.remove("collections") match
+      case Some(colObj): Some[Obj] =>
+        colObj.obj.remove("collectionsDir") match
+          case Some(s): Some[Str] => dirs("collectionsDir") = s.str
+          case _                  => ()
+        for (key, value) <- colObj.obj do collections(key) = value
+      case _ => ()
+
+  /** Process the defaults fro the updated config */
+  private def processDefaults() =
+    configs.obj.remove("default") match
+      case Some(colObj): Some[Obj] => ()
+      case _                       => ()
+
+  /** Process the groups fro the updated config */
+  private def processGroups() =
+    configs.obj.remove("groups") match
+      case Some(colObj): Some[Obj] => ()
+      case _                       => ()
+
+  /** Load all the plugins, defaults and custom */
+  private def loadPlugins(): Unit =
+    // default plugins
     Converters.addConverter(Markdown)
     Collections.addToCollection(Posts)
     Layouts.addEngine(MustacheLayout)
+    // custom plugins
+    configs.obj.remove("plugins") match
+      case Some(obj): Some[Obj] =>
+        PluginManager(dirs("pluginsDir").str, DObj(obj))
+      case _ => ()
 
-/** Should need to write the documentation for different options in the
-  * config.yml
-  *
-  * posts_visibility: render all posts by default?
-  *
-  * log_level: the level of log
-  *
-  * default_url_template: the template of url used by posts without a speficied
-  * template
-  */
+  /** Read the config, do all the initial stuff, return the global variables */
+  def apply(base: String) =
+
+    val glbsObj = Obj()
+    dirs("base") = base
+
+    glbsObj.obj ++= dirs.obj
+    glbsObj.obj ++= reading.obj
+    glbsObj.obj ++= site.obj
+
+    loadPlugins()
+
+    processDefaults()
+    processCollections()
+    processGroups()
+
+    for (key, value) <- configs.obj do glbsObj(key) = value
+
+    val _globals = DObj(glbsObj)
+
+    // TODO collection templates
+    Converters.modifyExtensions(extensions)
+    Collections(dirs("collectionsDir").str, DObj(collections), _globals)
+
+    _globals
 
 /** need to make a new list_map that will define the name of the list in yaml,
   * and the value name to assign to each of it's value.
   *
-  * For example, if the yaml is like
-  *
-  * authors: [a, b, c] list_map: authors: author
-  *
-  * then the yaml will be rendered as if it were
-  *
-  * authors: [author: a, author: b, author: c]
+  * For example, if the yaml is like `authors: [a, b, c]` list_map: authors:
+  * author then the yaml will be rendered as if it were authors: [author: a,
+  * author: b, author: c]
   */

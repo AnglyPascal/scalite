@@ -7,19 +7,15 @@
     - Before everything, make sure that the abstraction with collection works
 
 - Write the string handlers:
-    - `slugify()`: converts string into lower-case, hyphen seperated string. 
-        - challenge is to add customization. For now, copy jekyll
-    - `prettify():` takes a string, maybe slugified, and creates a nice english rep.
-        - again, challenge is to support customization.
-    - `excerpt()`: module for posts, that creates an excerpt of the post. Copy jekyll
-        for now.
+    - How are we using `slugify()` and `titlifiy()`?
+    - `excerpt()`: creates an excerpt of the post. Copy jekyll for now.
 
 - Start with global settings handling. Write the specification for items
     - We don't need many options to handle posts. Then check the code for posts, and
         test a small case.
     - Check url creation, that it words and the partials work.
-    - Then add the collection configurations in global settings.
-        - Collections can be specified to have a table of contents page. 
+
+- Collections ToC page
 
 - Make a directory builder and file writer
     - Inside collection items, define the output path. It should be defined by the url.
@@ -34,8 +30,6 @@
         inside `/assets/css/style.css` file
 
 - Front matter documentation, and other documentations. Work on this as you go.
-
-- Initializer. Somehow initializes all the objects
 
 
 ## A bit later
