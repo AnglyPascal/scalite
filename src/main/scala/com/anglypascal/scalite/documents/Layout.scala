@@ -22,10 +22,12 @@ abstract class Layout(val name: String, layoutPath: String)
     *
     * @param context
     *   a DObj with values of all the placeholders and global variables.
+    * @param contentPartial
+    *   The partial string that needs to be rendered under the "content" tag
     * @return
     *   the rendered layout as a string
     */
-  def render(context: DObj): String
+  def render(context: DObj, contentPartial: String = ""): String
 
   /** Parent of this layout, specified in the front matter
     */

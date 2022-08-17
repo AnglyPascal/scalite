@@ -65,19 +65,21 @@ class MustacheLayout(name: String, layoutPath: String)
     *   a Data object cointaing the following keys:
     *   - '''site''': global variables defined by "\_config.yml"
     *   - '''page''' of '''post''': page or post specific variables
-    *   - '''content''': contents of the child file
-    * @param partials
-    *   the partial layouts defined in the "/\_includes" folder
+    * @param contentPartial
+    *   The partial string that needs to be rendered by mustache under the
+    *   "content" tag
     * @return
     *   the string returned by the mustache after rendering
     */
-  def render(context: DObj): String =
-    val str = mustache.render(context, MustacheLayout.partials)
+  def render(context: DObj, contentPartial: String = ""): String =
+    val str = mustache.render(
+      context,
+      MustacheLayout.partials + ("content" -> new Mustache(contentPartial))
+    )
     parent match
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
-        context.content = str
-        p.render(context)
+        p.render(context, str)
       case _ => str
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory
@@ -135,4 +137,3 @@ object MustacheLayout extends LayoutObject with Plugin:
 
     logger.debug("Got the partials: " + ls.map(_._1).mkString(", "))
     ls.toMap
-
