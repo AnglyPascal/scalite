@@ -1,7 +1,9 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.collections.Posts
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.documents.*
@@ -12,6 +14,7 @@ import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
+import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 
@@ -120,9 +123,16 @@ object Globals:
   private val _globals = DObj(glbsObj)
   def globals = _globals
 
+
+  loadDefaultPlugins()
   /** The values for collection will be separated here and sent to the
     * constructor of Collection object
     */
+
+  private def loadDefaultPlugins(): Unit = 
+    Converters.addConverter(Markdown)
+    Collections.addToCollection(Posts)
+    Layouts.addEngine(MustacheLayout)
 
 /** Should need to write the documentation for different options in the
   * config.yml

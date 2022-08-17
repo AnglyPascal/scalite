@@ -11,14 +11,6 @@ import com.anglypascal.scalite.documents.*
   * used if the file has no date or is in _draft folder the cache structure can
   * be inspired from https://jekyllrb.com/docs/structure/
   */
-
-/** CRUCIAL TODO: need to check if the weejson support in Mustache works
-  */
-
-/** CRUCIAL TODO: need to make a wrapper for the global value to make it
-  * immutable. Only supply contains and get functions
-  */
-
 case class Site(base_dir: String):
 
   /** */
