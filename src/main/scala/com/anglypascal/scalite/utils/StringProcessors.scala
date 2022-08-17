@@ -8,7 +8,7 @@ object StringProcessors:
   /** during the rendering of a post, (or potentially anything), fetch the first
     * paragraph and return an excerpt.
     */
-  def excerpt(str: String, separator: String = "\n\n"): String = 
+  def getExcerpt(str: String, separator: String = "\n\n"): String = 
     str.split(separator).headOption match
       case Some(head) => 
         head
@@ -108,8 +108,15 @@ object StringProcessors:
     if allCaps then slug.split('-').map(_.capitalize).mkString(" ")
     else slug.split('-').mkString(" ").capitalize
 
-  @main
+  def titleParser(fn: String): Option[String] = 
+    val title = raw"\d{4}-\d{2}-\d{2}(.*)".r
+    fn match 
+      case title(t) => Some(titlify(t))
+      case _ => None
+
+  // @main
   def stringProcessor =
     val s = "Import _config.yml"
     slugifyModes.map(m => m -> slugify(s, m)).map(println(_))
     slugifyModes.map(slugify(s, _, true)).map(println(_))
+

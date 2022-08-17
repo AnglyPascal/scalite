@@ -19,10 +19,11 @@ sealed trait Data
   */
 final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
 
+  /** Get an iterable for the list of keys in the map */
   def keys = _obj.keys
-  def remove(keys: List[String]): DObj =
-    val obj = _obj -- keys
-    DObj(obj)
+
+  /** Remove the keys from the map returning the new map */
+  def remove(keys: List[String]): DObj = DObj(_obj -- keys)
 
   /** Returns a new DObj with the given mutable Map */
   def obj_=(o: Map[String, Data]) = DObj(o)
@@ -31,38 +32,18 @@ final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
   def obj_=(o: Obj) = DObj(o)
 
   /** Returns the value stored against key in the underlying Map */
-  def contains(key: String) =
-    _obj.contains(key: String) ||
-      (key == "content" && _content != None)
+  def contains(key: String) = _obj.contains(key: String)
 
   /** Returns the value stored against key in the underlying Map */
-  def apply(key: String): Data =
-    if key != "content" then _obj(key)
-    else
-      _content match
-        case Some(c) => DStr(c)
-        case None =>
-          val a = this.toString
-          Logger("DObj exception").warn(s"content is not set in DObj $a")
-          DStr("")
+  def apply(key: String): Data = _obj(key)
 
-  /** Returns the value stored against key in the underlying Map wrapped in
-    * Option
-    */
-  def get(key: String): Option[Data] =
-    if key != "content" then _obj.get(key)
-    else _content.map(DStr(_))
+  /** Returns the value mapped to key wrapped in an Option */
+  def get(key: String): Option[Data] = _obj.get(key)
 
   /** Return a new DObj object with the given pair added */
-  def add(pair: (String, Data)): DObj =
-    val _nobj = _obj + pair
-    DObj(_nobj)
+  def add(pair: (String, Data)): DObj = DObj(_obj + pair)
 
-  /** Store "content" separately rather than in _obj to allow overwrite */
-  def content: String = _content.getOrElse("")
-  def content_=(c: String) = _content = Some(c)
-  private var _content: Option[String] = None
-
+  /** Apply the given function to the underlying map */
   def map[A, B >: Data](f: ((String, B)) => A): Iterable[A] = _obj.map(f)
 
   override def toString(): String = _obj.toString
@@ -134,6 +115,7 @@ final class DStr(private val _str: String) extends Data:
 
 /** Factory methods for constructing a DStr */
 object DStr:
+
   /** Construct a DStr from a given String */
   def apply(_str: String) = new DStr(_str)
 
@@ -142,6 +124,7 @@ object DStr:
 
 /** Wrapper for Num */
 final class DNum(private val _num: BigDecimal) extends Data:
+
   /** Get the underlying BigDecimal */
   def num = _num
 
@@ -152,6 +135,7 @@ final class DNum(private val _num: BigDecimal) extends Data:
 
 /** Factory methods for constructing a DNum */
 object DNum:
+
   /** Construct a DNum from a Decimal */
   def apply(_num: BigDecimal) = new DNum(_num)
 
@@ -160,6 +144,7 @@ object DNum:
 
 /** Wrapper for Bool */
 final class DBool(private val _bool: Boolean) extends Data:
+
   /** Get the underlying Boolean */
   def bool = _bool
 
@@ -170,6 +155,7 @@ final class DBool(private val _bool: Boolean) extends Data:
 
 /** Factory methods for constructing a DBool */
 object DBool:
+
   /** Construct a DNum from a Boolean */
   def apply(_bool: Boolean) = new DBool(_bool)
 

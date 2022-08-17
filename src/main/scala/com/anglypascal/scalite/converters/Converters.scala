@@ -62,9 +62,6 @@ object Converters:
     * @param filepath
     *   the path to the file containing the extension. Used to find appropriate
     *   converter
-    * @returns
-    *   - Left(e) where e is a ConverterException, or
-    *   - Right(s) where s is the converted string.
     */
   def convert(
       str: String,

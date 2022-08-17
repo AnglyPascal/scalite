@@ -28,7 +28,7 @@ trait Converter extends Plugin:
   def matches(filepath: String): Boolean =
     ext.matches(filepath)
 
-  /** Specify the output filetype. */
+  /** Specify the output filetype. TODO: What's the point? */
   def outputExt: String
 
   /** Convert a given string

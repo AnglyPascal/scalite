@@ -4,7 +4,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.documents.Layout
 import com.anglypascal.scalite.documents.Reader
-import com.anglypascal.scalite.utils.*
+import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
 
 abstract class Item(filepath: String, globals: DObj) extends Reader(filepath):
@@ -18,7 +18,8 @@ class GenericItem(filepath: String, globals: DObj)
   /** */
   val title: String =
     import com.anglypascal.scalite.data.DataExtensions.*
-    front_matter.getOrElse("title")(
+
+    front_matter.extractOrElse("title")(
       front_matter.getOrElse("name")(
         titleParser(filepath).getOrElse("untitled" + this.toString)
       )
