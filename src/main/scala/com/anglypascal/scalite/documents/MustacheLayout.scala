@@ -5,7 +5,7 @@ import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.Data
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
-import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
@@ -109,7 +109,7 @@ object MustacheLayout extends LayoutObject with Plugin:
       layoutsPath: String,
       partialsPath: String
   ): Map[String, Layout] =
-    val files = getListOfFiles(layoutsPath)
+    val files = getListOfFilepaths(layoutsPath)
     val ls = files
       .filter(matches(_))
       .map(f => {
@@ -126,7 +126,7 @@ object MustacheLayout extends LayoutObject with Plugin:
 
   /** Process all the partials in "/\_partials" directory. */
   private def getPartials(directory: String): Map[String, Mustache] =
-    val files = getListOfFiles(directory)
+    val files = getListOfFilepaths(directory)
     val ls = files
       .filter(matches(_))
       .map(f => {

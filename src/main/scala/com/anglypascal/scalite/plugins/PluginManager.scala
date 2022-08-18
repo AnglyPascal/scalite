@@ -9,7 +9,7 @@ import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.documents.LayoutObject
 import com.anglypascal.scalite.documents.Layouts
-import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
@@ -112,11 +112,12 @@ object PluginManager:
 
   /** Create classLoaders from all the jar files in the pluginsDir */
   private def getClassLoaders(pluginsDir: String): Unit =
-    classLoaders = getListOfFiles(pluginsDir)
+    classLoaders = getListOfFilepaths(pluginsDir)
       .filter(_.endsWith(".jar"))
       .map(loadJar)
       .filter(_ != None)
       .map(_.get)
+      .toList
 
   def apply(pluginsDir: String, pluginsData: DObj): Unit =
     getClassLoaders(pluginsDir)

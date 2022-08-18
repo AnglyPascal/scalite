@@ -25,6 +25,8 @@ trait Collection[A <: Item] extends Plugin with Page:
   /** Name of the collection */
   val name: String
 
+  protected val parent_name = name
+
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
   protected def items_=(its: Map[String, A]) = _items = its
@@ -45,8 +47,6 @@ trait Collection[A <: Item] extends Plugin with Page:
     *   global configs
     */
   def apply(directory: String, globals: DObj): Unit
-
-  protected val parent_name: String = name
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs, set the sortBy and toc variables, and receive

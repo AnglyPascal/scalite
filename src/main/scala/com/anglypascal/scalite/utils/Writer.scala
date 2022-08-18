@@ -6,4 +6,4 @@ package com.anglypascal.scalite.writers
   * also write cache to _cache directory and metadata to _metadata directory
   */
 
-trait Writer
+object Writer
