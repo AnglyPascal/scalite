@@ -29,6 +29,8 @@ trait Page:
     */
   def write(filepath: String): Unit
 
+  def targetDir: String = ???
+
   /** Renders the content of this page, converting the user provided content and
     * rendering mustache. This results in a HTML formatted string holding the
     * content of the page.

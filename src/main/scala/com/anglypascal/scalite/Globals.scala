@@ -6,6 +6,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.plugins.PluginManager
@@ -16,7 +17,7 @@ import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
-import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.{Map => MMap}
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -62,17 +63,17 @@ object Globals:
   private lazy val collections = Obj(
     "posts" -> Obj(
       "output" -> true,
-      "folder" -> "/_posts",
       "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
-      "toc" -> false
+      "toc" -> false,
+      "permalink" -> "/{{item}}"
     ),
     "drafts" -> Obj(
       "output" -> false,
-      "folder" -> "/_drafts",
       "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
-      "toc" -> false
+      "toc" -> false,
+      "permalink" -> "/{{item}}"
     )
   )
 
@@ -100,31 +101,21 @@ object Globals:
 
   /** Process the collections from the updated config */
   private def processCollections() =
-    configs.obj.remove("collections") match
-      case Some(colObj): Some[Obj] =>
-        colObj.obj.remove("collectionsDir") match
-          case Some(s): Some[Str] => dirs("collectionsDir") = s.str
-          case _                  => ()
-        for (key, value) <- colObj.obj do collections(key) = value
-      case _ => ()
+    val colMap = configs.extractOrElse("collections")(MMap[String, Value]())
+    dirs("collectionsDir") = colMap.extractOrElse("collectionsDir")("")
+    for (key, value) <- colMap.obj do collections(key) = value
 
   /** Process the defaults fro the updated config */
   private def processDefaults() =
-    configs.obj.remove("defaults") match
-      case Some(colObj): Some[Obj] => ()
-      case _                       => ()
+    val defMap = configs.extractOrElse("defaults")(MMap[String, Value]())
 
   /** Process the groups fro the updated config */
   private def processGroups() =
-    configs.obj.remove("groups") match
-      case Some(colObj): Some[Obj] => ()
-      case _                       => ()
+    val grpMap = configs.extractOrElse("groups")(MMap[String, Value]())
 
   /** Process the groups fro the updated config */
   private def processAssets() =
-    configs.obj.remove("data") match
-      case Some(colObj): Some[Obj] => ()
-      case _                       => ()
+    val dataMap = configs.extractOrElse("data")(MMap[String, Value]())
 
   /** Load all the plugins, defaults and custom */
   private def loadPlugins(): Unit =
@@ -133,10 +124,8 @@ object Globals:
     Collections.addToCollection(Posts)
     Layouts.addEngine(MustacheLayout)
     // custom plugins
-    configs.obj.remove("plugins") match
-      case Some(obj): Some[Obj] =>
-        PluginManager(dirs("pluginsDir").str, DObj(obj))
-      case _ => ()
+    val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
+    PluginManager(dirs("pluginsDir").str, DObj(plugMap))
 
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =

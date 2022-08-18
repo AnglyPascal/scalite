@@ -38,9 +38,7 @@ object Collections:
     import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 
     // override the collectionsDir if it's in collectionData
-    val colsDir = collectionData.get("collectionsDir") match
-      case Some(v): Some[DStr] => v.str
-      case _                   => collectionsDir
+    val colsDir = collectionData.getOrElse("collectionsDir")(collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
     for key <- collectionData.keys if key != "collectionsDir" do
@@ -86,50 +84,20 @@ object Collections:
             collections.remove(key)
           else
             /** here add all the remaining into a stuff and ship with globals */
-            val defKeys = List("output", "folder", "directory", "sortBy", "toc")
+            val defKeys = List("output", "directory", "sortBy", "toc")
             val locals = cobj.removeAll(defKeys)
 
-            val folder = cobj.get("folder") match
-              case Some(d): Some[DStr] => d.str
-              case _                   => s"/_$key"
-            val dir = cobj.get("directory") match
-              case Some(d): Some[DStr] => d.str + "/" + folder
-              case _                   => colsDir + s"/_$key"
+            val dir = cobj.getOrElse("directory")(colsDir + s"/_$key")
             logger.debug(s"fetching files from $dir for collection $key")
-
-            // val sortBy = cobj.get("sortBy") match
-            //   case Some(d): Some[DStr] => Some(d.str)
-            //   case _                   => None
-            // val toc = cobj.get("toc") match
-            //   case Some(d): Some[DBool] => Some(d.bool)
-            //   case _                    => None
 
             val sortBy = cobj.getOrElse("sortBy")("title")
             val toc = cobj.getOrElse("sortBy")(false)
-            val permalink = cobj.getOrElse("permalink")("/{{item}}")
+            val permalink = cobj.getOrElse("permalink")("")
 
-            // sortBy match
-            //   case Some(s) =>
-            //     toc match
-            //       case Some(t) =>
-            //         logger.debug(
-            //           s"found custom sortBy $s and toc $t for collection $key"
-            //         )
-            //         Col(dir, locals, globals, s, t)
-            //       case None =>
-            //         logger.debug(s"found custom sortBy $s for collection $key")
-            //         Col(dir, locals, globals, _sortBy = s)
-            //   case None =>
-            //     toc match
-            //       case Some(t) =>
-            //         logger.debug(s"found custom toc $t for collection $key")
-            //         Col(dir, locals, globals, _toc = t)
-            //       case None =>
-            //         logger.debug(
-            //           s"using default sortBy and toc for collection $key"
-            //         )
-            //         Col(dir, locals, globals)
-
+            logger.debug(
+              s"sorting by $sortBy, toc $toc, permalink $permalink for $key"
+            )
+            Col(dir, locals, globals, sortBy, toc, permalink)
             // add this collection to the collections map
             addToCollection(Col)
 

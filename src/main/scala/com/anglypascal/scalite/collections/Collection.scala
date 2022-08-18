@@ -46,7 +46,7 @@ trait Collection[A <: Item] extends Plugin with Page:
     * @param globals
     *   global configs
     */
-  def apply(directory: String, globals: DObj): Unit
+  def apply(directory: String, _globals: DObj): Unit
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs, set the sortBy and toc variables, and receive
@@ -58,21 +58,28 @@ trait Collection[A <: Item] extends Plugin with Page:
       _globals: DObj,
       _sortBy: String = "title",
       _toc: Boolean = false,
-      _permalink: String = "/{{item}}"
+      _permalink: String = ""
   ): Unit =
-    sortBy = _sortBy
     toc = _toc
-    locals = _locals
+    sortBy = _sortBy
     globals = _globals
+    permalink = _permalink
+
+    // TODO: what else needs to be added to the collection?
+    locals = _locals.add("name" -> DStr(name))
+
     apply(directory, _globals)
 
-  protected var permalink = "/{{item}}"
+  /** Template for the permalink. This will be prepended to the template of the
+    * items. TODO
+    */
+  protected var permalink: String = _
 
   /** Sort the items of this collection by this key */
-  protected var sortBy = "title"
+  protected var sortBy: String = _
 
   /** Should this collection have a separate page? */
-  protected var toc = false
+  protected var toc: Boolean = _
 
   /** Collection metadata other than sortBy, toc, folder, directory, output. */
   protected var locals: DObj = _
@@ -80,26 +87,28 @@ trait Collection[A <: Item] extends Plugin with Page:
   /** Store a reference to the global configs */
   protected var globals: DObj = _
 
-  /** Compare two given items by the given key */
-  private def compareBy(fst: A, snd: A, key: String): Int =
-    val g1 = fst.locals.get(key)
-    val g2 = snd.locals.get(key)
-    g1 match
+  /** Compare two options */
+  private def cmpOpt[T](
+      o1: Option[T],
+      o2: Option[T]
+  )(using ord: Ordering[T]): Int =
+    o1 match
       case None =>
-        g2 match
+        o2 match
           case None    => 0
           case Some(_) => -1
-      case Some(s1): Some[DStr] =>
-        g2 match
-          case None                 => 1
-          case Some(s2): Some[DStr] => s1.str compare s2.str
-          case _                    => 0
-      case Some(s1): Some[DNum] =>
-        g2 match
-          case None                 => 1
-          case Some(s2): Some[DNum] => s1.num compare s2.num
-          case _                    => 0
-      case _ => 0
+      case Some(a) =>
+        o2 match
+          case None    => 1
+          case Some(b) => ord.compare(a, b)
+
+  /** Compare two given items by the given key */
+  private def compareBy(fst: A, snd: A, key: String): Int =
+    val s = cmpOpt(fst.locals.getStr, fst.locals.getStr)
+    if s != 0 then return s
+    val n = cmpOpt(fst.locals.getNum, fst.locals.getNum)
+    if n != 0 then return n
+    0
 
   /** The compare function to be used with sortWith to sort the posts in this
     * collection. This first tries sortBy then falls back to "title".

@@ -7,6 +7,8 @@ import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
 
+import scala.collection.mutable.Map
+
 object DataExtensions:
 
   extension (data: Obj)
@@ -44,8 +46,20 @@ object DataExtensions:
           case _ => default
       else default
 
+    final def extractOrElse(
+        key: String
+    )(default: Map[String, Value]): Map[String, Value] =
+      if data.obj.contains(key) then
+        data.obj.remove(key) match
+          case Some(s) =>
+            s match
+              case s: Obj => s.obj
+              case _      => default
+          case _ => default
+      else default
+
 @main
-def dataExtensionsTest = 
+def dataExtensionsTest =
   import DataExtensions.*
 
   val d = DNum(5)

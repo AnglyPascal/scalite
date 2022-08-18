@@ -52,7 +52,13 @@ object PluginManager:
           .getField("MODULE$")
           .get(man.runtimeClass)
       Some(obj.asInstanceOf[T])
-    catch case e => None
+
+      /** TODO Check if there are any specifc exceptions being thorwn
+        */
+    catch
+      case e =>
+        logger.trace(s"$objName wasn't in classLoader ${classLoader.toString}")
+        None
 
   /** Search for the given object in all the loaded jars */
   private def findObject[T <: Plugin](objName: (DStr | DObj))(using
@@ -71,7 +77,8 @@ object PluginManager:
     def getObj = getObject[T](key)
     for loader <- classLoaders do
       getObj(loader) match
-        case (some: Some[T]) =>
+        /** FIXME: this type check will be erased, fix this */
+        case some: Some[_] =>
           objName match
             case k: DStr =>
               logger.debug(s"Found plugin $key")
