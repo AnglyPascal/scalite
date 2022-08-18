@@ -25,9 +25,10 @@ object Globals:
 
   /** Where stuff are */
   private lazy val dirs = Obj(
+    "base" -> ".",
+    "collectionsDir" -> ".",
     "destination" -> "/_site",
-    "layoutDir" -> "/_layouts",
-    "collectionsDir" -> "/src/main/scala/site_template",
+    "layoutsDir" -> "/_layouts",
     "includesDir" -> "/_includes",
     "sassDir" -> "/_sass",
     "dataDir" -> "/_data",
@@ -38,7 +39,7 @@ object Globals:
   private lazy val reading = Obj(
     "include" -> Arr(".htaccess"),
     "exclude" -> Arr("build.sbt"),
-    "keepFiles" -> Arr(".git", ".svn"),
+    "keepFiles" -> Arr(".git", ".svn"), // give regex list
     "markdownExt" -> "markdown,mkdown,mkdn,mkd,md",
     "textileExt" -> "textile",
     "encoding" -> "utf-8"
@@ -48,13 +49,13 @@ object Globals:
   private lazy val site = Obj(
     "title" -> "A Shiny New Website",
     "lang" -> "en",
-    "root_url" -> "/",
+    "rootUrl" -> "/",
     "description" -> "generic site description",
     "author" -> Obj(),
     "paginate" -> false,
-    "show_excerpts" -> true,
-    "date_format" -> "dd MMM, yyyy",
-    "url_template" -> "{{default}}"
+    "showExcerpts" -> true,
+    "dateFormat" -> "dd MMM, yyyy",
+    "urlTemplate" -> "{{default}}"
   )
 
   /** Defaults of the `collection` section. */
@@ -76,16 +77,12 @@ object Globals:
   )
 
   private lazy val build = Obj(
-    "log_level" -> 1
+    "logLevel" -> 1
   )
 
-  /** Load the configs from "/\_config.yml" file
-    *
-    * TODO: Support for data provided in _data folder. This will be in
-    * site("data")
-    */
+  /** Load the configs from "/\_config.yml" file */
   private lazy val configs =
-    yamlParser(dirs("base_dir").str + "/_config.yml")
+    yamlParser(dirs("base").str + "/_config.yml")
 
   /** Get the updated exteions for the converters. Will move this functionality
     * later to the Converters section
@@ -113,13 +110,19 @@ object Globals:
 
   /** Process the defaults fro the updated config */
   private def processDefaults() =
-    configs.obj.remove("default") match
+    configs.obj.remove("defaults") match
       case Some(colObj): Some[Obj] => ()
       case _                       => ()
 
   /** Process the groups fro the updated config */
   private def processGroups() =
     configs.obj.remove("groups") match
+      case Some(colObj): Some[Obj] => ()
+      case _                       => ()
+
+  /** Process the groups fro the updated config */
+  private def processAssets() =
+    configs.obj.remove("data") match
       case Some(colObj): Some[Obj] => ()
       case _                       => ()
 
@@ -140,6 +143,7 @@ object Globals:
 
     val glbsObj = Obj()
     dirs("base") = base
+    dirs("collecionsDir") = base
 
     glbsObj.obj ++= dirs.obj
     glbsObj.obj ++= reading.obj
@@ -150,6 +154,7 @@ object Globals:
     processDefaults()
     processCollections()
     processGroups()
+    processAssets()
 
     for (key, value) <- configs.obj do glbsObj(key) = value
 

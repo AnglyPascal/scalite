@@ -175,6 +175,10 @@ object DataImplicits:
   given Conversion[DNum, BigDecimal] = _.num
   given Conversion[DBool, Boolean] = _.bool
 
+  given Conversion[String, DStr] = DStr(_)
+  given Conversion[BigDecimal, DNum] = DNum(_)
+  given Conversion[Boolean, DBool] = DBool(_)
+
   given Conversion[Value, Data] =
     _ match
       case v: Obj  => DObj(v)

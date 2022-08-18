@@ -32,7 +32,7 @@ object Markdown extends Converter:
         str
       case Right(s) => s
 
-@main
+// @main
 def markDownTest =
   val s = "[link]({{mustache}})"
   val t = Markdown.convert(s)

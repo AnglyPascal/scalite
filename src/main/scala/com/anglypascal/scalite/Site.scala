@@ -15,7 +15,7 @@ case class Site(base_dir: String):
 
   /** */
   val c = DataAST
-  val globals = Globals.globals
+  // val globals = Globals.globals
 
   // val layouts = MustacheLayout(globals("base").str + globals("layout_dir").str)
   // val partials = Partial(globals("base").str + globals("includes_dir").str)
