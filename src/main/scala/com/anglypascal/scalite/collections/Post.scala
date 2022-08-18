@@ -46,12 +46,12 @@ import com.typesafe.scalalogging.Logger
   *     through the plugin is added TODO
   *
   * @param filepath
-  *   path to the post file
+  *   absolute path to the post file
   * @param globals
   *   a weejson object passed through the "_config.yml" file
   */
-class Post(filepath: String, globals: DObj)
-    extends Item(filepath, globals)
+class Post(parentDir: String, relativePath: String, globals: DObj)
+    extends Item(parentDir, relativePath, globals)
     with ReaderOps
     with Page:
 

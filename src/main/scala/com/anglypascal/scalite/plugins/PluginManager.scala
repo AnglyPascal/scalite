@@ -9,7 +9,7 @@ import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.documents.LayoutObject
 import com.anglypascal.scalite.documents.Layouts
-import com.anglypascal.scalite.utils.getListOfFiles
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
 import com.typesafe.scalalogging.Logger
 
 import java.io.File

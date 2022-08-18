@@ -2,6 +2,7 @@ package com.anglypascal.scalite.utils
 
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.Data
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
@@ -9,6 +10,7 @@ import com.typesafe.scalalogging.Logger
 import java.io.File
 import scala.util.matching.Regex
 
+/** Cleans the build directory before write files to it */
 object Cleaner:
 
   /** Clears the folder with absolute path cleanSite, keeping the files matching
@@ -25,46 +27,30 @@ object Cleaner:
     *   [".*\.txt", ".git"] will keep all the files ending with extension ".txt"
     *   and the folder .git under cleanSite. Note that
     */
-  def clean(cleanSite: String, excludes: List[String]): Unit =
-    val r = s"$cleanSite/(${excludes.mkString("|")})".r
-    val f = new File(cleanSite)
-
+  private def clean(cleanSite: String, excludes: List[String]): Unit =
+    val r = s"(${excludes.mkString("|")})".r
+    // delete a path if it's a file, or the directory is empty
     def fn(file: File, isDir: Boolean = false) =
       if !isDir || (file.listFiles().length == 0) then
         file.delete()
         logger.trace(s"deleted $file")
-
-    val all = recursiveListFiles(f, r)
+    // paths relative to the cleanSite
+    val all = getListOfFiles(cleanSite, r)
     val files = all.filter(!_.isDirectory)
     val dirs = all.filter(_.isDirectory).sortWith(_.getPath > _.getPath)
-
+    // delete the files and empty directories
     files.map(fn(_))
     dirs.map(fn(_, true))
 
-  val logger = Logger("Cleaner")
-
-  /** Recursively find all the files under the directory f that do not match the
-    * given regex exr
-    */
-  def recursiveListFiles(f: File, exr: Regex): Array[File] =
-    if !f.isDirectory then
-      logger.warn(s"the passed path ${f.getPath} is not a directory")
-      return Array()
-
-    val these = f.listFiles
-    if these == null then
-      logger.warn(s"there was an IO errow while processing ${f.getPath}")
-      return Array()
-
-    val good = these.filter(f => !exr.matches(f.getAbsolutePath))
-    good ++ good.filter(_.isDirectory).flatMap(recursiveListFiles(_, exr))
+  private val logger = Logger("Cleaner")
 
   /** Clean the destination site according to the global configuration */
   def apply(globals: DObj): Unit =
     import com.anglypascal.scalite.data.DataExtensions.{getOrElse, getStr}
 
-    var cleanSite =
-      globals.getOrElse("base")(".") + globals.getOrElse("destination")(".")
+    var cleanSite = // FIXME default would not be the absolute path though
+      globals.getOrElse("base")(".") +
+        globals.getOrElse("destination")("/_site")
 
     val excludes =
       def f(l: List[String], d: Data): List[String] =

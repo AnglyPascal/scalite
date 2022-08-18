@@ -72,13 +72,13 @@ object Category extends Group("category"):
     */
   private def getGroupNames(post: Post): Iterable[String] =
     // process the filepath first
-    val arr = post.filepath.split("/").tail.init
+    val arr = post.relativePath.split("/").init
     // check the entry in the front matter
     val unslugged = post.getGroupsList("categories") match
-      case s: Str => arr ++ s.str.split(", ") // more options?
+      case s: Str => arr ++ s.str.split(",").map(_.trim) // more options?
       case a: Arr => arr ++ a.arr.map(s => s.str) // error-prone
       case _      => arr
     // slugify the category names
-    unslugged.map(slugify(_))
+    unslugged.map(slugify(_, "pretty", true))
 
   /** TODO: give more options in slugify? */

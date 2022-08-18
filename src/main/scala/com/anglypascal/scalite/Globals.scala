@@ -26,7 +26,7 @@ object Globals:
   /** Where stuff are */
   private lazy val dirs = Obj(
     "base" -> ".",
-    "collectionsDir" -> ".",
+    "collectionsDir" -> "",
     "destination" -> "/_site",
     "layoutsDir" -> "/_layouts",
     "includesDir" -> "/_includes",
@@ -162,7 +162,11 @@ object Globals:
 
     // TODO collection templates
     Converters.modifyExtensions(extensions)
-    Collections(dirs("collectionsDir").str, DObj(collections), _globals)
+    Collections(
+      dirs("base").str + dirs("collectionsDir").str,
+      DObj(collections),
+      _globals
+    )
 
     _globals
 

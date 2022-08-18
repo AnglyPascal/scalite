@@ -4,8 +4,8 @@ import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.Data
 import com.anglypascal.scalite.plugins.Plugin
-import com.anglypascal.scalite.utils.getFileName
-import com.anglypascal.scalite.utils.getListOfFiles
+import com.anglypascal.scalite.utils.DirectoryReader.getFileName
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger

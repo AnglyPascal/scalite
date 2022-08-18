@@ -2,9 +2,8 @@
 
 ## Context Handler
 
-- Go around checking the model. Adding logs while you're at it. Attention:
-    - Effects of the immutable Data
-    - Before everything, make sure that the abstraction with collection works
+- Relative and Absolute path. 
+    My idea is to use two paths in the constructor, parentDir, relativePath
 
 - Write the string handlers:
     - How are we using `slugify()` and `titlifiy()`?

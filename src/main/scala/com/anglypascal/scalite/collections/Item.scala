@@ -7,13 +7,17 @@ import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
 
-abstract class Item(filepath: String, globals: DObj) extends Reader(filepath):
+abstract class Item(
+    val parentDir: String,
+    val relativePath: String,
+    globals: DObj
+) extends Reader(parentDir + relativePath):
   /** */
   def locals: DObj
   def render: String
 
-class GenericItem(filepath: String, globals: DObj)
-    extends Item(filepath, globals):
+class GenericItem(parentDir: String, relativePath: String, globals: DObj)
+    extends Item(parentDir, relativePath, globals):
 
   /** */
   val title: String =

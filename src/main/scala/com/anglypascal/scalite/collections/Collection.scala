@@ -27,7 +27,7 @@ trait Collection[A <: Item] extends Plugin with Page:
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
-  def items_=(its: Map[String, A]) = _items = its
+  protected def items_=(its: Map[String, A]) = _items = its
   private var _items: Map[String, A] = _
 
   /** This sorts out the items, renders them, and writes them to the disk
@@ -36,10 +36,22 @@ trait Collection[A <: Item] extends Plugin with Page:
     */
   def process: Unit = ???
 
+  /** Collect all the elements of this collection from the given directory, will
+    * the given global configs.
+    *
+    * @param directory
+    *   where files containting items of this collection will be
+    * @param globals
+    *   global configs
+    */
   def apply(directory: String, globals: DObj): Unit
 
   protected val parent_name: String = name
 
+  /** Collect all the elements of this collection from the given directory, will
+    * the given global configs, set the sortBy and toc variables, and receive
+    * local variables for the rendering of this collection page.
+    */
   def apply(
       directory: String,
       _locals: DObj,
@@ -53,23 +65,19 @@ trait Collection[A <: Item] extends Plugin with Page:
     globals = _globals
     apply(directory, _globals)
 
-  def sortBy = _sortBy
-  def sortBy_=(key: String) = _sortBy = key
-  private var _sortBy = "title"
+  /** Sort the items of this collection by this key */
+  protected var sortBy = "title"
 
-  def toc = _toc
-  def toc_=(t: Boolean) = _toc = t
-  private var _toc = false
+  /** Should this collection have a separate page? */
+  protected var toc = false
 
   /** Collection metadata other than sortBy, toc, folder, directory, output. */
-  def locals = _locals
-  def locals_=(loc: DObj) = _locals = loc
-  private var _locals: DObj = _
+  protected var locals: DObj = _
 
-  def globals = _globals
-  def globals_=(glob: DObj) = _globals = glob
-  private var _globals: DObj = _
+  /** Store a reference to the global configs */
+  protected var globals: DObj = _
 
+  /** Compare two given items by the given key */
   private def compareBy(fst: A, snd: A, key: String): Int =
     val g1 = fst.locals.get(key)
     val g2 = snd.locals.get(key)

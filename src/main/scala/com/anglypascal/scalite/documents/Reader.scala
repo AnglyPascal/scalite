@@ -1,7 +1,7 @@
 package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.utils.DateParser.dateToString
-import com.anglypascal.scalite.utils.readFile
+import com.anglypascal.scalite.utils.DirectoryReader.readFile
 import com.anglypascal.scalite.utils.yamlParser
 import com.rallyhealth.weejson.v1.Obj
 
