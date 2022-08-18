@@ -12,18 +12,52 @@ import com.typesafe.scalalogging.Logger
 import scala.Conversion
 
 /** Immutable wrapper around WeeJson Value AST */
-sealed trait Data
+sealed trait Data:
+
+  /** If this is a DStr, return the string */
+  final def getStr: Option[String] =
+    this match
+      case data: DStr => Some(data.str)
+      case _          => None
+
+  /** If this is a DNum, return the number */
+  final def getNum: Option[BigDecimal] =
+    this match
+      case data: DNum => Some(data.num)
+      case _          => None
+
+  /** If this is a DBool, return the boolean */
+  final def getBool: Option[Boolean] =
+    this match
+      case data: DBool => Some(data.bool)
+      case _           => None
+
+  /** If this is a DArr, return the list */
+  final def getArr: Option[List[Data]] =
+    this match
+      case data: DArr => Some(data._arr)
+      case _          => None
+
+  /** If this is a DObj, return the map */
+  final def getObj: Option[Map[String, Data]] =
+    this match
+      case data: DObj => Some(data._obj)
+      case _          => None
 
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
-final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
+final class DObj(private[data] val _obj: Map[String, Data])
+    extends Data
+    with Iterable[(String, Data)]:
 
   /** Get an iterable for the list of keys in the map */
   def keys = _obj.keys
 
   /** Remove the keys from the map returning the new map */
-  def remove(keys: List[String]): DObj = DObj(_obj -- keys)
+  def removeAll(keys: List[String]): DObj = DObj(_obj -- keys)
+
+  def removed(key: String): DObj = DObj(_obj.removed(key))
 
   /** Returns a new DObj with the given mutable Map */
   def obj_=(o: Map[String, Data]) = DObj(o)
@@ -43,8 +77,47 @@ final class DObj(private[data] val _obj: Map[String, Data]) extends Data:
   /** Return a new DObj object with the given pair added */
   def add(pair: (String, Data)): DObj = DObj(_obj + pair)
 
+  def iterator = _obj.iterator
+
   /** Apply the given function to the underlying map */
   def map[A, B >: Data](f: ((String, B)) => A): Iterable[A] = _obj.map(f)
+
+  /** Returns the string stored against the key, returning the default if fails
+    */
+  def getOrElse(key: String)(default: String): String =
+    get(key).flatMap(_.getStr) match
+      case Some(s) => s
+      case _       => default
+
+  /** Returns the boolean stored against the key, returning the default if fails
+    */
+  def getOrElse(key: String)(default: Boolean): Boolean =
+    get(key).flatMap(_.getBool) match
+      case Some(s) => s
+      case _       => default
+
+  /** Returns the number stored against the key, returning the default if fails
+    */
+  def getOrElse(key: String)(default: BigDecimal): BigDecimal =
+    get(key).flatMap(_.getNum) match
+      case Some(s) => s
+      case _       => default
+
+  /** Returns the list stored against the key, returning the default if fails
+    */
+  def getOrElse(key: String)(default: List[Data]): List[Data] =
+    get(key).flatMap(_.getArr) match
+      case Some(s) => s
+      case _       => default
+
+  /** Returns the map stored against the key, returning the default if fails
+    */
+  def getOrElse(key: String)(
+      default: Map[String, Data]
+  ): Map[String, Data] =
+    get(key).flatMap(_.getObj) match
+      case Some(s) => s
+      case _       => default
 
   override def toString(): String = _obj.toString
 
@@ -64,19 +137,20 @@ object DObj:
     )
 
 /** Immutable wrapper around Arr */
-final class DArr(private[data] val _arr: List[Data]) extends Data:
+final class DArr(private[data] val _arr: List[Data])
+    extends Data
+    with Iterable[Data]:
 
   /** Return a new DArr with the new List[Data] */
   def arr_=(a: List[Data]) = DArr(a)
 
-  /** Return the ind entry of the List[Data], inefficient TODO */
+  /** Return the index entry of the List[Data], inefficient TODO */
   def apply(ind: Int): Data = _arr(ind)
 
   /** Add a data entry to the front of the list, returning a new DArr */
   def add(entry: Data): DArr = DArr(entry :: _arr)
 
-  def head: Data = _arr.head
-  def tail: DArr = DArr(_arr.tail)
+  def iterator = _arr.iterator
 
   def map[A, B >: Data](f: B => A): List[A] = _arr.map(f)
 

@@ -57,13 +57,16 @@ trait Collection[A <: Item] extends Plugin with Page:
       _locals: DObj,
       _globals: DObj,
       _sortBy: String = "title",
-      _toc: Boolean = false
+      _toc: Boolean = false,
+      _permalink: String = "/{{item}}"
   ): Unit =
     sortBy = _sortBy
     toc = _toc
     locals = _locals
     globals = _globals
     apply(directory, _globals)
+
+  protected var permalink = "/{{item}}"
 
   /** Sort the items of this collection by this key */
   protected var sortBy = "title"

@@ -46,7 +46,7 @@ object Cleaner:
 
   /** Clean the destination site according to the global configuration */
   def apply(globals: DObj): Unit =
-    import com.anglypascal.scalite.data.DataExtensions.{getOrElse, getStr}
+    import com.anglypascal.scalite.data.DataExtensions.getOrElse
 
     var cleanSite = // FIXME default would not be the absolute path though
       globals.getOrElse("base")(".") +
@@ -63,7 +63,7 @@ object Cleaner:
 
     clean(cleanSite, excludes)
 
-@main
+// @main
 def cleanerTest =
   val dobj = Obj(
     "base" -> "/home/ahsan/haha",

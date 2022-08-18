@@ -2,6 +2,9 @@
 
 ## Context Handler
 
+- __FATAL__ Type checks like `Some(s): Some[Str]` doesn't work properly. Need to change
+    of of these
+
 - Relative and Absolute path. 
     My idea is to use two paths in the constructor, parentDir, relativePath
 
