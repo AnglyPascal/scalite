@@ -24,29 +24,10 @@ import com.typesafe.scalalogging.Logger
 
 /** Reads the content of a post file and prepares a Post object.
   *
-  * In the front matter, the following entries are standard:
-  *   - '''title''': Name of the post. If unspecified, the title will be fetched
-  *     from the post filename
-  *   - '''date''': Date to be shown on the rendered post. If unspecified, the
-  *     date will be fetched from the post filename.
-  *   - '''date_format''': The date format specific to this post. If
-  *     unspecified, the globally specified format will be used. If that's not
-  *     specified either, the format US standard format, June 26, 2022, will be
-  *     used.
-  *   - '''visible''': Boolean value indicating whether this post should be
-  *     converted to a file. If unspecified, the global default, false will be
-  *     used, which can be modified globally through "_config.yml"
-  *   - '''permalink''': A mustache template inside quotations specifying the
-  *     url template for this post. For details about the format, TODO
-  *   - '''tags''': A space or comma separated string of tags, or a list of
-  *     tags.
-  *   - '''categories''': A comma separated string of categories, or a list of
-  *     them.
-  *   - any other tag will be passed in to the renderer directly unless support
-  *     through the plugin is added TODO
-  *
-  * @param filepath
-  *   absolute path to the post file
+  * @param parentDir
+  *   absolute path to the root folder containing posts
+  * @param relativePath
+  *   path to the post file relative to the parentDir
   * @param globals
   *   a weejson object passed through the "_config.yml" file
   */
@@ -60,7 +41,7 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
     */
-  val parent_name =
+  protected val parentName =
     front_matter.obj.remove("layout") match
       case Some(s) =>
         s match
@@ -73,11 +54,8 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
             "post"
       case None => "post"
 
-  /** Search for the parent layout in Layout.layouts
-    *
-    * TODO: Make this one abstract as well, also change it to the generic Layout
-    */
-  _parent = Layouts.layouts.get(parent_name)
+  /** Search for the parent layout in Layout.layouts */
+  _parent = Layouts.layouts.get(parentName)
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
@@ -94,7 +72,7 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
     * time-zone. Nothing is necessary, but if date is being given, it has to be
     * given in full, if time is given, it has to be given in full.
     */
-  lazy val date = urlObj.getOrElse("date_string")("undated")
+  lazy val date = urlObj.getOrElse("dateString")("undated")
 
   /** TODO: Will later add support for getting the modified time values in the
     * case when the date/time is not specified in either the title name or the
@@ -105,29 +83,43 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
   private lazy val urlObj: DObj =
     val dateString = front_matter.extractOrElse("date")(filepath)
     val dateFormat =
-      front_matter.extractOrElse("date_format")(
-        globals.getOrElse("date_format")("yyyy-MM-dd")
+      front_matter.extractOrElse("dateFormat")(
+        globals.getOrElse("dateFormat")("yyyy-MM-dd")
       )
     val obj = dateParseObj(dateString, dateFormat)
     obj("title") = title
     obj("modified_time") = lastModifiedTime(dateFormat)
+    obj("outputExt") = outputExt
     DObj(obj)
 
   /** Template for the permalink of the post */
-  private lazy val permalink =
+  private lazy val permalinkTemplate =
     front_matter.extractOrElse("permalink")(
-      globals.getOrElse("default_url_template")(filepath)
+      globals.getOrElse("default_url_template")(filepath) // FIXME
     )
 
-  lazy val url = URL(permalink)(urlObj)
+  lazy val _permalink = URL(permalinkTemplate)(urlObj)
+  def permalink = _permalink
+
+  /** Returns whether to render this post or not. Default is false. */
+  val visible: Boolean =
+    front_matter.extractOrElse("visible")(
+      globals.getOrElse("postsVisibility")(false)
+    )
+
+  private lazy val _outputExt: String =
+    front_matter.extractOrElse("outputExt")(
+      Converters.findByExt(filepath).map(_.outputExt).getOrElse(".html")
+    )
+  def outputExt = _outputExt
 
   lazy val locals =
     front_matter.obj ++= List(
       "title" -> title,
       "date" -> date,
-      "url" -> url
+      "url" -> permalink
     )
-    front_matter.obj.get("show_excerpt") match
+    front_matter.obj.get("showExcerpt") match
       case Some(some) =>
         some match
           case some: Bool =>
@@ -137,16 +129,10 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
 
     DObj(front_matter)
 
-  /** Returns whether to render this post or not. Default is false. */
-  val visible: Boolean =
-    front_matter.extractOrElse("visible")(
-      globals.getOrElse("posts_visibility")(false)
-    )
-
   /** Get the posts from the front\_matter and get their permalinks
     * @example
     *   {{{
-    * post_urls:
+    * postUrls:
     *   post1: 2022-04-01-post-name
     *   post2: 2013-02-23-another-post-name
     *   }}}
@@ -158,10 +144,10 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
         case str: Str =>
           Posts.items.get(str.str) match
             case Some(post) =>
-              List(p._1 -> post.url)
+              List(p._1 -> post.permalink)
             case None => List()
         case _ => List()
-    front_matter.obj.remove("post_urls") match
+    front_matter.obj.remove("postUrls") match
       case None => Map()
       case Some(v) =>
         v match
@@ -181,7 +167,7 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
       case Some(l) => l.render(context, str)
       case None    => str
 
-  /** TODO: if show_excerpt is true, then create an excerpt object here? And add
+  /** TODO: if showExcerpt is true, then create an excerpt object here? And add
     * the excerpt to the obj.
     *
     * For now, leave it simple like this
@@ -209,7 +195,3 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
     */
   def processGroups(): Unit =
     for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
-
-  def write(filepath: String): Unit =
-    if !visible then return
-    Files.write(Paths.get(filepath), render.getBytes(StandardCharsets.UTF_8))

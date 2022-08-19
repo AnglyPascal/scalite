@@ -34,7 +34,7 @@ object Converters:
     *   Some(c) if c accepts filetypes matching ext None if no such converter is
     *   available
     */
-  private def findByExt(ext: String): Option[Converter] =
+  def findByExt(ext: String): Option[Converter] =
     _converters.filter(_._2.matches(ext)).headOption.map(_._2)
 
   /** Checks if there is a converter avaiable for thei given filepath

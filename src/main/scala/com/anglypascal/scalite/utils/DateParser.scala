@@ -6,6 +6,8 @@ import com.typesafe.scalalogging.Logger
 
 /** TODO: This should be stored in the page actually, not just in post. How do
   * we refactor the code to allow this?
+  *
+  * TODO: Date paritals need to have that > tag
   */
 object DateParser:
   import com.anglypascal.scalite.data.DataExtensions.*

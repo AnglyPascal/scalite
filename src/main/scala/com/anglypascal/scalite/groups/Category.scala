@@ -33,7 +33,9 @@ object Category extends Group("category"):
     */
   class Category(name: String, globals: DObj) extends GroupType(name, globals):
     /** */
-    def write(filepath: String): Unit = ???
+    lazy val permalink: String = ???
+
+    def outputExt = ".html"
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()

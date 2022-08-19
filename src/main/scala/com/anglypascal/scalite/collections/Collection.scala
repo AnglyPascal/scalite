@@ -11,6 +11,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.URL
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -25,7 +26,7 @@ trait Collection[A <: Item] extends Plugin with Page:
   /** Name of the collection */
   val name: String
 
-  protected val parent_name = name
+  protected val parentName = name
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
@@ -37,6 +38,10 @@ trait Collection[A <: Item] extends Plugin with Page:
     * TODO This will write to the disk, but to where?
     */
   def process: Unit = ???
+    /** sorteditems
+     *  sorteditems.map(_.write())
+     *  write()
+     */
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
@@ -60,10 +65,10 @@ trait Collection[A <: Item] extends Plugin with Page:
       _toc: Boolean = false,
       _permalink: String = ""
   ): Unit =
-    toc = _toc
+    if _toc then _visible = true
     sortBy = _sortBy
     globals = _globals
-    permalink = _permalink
+    permalinkTemplate = _permalink
 
     // TODO: what else needs to be added to the collection?
     locals = _locals.add("name" -> DStr(name))
@@ -73,16 +78,20 @@ trait Collection[A <: Item] extends Plugin with Page:
   /** Template for the permalink. This will be prepended to the template of the
     * items. TODO
     */
-  protected var permalink: String = _
+  lazy val permalink: String = URL(permalinkTemplate)(locals)
+  private var permalinkTemplate: String = _
 
   /** Sort the items of this collection by this key */
   protected var sortBy: String = _
 
   /** Should this collection have a separate page? */
-  protected var toc: Boolean = _
+  protected var _visible: Boolean = false
+  def visible = _visible
 
   /** Collection metadata other than sortBy, toc, folder, directory, output. */
   protected var locals: DObj = _
+
+  def outputExt = ".html"
 
   /** Store a reference to the global configs */
   protected var globals: DObj = _
@@ -119,7 +128,6 @@ trait Collection[A <: Item] extends Plugin with Page:
     compareBy(fst, snd, "title") < 0
 
   def render: String =
-    if !toc then return ""
     val sortedItems = items.map(_._2).toList.sortWith(compare)
     val itemsData = DArr(sortedItems.map(_.locals))
     val context = DObj(
@@ -132,7 +140,3 @@ trait Collection[A <: Item] extends Plugin with Page:
     parent match
       case None    => ""
       case Some(p) => p.render(context)
-
-  def write(filepath: String): Unit =
-    if !toc then return
-    Files.write(Paths.get(filepath), render.getBytes(StandardCharsets.UTF_8))

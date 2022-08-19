@@ -30,6 +30,7 @@
 
 - Front matter documentation, and other documentations. Work on this as you go.
 
+- Check trace of Value extentions to see if the tags used in front matter are consistent
 
 ## A bit later
 

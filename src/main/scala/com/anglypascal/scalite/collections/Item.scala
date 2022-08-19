@@ -1,48 +1,30 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.documents.Layout
 import com.anglypascal.scalite.documents.Reader
-import com.anglypascal.scalite.utils.StringProcessors.titleParser
-import com.rallyhealth.weejson.v1.Obj
 
+/** Abstract class for a generic Item that simply has a source file to read from
+  * and some internal variables defined in locals to process the contents of
+  * that file with method render.
+  *
+  * @constructor
+  *   creates a new Item from the given path to the source file
+  *
+  * @param parentDir
+  *   path to the directory of the Collection this Item is in
+  * @param relativePath
+  *   path to the source file of this Item relative to the parentDir
+  * @param globals
+  *   global variables
+  */
 abstract class Item(
     val parentDir: String,
     val relativePath: String,
-    globals: DObj
+    private val globals: DObj
 ) extends Reader(parentDir + relativePath):
-  /** */
+
+  /** local variales for this item */
   def locals: DObj
+
+  /** Process the contents of this item */
   def render: String
-
-class GenericItem(parentDir: String, relativePath: String, globals: DObj)
-    extends Item(parentDir, relativePath, globals):
-
-  /** */
-  val title: String =
-    import com.anglypascal.scalite.data.DataExtensions.*
-
-    front_matter.extractOrElse("title")(
-      front_matter.getOrElse("name")(
-        titleParser(filepath).getOrElse("untitled" + this.toString)
-      )
-    ) // so that titles are always different for different items
-
-  /** check with jekyll if it needs more basic */
-  def locals =
-    val used = List("title")
-    val obj = Obj()
-    for
-      (s, v) <- front_matter.obj
-      if !used.contains(s)
-    do obj(s) = v
-    obj.obj ++= List("title" -> title)
-    DObj(obj)
-
-  /** TODO: Also provide support for forced conversion. In the globals, a user
-    * should be able to say, convert: true to force this conversion here.
-    */
-  def render: String =
-    if front_matter == Obj() then main_matter
-    else Converters.convert(main_matter, filepath)

@@ -65,3 +65,18 @@ cache the posts even when output is set to false.
 
 The front-matter defaults should be placed inside Globals: defaults. Scope
 option will define the scope of these defaults.
+
+
+#### Post front_matter
+
+In the front matter, the following entries are standard:
+``` yaml
+title: null             # name of the post
+date: null              # date in the format yyyy-MM-dd HH:mm:ss
+visible: false          # should this post be rendered
+tags: null              # space separated list of tags
+categories: null        # comma separated list of categories
+outputExt: ".html"      # extension of the output file
+date_format: yyyy-MM-dd # format in which to rendered the date in the output
+permalink: "/{{>pretty}}" # template for the permalink 
+```

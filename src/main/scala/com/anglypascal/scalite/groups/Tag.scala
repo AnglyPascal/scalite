@@ -36,7 +36,9 @@ object Tag extends Group("tag"):
       "title" -> DStr(name),
     )
 
-    def write(filepath: String): Unit = ???
+    lazy val permalink: String = ???
+
+    def outputExt = ".html"
 
 
 

@@ -39,7 +39,7 @@ trait PostsGroup(
   /** Name of the layout to be used for rendering the page for this PostsGroup.
     * If not specified in the global settings, this defaults back to "ctype"
     */
-  val parent_name = globals.getOrElse(ctype + "Layout")(ctype)
+  val parentName = globals.getOrElse(ctype + "Layout")(ctype)
 
   /** Convert the given post to a weeJson obj that will be used to render this
     * post's representative in the page of this PostsGroup. Is intended for
@@ -61,7 +61,8 @@ trait PostsGroup(
   )
 
   /** Should the tag be rendered in a separate page? */
-  protected val visible: Boolean = true
+  protected var _visible: Boolean = true
+  def visible = _visible
 
   /** Render the page of this PostsGroup.
     *
