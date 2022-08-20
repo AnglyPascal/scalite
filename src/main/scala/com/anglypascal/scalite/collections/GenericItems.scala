@@ -13,8 +13,12 @@ import com.anglypascal.scalite.data.DataExtensions.*
   * Item, and depending on whether it has a front matter or not, converters the
   * contents with a Converter
   */
-class GenericItem(parentDir: String, relativePath: String, globals: DObj)
-    extends Item(parentDir, relativePath, globals):
+class GenericItem(
+    parentDir: String,
+    relativePath: String,
+    globals: DObj,
+    colName: String
+) extends Item(parentDir, relativePath, globals, colName):
 
   /** Title of this item */
   val title: String =
@@ -35,10 +39,16 @@ class GenericItem(parentDir: String, relativePath: String, globals: DObj)
     obj.obj ++= List("title" -> title)
     DObj(obj)
 
+  val visible: Boolean =
+    front_matter.extractOrElse("visible")(
+      globals.getOrElse("postsVisibility")(false)
+      // FIXME this global setting should be set by the collection
+    )
+
   /** If there's some front\_matter, then the main\_matter will be conerted with
     * appropriate converter. Otherwise, the identity will be returned
     */
-  def render: String =
+  protected def render: String =
     if front_matter.obj.isEmpty then main_matter
     else Converters.convert(main_matter, filepath)
 
@@ -48,6 +58,6 @@ class GenericCollection(val name: String) extends Collection[Item]:
   def apply(directory: String, globals: DObj) =
     val files = getListOfFilepaths(directory)
     def f(fn: String) =
-      val item = new GenericItem(directory, fn, globals)
+      val item = new GenericItem(directory, fn, globals, name)
       (item.title, item)
     items = files.map(f).toMap

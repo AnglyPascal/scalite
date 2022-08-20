@@ -51,4 +51,4 @@ trait Page:
     * @returns
     *   The ready to publish content of this page.
     */
-  def render: String
+  protected def render: String

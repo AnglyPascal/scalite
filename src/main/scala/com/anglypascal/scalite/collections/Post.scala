@@ -31,8 +31,12 @@ import com.typesafe.scalalogging.Logger
   * @param globals
   *   a weejson object passed through the "_config.yml" file
   */
-class Post(parentDir: String, relativePath: String, globals: DObj)
-    extends Item(parentDir, relativePath, globals)
+class Post(
+    parentDir: String,
+    relativePath: String,
+    globals: DObj,
+    colName: String
+) extends Item(parentDir, relativePath, globals, colName)
     with ReaderOps
     with Page:
 
@@ -90,6 +94,8 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
     obj("title") = title
     obj("modified_time") = lastModifiedTime(dateFormat)
     obj("outputExt") = outputExt
+    obj("collection") = colName
+    // TODO slugs
     DObj(obj)
 
   /** Template for the permalink of the post */
@@ -105,6 +111,7 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
   val visible: Boolean =
     front_matter.extractOrElse("visible")(
       globals.getOrElse("postsVisibility")(false)
+      // FIXME this global setting should be set by the collection
     )
 
   private lazy val _outputExt: String =
@@ -156,7 +163,7 @@ class Post(parentDir: String, relativePath: String, globals: DObj)
 
   /** Convert the contents of the post to HTML, throwing an exception on failure
     */
-  def render: String =
+  protected def render: String =
     /** call to postUrls */
     val str = Converters.convert(main_matter, filepath)
     val context = DObj(

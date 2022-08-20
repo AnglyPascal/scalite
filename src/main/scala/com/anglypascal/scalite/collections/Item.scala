@@ -17,14 +17,17 @@ import com.anglypascal.scalite.documents.Reader
   * @param globals
   *   global variables
   */
-abstract class Item(
+abstract class Item (
     val parentDir: String,
     val relativePath: String,
-    private val globals: DObj
+    private val globals: DObj,
+    val colName: String
 ) extends Reader(parentDir + relativePath):
 
   /** local variales for this item */
   def locals: DObj
 
   /** Process the contents of this item */
-  def render: String
+  protected def render: String
+
+  def visible: Boolean

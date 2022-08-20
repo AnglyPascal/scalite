@@ -20,6 +20,11 @@ import com.anglypascal.scalite.URL
   *
   * A collection of posts will be in a separate folder in the home directory,
   * and will be handled separately.
+  *
+  * @tparam A
+  *   subclass of [[com.anglypascal.scalite.collections.Item]]
+  *
+  * TODO: Items should receive a reference to the collection it's part of
   */
 trait Collection[A <: Item] extends Plugin with Page:
 
@@ -32,16 +37,6 @@ trait Collection[A <: Item] extends Plugin with Page:
   def items = _items
   protected def items_=(its: Map[String, A]) = _items = its
   private var _items: Map[String, A] = _
-
-  /** This sorts out the items, renders them, and writes them to the disk
-    *
-    * TODO This will write to the disk, but to where?
-    */
-  def process: Unit = ???
-    /** sorteditems
-     *  sorteditems.map(_.write())
-     *  write()
-     */
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
@@ -78,8 +73,8 @@ trait Collection[A <: Item] extends Plugin with Page:
   /** Template for the permalink. This will be prepended to the template of the
     * items. TODO
     */
-  lazy val permalink: String = URL(permalinkTemplate)(locals)
   private var permalinkTemplate: String = _
+  lazy val permalink: String = URL(permalinkTemplate)(locals)
 
   /** Sort the items of this collection by this key */
   protected var sortBy: String = _
@@ -127,8 +122,8 @@ trait Collection[A <: Item] extends Plugin with Page:
     if c != 0 then return c < 0
     compareBy(fst, snd, "title") < 0
 
-  def render: String =
-    val sortedItems = items.map(_._2).toList.sortWith(compare)
+  protected def render: String =
+    val sortedItems = items.map(_._2).filter(_.visible).toList.sortWith(compare)
     val itemsData = DArr(sortedItems.map(_.locals))
     val context = DObj(
       "site" -> globals,
@@ -140,3 +135,9 @@ trait Collection[A <: Item] extends Plugin with Page:
     parent match
       case None    => ""
       case Some(p) => p.render(context)
+
+  /** This sorts out the items, renders them, and writes them to the disk
+    */
+  private[collections] def process(): Unit =
+    for (_, item) <- items do item.write()
+    write()

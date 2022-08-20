@@ -80,3 +80,24 @@ outputExt: ".html"      # extension of the output file
 date_format: yyyy-MM-dd # format in which to rendered the date in the output
 permalink: "/{{>pretty}}" # template for the permalink 
 ```
+
+
+## Permalink
+
+A permalink template is a mustache template. To set a new permalink in the the configs,
+remember to use quotations so that yaml recognizes the `{{}}` as strings. The following
+tags are allowed in permalink templates:
+
+Variable     | Description
+------------ | ------------
+`year`         | Year from posts filename or front mater date
+`collection`   | The collection this post belongs to
+`categories`   | The specified categories for this post. If a post has multiple categories, Jekyll will create a hierarchy (e.g. /category1/category2). Also Jekyll automatically parses out double slashes in the URLs, so if no categories are present, it will ignore this.
+`tags`         | The tags this post has, separated by '-'
+`title`        | Title of this post, not slugified
+`slug`         | slugified, all lower case, escapes all non alphabetical characters
+`prettySlug`   | slugified, doesn't escape a few standard non alphabetical chars
+`casedSlug`    | slugified, case sensitive, escapes alphabetical chars
+`asciiSlug`    | slugified, url encoded
+`outputExt`    | extension of this file
+`modifiedTime` | last modified time of this post/page

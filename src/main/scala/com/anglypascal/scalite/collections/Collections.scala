@@ -111,3 +111,7 @@ object Collections:
       if !collections.contains("posts") then collections("posts") = Posts
       logger.debug("posts are being renderd by default")
       collections("posts")(colsDir + "/_posts", globals)
+
+  /** Process all the collections */
+  def process: Unit = 
+    for (_, col) <- collections do col.process()

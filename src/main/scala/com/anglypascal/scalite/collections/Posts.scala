@@ -20,7 +20,7 @@ object Posts extends Collection[Post]:
   def apply(directory: String, globals: DObj) =
     val files = getListOfFilepaths(directory)
     def f(fn: String) =
-      val post = new Post(directory, fn, globals)
+      val post = new Post(directory, fn, globals, name)
       post.processGroups()
       (getFileName(fn), post)
     items = files.filter(Converters.hasConverter).map(f).toMap
