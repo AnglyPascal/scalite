@@ -22,7 +22,7 @@ trait Converter extends Plugin:
     */
   def setExt(exts: String): Unit =
     val s = exts.split(",").map(_.trim).mkString("|")
-    _ext = (raw".*\.(" + s + ")").r
+    _ext = (".*\\.(" + s + ")").r
 
   /** Does this converter accepts the file? */
   def matches(filepath: String): Boolean =

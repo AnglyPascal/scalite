@@ -17,14 +17,12 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.reflect.ClassTag
 
-/** Object that is called with the plugins directory and the plugins data from
-  * config.yml to add all the available plugins to runtime
-  */
+/** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager:
 
   private val logger = Logger("Plugin Manager")
 
-  /** Rerturns the URLClassLoader from the jar file from jarPath */
+  /** Rerturns the URLClassLoader from jarPath */
   private def loadJar(jarPath: String): Option[URLClassLoader] =
     try
       Some(
@@ -41,7 +39,7 @@ object PluginManager:
         logger.error(s"Loading $jarPath threw " + e.toString)
         None
 
-  /** Returns the object from the classLoader if it exists */
+  /** Returns the object objName from the classLoader if it exists */
   private def getObject[T <: Plugin](
       objName: String
   )(classLoader: URLClassLoader)(using man: ClassTag[T]): Option[T] =
@@ -52,9 +50,7 @@ object PluginManager:
           .getField("MODULE$")
           .get(man.runtimeClass)
       Some(obj.asInstanceOf[T])
-
-      /** TODO Check if there are any specifc exceptions being thorwn
-        */
+      // TODO Check if there are any specifc exceptions being thorwn
     catch
       case e =>
         logger.trace(s"$objName wasn't in classLoader ${classLoader.toString}")
@@ -107,7 +103,7 @@ object PluginManager:
 
   private def loadCollections(names: List[DStr | DObj]) =
     findObjects[Collection[?]](names).map(C =>
-      Collections.addToCollection(C.asInstanceOf[Collection[?]])
+      Collections.addCollection(C.asInstanceOf[Collection[?]])
     )
 
   private def loadLayouts(names: List[DStr | DObj]) =

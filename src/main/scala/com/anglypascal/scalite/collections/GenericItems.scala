@@ -1,13 +1,12 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
-import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Layout
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
-import com.anglypascal.scalite.data.DataExtensions.*
 
 /** A generic implementation of the Item class. Defines title or name of the
   * Item, and depending on whether it has a front matter or not, converters the
@@ -21,7 +20,7 @@ class GenericItem(
   /** Title of this item */
   val title: String =
     front_matter.extractOrElse("title")(
-      front_matter.getOrElse("name")(
+      front_matter.extractOrElse("name")(
         titleParser(filepath).getOrElse("untitled" + this.toString)
       )
     ) // so that titles are always different for different items
@@ -37,17 +36,14 @@ class GenericItem(
     obj.obj ++= List("title" -> title)
     DObj(obj)
 
-  val visible: Boolean =
-    front_matter.extractOrElse("visible")(
-      globals.getOrElse("postsVisibility")(false)
-      // FIXME this global setting should be set by the collection
-    )
+  val visible: Boolean = front_matter.extractOrElse("visible")(false)
 
   /** If there's some front\_matter, then the main\_matter will be conerted with
     * appropriate converter. Otherwise, the identity will be returned
     */
   protected def render: String =
-    if front_matter.obj.isEmpty then main_matter
+    // TODO what if frontmatter is deleted by the process
+    if front_matter.obj.isEmpty then main_matter 
     else Converters.convert(main_matter, filepath)
 
 object GenericItem extends ItemConstructor[GenericItem]:

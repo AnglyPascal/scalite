@@ -8,7 +8,7 @@ import laika.markdown.github
 import laika.parse.code
 
 object Markdown extends Converter:
-  val fileType: String = "markdown"
+  val fileType = "markdown"
 
   setExt("md,markdown,mkd")
 

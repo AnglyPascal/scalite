@@ -1,15 +1,15 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DBool
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
+import com.rallyhealth.weejson.v1.Bool
+import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.Defaults
-import com.rallyhealth.weejson.v1.Obj
-import com.rallyhealth.weejson.v1.Bool
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -22,7 +22,7 @@ object Collections:
     */
   private val collections = LinkedHashMap[String, Collection[?]]()
 
-  def addToCollection(col: Collection[?]): Unit =
+  def addCollection(col: Collection[?]): Unit =
     collections += (col.name -> col)
 
   private val logger = Logger("Collection object")
@@ -60,7 +60,7 @@ object Collections:
           logger.debug(s"rendering the collection $key")
           val dir = colsDir + s"/_$key"
           Col.setup(dir, globals)
-          addToCollection(Col)
+          addCollection(Col)
 
         // collections:
         //     drafts: false
@@ -71,8 +71,9 @@ object Collections:
         // full configuration
         case cobj: Obj =>
           val output =
-            if key != "posts" then cobj.extractOrElse("output")(false)
-            else if key == "posts" then
+            if key != "posts" && key != "statics" then
+              cobj.extractOrElse("output")(false)
+            else if key == "posts" || key == "statics" then
               logger.debug("posts are rendered by default")
               cobj.extractOrElse("output")(true)
             else
@@ -107,7 +108,7 @@ object Collections:
 
             Col.setup(dir, _globals, sortBy, toc, permalinkTemplate, DObj(cobj))
             // add this collection to the collections map
-            addToCollection(Col)
+            addCollection(Col)
 
         // wasn't mentioned in the configuration
         case _ =>

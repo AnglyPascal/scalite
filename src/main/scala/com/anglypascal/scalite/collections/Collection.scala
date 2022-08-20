@@ -1,22 +1,22 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.URL
+import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DNum
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.documents.Layouts
 import com.anglypascal.scalite.documents.Page
-
-import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
-import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import com.anglypascal.scalite.plugins.Plugin
-import com.anglypascal.scalite.URL
-import com.anglypascal.scalite.Defaults
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -81,14 +81,10 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
 
   /** Template for the permalink. This will override the permalink template for
     * the entire collection.
-    *
-    * TODO: Heres a problem. How do we pass the configs made in the collection
-    * to the items? Idea is that there should be a section in the `\_globals`
-    * passed to the files named "collection" that defines these
     */
   private var permalinkTemplate: String = Defaults.permalinkTemplate
   private lazy val _permalink: String = URL(permalinkTemplate)(locals)
-  def permalink = _permalink
+  def permalink = purifyUrl(_permalink)
 
   /** Sort the items of this collection by this key */
   protected var sortBy: String = Defaults.Collection.sortBy

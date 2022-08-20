@@ -120,3 +120,6 @@ object StringProcessors:
     slugifyModes.map(m => m -> slugify(s, m)).map(println(_))
     slugifyModes.map(slugify(s, _, true)).map(println(_))
 
+
+  // removes double backslashes and some encoding issues from urls
+  def purifyUrl(str: String): String = ???

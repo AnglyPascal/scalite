@@ -1,5 +1,6 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
@@ -8,20 +9,20 @@ import com.anglypascal.scalite.data.*
 import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.groups.Group
 import com.anglypascal.scalite.groups.PostsGroup
-import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.DateParser.*
+import com.anglypascal.scalite.utils.StringProcessors.*
+import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
+import com.typesafe.scalalogging.Logger
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.LinkedHashMap
-import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.Defaults
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -37,7 +38,7 @@ class Post(
     relativePath: String,
     globals: DObj
 ) extends Item(parentDir, relativePath, globals)
-    with ReaderOps
+    // with ReaderOps
     with Page:
 
   private val logger = Logger("Post")
@@ -92,10 +93,11 @@ class Post(
       )
     val obj = dateParseObj(dateString, dateFormat)
     obj("title") = title
-    obj("modified_time") = lastModifiedTime(dateFormat)
+    obj("modifiedTime") = lastModifiedTime(filepath, dateFormat)
     obj("outputExt") = outputExt
     obj("collection") =
       globals.getOrElse("collection")(DObj()).getOrElse("name")("posts")
+    obj("filename") = getFileName(filepath)
     // TODO slugs
     DObj(obj)
 
@@ -110,9 +112,8 @@ class Post(
           )
         )
     )
-
-  lazy val _permalink = URL(permalinkTemplate)(urlObj)
-  def permalink = _permalink
+  private lazy val _permalink = URL(permalinkTemplate)(urlObj)
+  def permalink = purifyUrl(_permalink)
 
   /** Returns whether to render this post or not. Default is true. Putting
     * output: false inside collection.post complete turns off rendering of
@@ -177,7 +178,7 @@ class Post(
     val str = Converters.convert(main_matter, filepath)
     val context = DObj(
       postUrls.map(p => (p._1, DStr(p._2))) ++
-        Map("site" -> globals, "post" -> locals)
+        Map("site" -> globals, "page" -> locals)
     )
     parent match
       case Some(l) => l.render(context, str)

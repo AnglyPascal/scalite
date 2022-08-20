@@ -1,9 +1,5 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.plugins.Plugin
-import com.anglypascal.scalite.data.Data
-
 /** Companion object that creates the Posts collection. */
 object Posts extends Collection[Post](Post):
 
@@ -12,5 +8,3 @@ object Posts extends Collection[Post](Post):
 
   // Default value of sortBy. Updated by the configuration
   sortBy = "date"
-
-  /** Find all the files from the directory and create Post objects */

@@ -18,6 +18,10 @@ import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
+import com.anglypascal.scalite.assets.Assets
+import com.anglypascal.scalite.converters.Identity
+import com.anglypascal.scalite.collections.StaticPages
+import com.anglypascal.scalite.collections.Drafts
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -126,8 +130,12 @@ object Globals:
   private def loadPlugins(): Unit =
     // default plugins
     Converters.addConverter(Markdown)
-    Collections.addToCollection(Posts)
+    Converters.addConverter(Identity)
+    Collections.addCollection(Posts)
+    Collections.addCollection(Drafts)
+    Collections.addCollection(StaticPages)
     Layouts.addEngine(MustacheLayout)
+
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
     PluginManager(dirs("pluginsDir").str, DObj(plugMap))
@@ -149,6 +157,7 @@ object Globals:
     processCollections()
     processGroups()
     processAssets()
+    glbsObj("assets") = Assets("???")
 
     for (key, value) <- configs.obj do glbsObj(key) = value
 

@@ -3,6 +3,7 @@ package com.anglypascal.scalite.utils
 import com.github.nscala_time.time.Imports.*
 import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
+// import org.joda.time.DateTime
 
 /** TODO: This should be stored in the page actually, not just in post. How do
   * we refactor the code to allow this?
@@ -77,3 +78,13 @@ object DateParser:
       case e =>
         Logger("dateToString").error("didn't receive a valid format string")
         ""
+
+  def lastModifiedTime(filepath: String, dateFormat: String): String =
+    import java.nio.file.Files
+    import java.nio.file.Paths
+
+    val path = Paths.get(filepath)
+    val modTime =
+      Files.getLastModifiedTime(path).toInstant().getEpochSecond()
+    val date = new DateTime(modTime)
+    dateToString(date, dateFormat)
