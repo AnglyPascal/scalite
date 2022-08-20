@@ -9,6 +9,11 @@ package com.anglypascal.scalite
   * Collection. It has an internal state defined in a DObj `locals` and a render
   * method thar returns the processed contents of this Item.
   *
+  * [[com.anglypascal.scalite.collections.ItemConstructor]] defines a single
+  * apply function that creates a new Item. This is expected to be extended by
+  * the companion objects of an Item, so that those objects could be passed in
+  * to the constructor of Collection to define its setup methods.
+  *
   * [[com.anglypascal.scalite.collections.Post]] is a predefined Item. It
   * represents a blog post that has a source file in some markup language and
   * whose contents will be rendered with a template Layout.

@@ -16,10 +16,8 @@ import com.anglypascal.scalite.data.DataExtensions.*
 class GenericItem(
     parentDir: String,
     relativePath: String,
-    globals: DObj,
-    colName: String
-) extends Item(parentDir, relativePath, globals, colName):
-
+    globals: DObj
+) extends Item(parentDir, relativePath, globals):
   /** Title of this item */
   val title: String =
     front_matter.extractOrElse("title")(
@@ -52,12 +50,14 @@ class GenericItem(
     if front_matter.obj.isEmpty then main_matter
     else Converters.convert(main_matter, filepath)
 
-/** Defines the collection of generic item */
-class GenericCollection(val name: String) extends Collection[Item]:
+object GenericItem extends ItemConstructor[GenericItem]:
+  def apply(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj
+  ): GenericItem =
+    new GenericItem(parentDir, relativePath, globals)
 
-  def apply(directory: String, globals: DObj) =
-    val files = getListOfFilepaths(directory)
-    def f(fn: String) =
-      val item = new GenericItem(directory, fn, globals, name)
-      (item.title, item)
-    items = files.map(f).toMap
+/** Defines the collection of generic item */
+class GenericCollection(val name: String)
+    extends Collection[GenericItem](GenericItem)

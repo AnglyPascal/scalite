@@ -21,20 +21,25 @@ import scala.collection.mutable.{Map => MMap}
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
+  *
+  * TODO I really should define all these defaults in a separate immutable
+  * object, so that I can call those for the getOrElse
   */
 object Globals:
 
   /** Where stuff are */
-  private lazy val dirs = Obj(
-    "base" -> ".",
-    "collectionsDir" -> "",
-    "destination" -> "/_site",
-    "layoutsDir" -> "/_layouts",
-    "includesDir" -> "/_includes",
-    "sassDir" -> "/_sass",
-    "dataDir" -> "/_data",
-    "pluginsDir" -> "/_plugins"
-  )
+  private lazy val dirs =
+    import Defaults.Directories.*
+    Obj(
+      "base" -> base,
+      "collectionsDir" -> collectionsDir,
+      "destination" -> destination,
+      "layoutsDir" -> layoutsDir,
+      "includesDir" -> includesDir,
+      "sassDir" -> sassDir,
+      "dataDir" -> dataDir,
+      "pluginsDir" -> pluginsDir
+    )
 
   /** Which files to read */
   private lazy val reading = Obj(
@@ -48,15 +53,15 @@ object Globals:
 
   /** Details about this website */
   private lazy val site = Obj(
-    "title" -> "A Shiny New Website",
-    "lang" -> "en",
+    "title" -> Defaults.title,
+    "description" -> Defaults.description,
+    "lang" -> Defaults.lang,
     "rootUrl" -> "/",
-    "description" -> "generic site description",
-    "author" -> Obj(),
-    "paginate" -> false,
-    "showExcerpts" -> true,
-    "dateFormat" -> "dd MMM, yyyy",
-    "urlTemplate" -> "{{default}}"
+    "author" -> Defaults.author,
+    "paginate" -> Defaults.paginate,
+    "showExcerpts" -> Defaults.showExceprts,
+    "dateFormat" -> Defaults.dateFormat,
+    "permalinkTemplate" -> Defaults.permalinkTemplate
   )
 
   /** Defaults of the `collection` section. */
@@ -66,14 +71,14 @@ object Globals:
       "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
       "toc" -> false,
-      "permalink" -> "/{{item}}"
+      "permalinkTemplate" -> "/{{> item }}" // TODO how is item going to be rendered?
     ),
     "drafts" -> Obj(
       "output" -> false,
       "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
       "toc" -> false,
-      "permalink" -> "/{{item}}"
+      "permalinkTemplate" -> "/{{> item }}"
     )
   )
 
@@ -153,7 +158,7 @@ object Globals:
     Converters.modifyExtensions(extensions)
     Collections(
       dirs("base").str + dirs("collectionsDir").str,
-      DObj(collections),
+      collections,
       _globals
     )
 

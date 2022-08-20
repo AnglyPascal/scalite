@@ -42,7 +42,7 @@ trait Page:
   def visible: Boolean
 
   /** The extension of the output file */
-  def outputExt: String // this will have to be in urlObj, no?
+  protected def outputExt: String // this will have to be in urlObj, no?
 
   /** Renders the content of this page, converting the user provided content and
     * rendering mustache. This results in a HTML formatted string holding the

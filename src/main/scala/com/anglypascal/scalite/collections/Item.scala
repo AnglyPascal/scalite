@@ -16,12 +16,13 @@ import com.anglypascal.scalite.documents.Reader
   *   path to the source file of this Item relative to the parentDir
   * @param globals
   *   global variables
+  * @param colName
+  *   name of the collection this item is part of
   */
-abstract class Item (
+abstract class Item(
     val parentDir: String,
     val relativePath: String,
-    private val globals: DObj,
-    val colName: String
+    private val globals: DObj
 ) extends Reader(parentDir + relativePath):
 
   /** local variales for this item */
@@ -31,3 +32,6 @@ abstract class Item (
   protected def render: String
 
   def visible: Boolean
+
+trait ItemConstructor[A <: Item]:
+  def apply(parentDir: String, relativePath: String, globals: DObj): A

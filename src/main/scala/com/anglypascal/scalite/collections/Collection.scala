@@ -7,11 +7,16 @@ import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.documents.Layouts
 import com.anglypascal.scalite.documents.Page
 
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.anglypascal.scalite.utils.DirectoryReader.getFileName
+import com.anglypascal.scalite.converters.Converters
+
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.URL
+import com.anglypascal.scalite.Defaults
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -23,10 +28,10 @@ import com.anglypascal.scalite.URL
   *
   * @tparam A
   *   subclass of [[com.anglypascal.scalite.collections.Item]]
-  *
-  * TODO: Items should receive a reference to the collection it's part of
   */
-trait Collection[A <: Item] extends Plugin with Page:
+trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
+    extends Plugin
+    with Page:
 
   /** Name of the collection */
   val name: String
@@ -46,47 +51,57 @@ trait Collection[A <: Item] extends Plugin with Page:
     * @param globals
     *   global configs
     */
-  def apply(directory: String, _globals: DObj): Unit
+  def setup(directory: String, _globals: DObj) =
+    globals = _globals
+    val files = getListOfFilepaths(directory)
+    def f(fn: String) =
+      (getFileName(fn), itemConstructor(directory, fn, globals))
+    items = files.filter(Converters.hasConverter).map(f).toMap
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs, set the sortBy and toc variables, and receive
     * local variables for the rendering of this collection page.
     */
-  def apply(
+  def setup(
       directory: String,
-      _locals: DObj,
       _globals: DObj,
-      _sortBy: String = "title",
-      _toc: Boolean = false,
-      _permalink: String = ""
+      _sortBy: String,
+      _toc: Boolean,
+      _permalinkTemplate: String,
+      _locals: DObj
   ): Unit =
-    if _toc then _visible = true
+    _visible = _toc
     sortBy = _sortBy
-    globals = _globals
-    permalinkTemplate = _permalink
+    // We don't need the collections section of globals to render this collection
+    // The necessary info is already in locals
+    globals = _globals.removed("collection")
+    permalinkTemplate = _permalinkTemplate
+    locals = _locals
+    this.setup(directory, _globals)
 
-    // TODO: what else needs to be added to the collection?
-    locals = _locals.add("name" -> DStr(name))
-
-    apply(directory, _globals)
-
-  /** Template for the permalink. This will be prepended to the template of the
-    * items. TODO
+  /** Template for the permalink. This will override the permalink template for
+    * the entire collection.
+    *
+    * TODO: Heres a problem. How do we pass the configs made in the collection
+    * to the items? Idea is that there should be a section in the `\_globals`
+    * passed to the files named "collection" that defines these
     */
-  private var permalinkTemplate: String = _
-  lazy val permalink: String = URL(permalinkTemplate)(locals)
+  private var permalinkTemplate: String = Defaults.permalinkTemplate
+  private lazy val _permalink: String = URL(permalinkTemplate)(locals)
+  def permalink = _permalink
 
   /** Sort the items of this collection by this key */
-  protected var sortBy: String = _
+  protected var sortBy: String = Defaults.Collection.sortBy
 
   /** Should this collection have a separate page? */
-  protected var _visible: Boolean = false
+  protected var _visible: Boolean = Defaults.Collection.toc
   def visible = _visible
 
   /** Collection metadata other than sortBy, toc, folder, directory, output. */
-  protected var locals: DObj = _
+  protected var locals: DObj = DObj()
 
-  def outputExt = ".html"
+  /** The toc will have default output extension html */
+  protected def outputExt = ".html"
 
   /** Store a reference to the global configs */
   protected var globals: DObj = _
@@ -123,21 +138,23 @@ trait Collection[A <: Item] extends Plugin with Page:
     compareBy(fst, snd, "title") < 0
 
   protected def render: String =
-    val sortedItems = items.map(_._2).filter(_.visible).toList.sortWith(compare)
-    val itemsData = DArr(sortedItems.map(_.locals))
-    val context = DObj(
-      "site" -> globals,
-      "page" -> DObj(
-        "title" -> DStr(name),
-        "items" -> itemsData
-      )
-    )
     parent match
-      case None    => ""
-      case Some(p) => p.render(context)
+      case None => ""
+      case Some(p) =>
+        val sortedItems =
+          items.map(_._2).filter(_.visible).toList.sortWith(compare)
+        val itemsData = DArr(sortedItems.map(_.locals))
+        val _locals = locals.add("title" -> DStr(name), "items" -> itemsData)
+        val context = DObj(
+          "site" -> globals,
+          "page" -> _locals
+        )
+        p.render(context)
 
-  /** This sorts out the items, renders them, and writes them to the disk
-    */
+  /** This sorts out the items, renders them, and writes them to the disk */
   private[collections] def process(): Unit =
-    for (_, item) <- items do item.write()
+    for (_, item) <- items do
+      item match
+        case item: Page => item.write()
+        case _          => ()
     write()

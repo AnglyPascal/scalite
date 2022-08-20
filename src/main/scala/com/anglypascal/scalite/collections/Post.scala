@@ -21,6 +21,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.LinkedHashMap
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.Defaults
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -34,9 +35,8 @@ import com.typesafe.scalalogging.Logger
 class Post(
     parentDir: String,
     relativePath: String,
-    globals: DObj,
-    colName: String
-) extends Item(parentDir, relativePath, globals, colName)
+    globals: DObj
+) extends Item(parentDir, relativePath, globals)
     with ReaderOps
     with Page:
 
@@ -94,29 +94,38 @@ class Post(
     obj("title") = title
     obj("modified_time") = lastModifiedTime(dateFormat)
     obj("outputExt") = outputExt
-    obj("collection") = colName
+    obj("collection") =
+      globals.getOrElse("collection")(DObj()).getOrElse("name")("posts")
     // TODO slugs
     DObj(obj)
 
   /** Template for the permalink of the post */
   private lazy val permalinkTemplate =
-    front_matter.extractOrElse("permalink")(
-      globals.getOrElse("default_url_template")(filepath) // FIXME
+    front_matter.extractOrElse("permalinkTemplate")(
+      globals
+        .getOrElse("collection")(DObj())
+        .getOrElse("permalinkTemplate")(
+          globals.getOrElse("permalinkTemplate")(
+            Defaults.permalinkTemplate
+          )
+        )
     )
 
   lazy val _permalink = URL(permalinkTemplate)(urlObj)
   def permalink = _permalink
 
-  /** Returns whether to render this post or not. Default is false. */
-  val visible: Boolean =
-    front_matter.extractOrElse("visible")(
-      globals.getOrElse("postsVisibility")(false)
-      // FIXME this global setting should be set by the collection
-    )
+  /** Returns whether to render this post or not. Default is true. Putting
+    * output: false inside collection.post complete turns off rendering of
+    * posts.
+    */
+  val visible: Boolean = front_matter.extractOrElse("visible")(true)
 
   private lazy val _outputExt: String =
     front_matter.extractOrElse("outputExt")(
-      Converters.findByExt(filepath).map(_.outputExt).getOrElse(".html")
+      Converters
+        .findByExt(filepath)
+        .map(_.outputExt)
+        .getOrElse(".html")
     )
   def outputExt = _outputExt
 
@@ -200,5 +209,8 @@ class Post(
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
-  def processGroups(): Unit =
-    for bagObj <- Group.availableGroups do bagObj.addToGroups(this, globals)
+  for groupObj <- Group.availableGroups do groupObj.addToGroups(this, globals)
+
+object Post extends ItemConstructor[Post]:
+  def apply(parentDir: String, relativePath: String, globals: DObj): Post =
+    new Post(parentDir, relativePath, globals)

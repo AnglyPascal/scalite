@@ -75,7 +75,7 @@ final class DObj(private[data] val _obj: Map[String, Data])
   def get(key: String): Option[Data] = _obj.get(key)
 
   /** Return a new DObj object with the given pair added */
-  def add(pair: (String, Data)): DObj = DObj(_obj + pair)
+  def add(pairs: (String, Data)*): DObj = DObj(_obj ++ pairs)
 
   def iterator = _obj.iterator
 
@@ -117,6 +117,13 @@ final class DObj(private[data] val _obj: Map[String, Data])
   ): Map[String, Data] =
     get(key).flatMap(_.getObj) match
       case Some(s) => s
+      case _       => default
+
+  def getOrElse(key: String)(
+      default: DObj
+  ): DObj =
+    get(key).flatMap(_.getObj) match
+      case Some(s) => DObj(s)
       case _       => default
 
   override def toString(): String = _obj.toString
