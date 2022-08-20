@@ -2,9 +2,6 @@
 
 ## Context Handler
 
-- Relative and Absolute path. 
-    My idea is to use two paths in the constructor, parentDir, relativePath
-
 - Write the string handlers:
     - How are we using `slugify()` and `titlifiy()`?
     - `excerpt()`: creates an excerpt of the post. Copy jekyll for now.
@@ -14,12 +11,11 @@
         test a small case.
     - Check url creation, that it words and the partials work.
 
-- Collections ToC page
-
 - Make a directory builder and file writer
     - Inside collection items, define the output path. It should be defined by the url.
-    - Write a file copier that copies static files.
     - While you're at it, look into the caching system.
+
+- Write the Assets class for static files
 
 - Write a Main object, with only one option for now: `build`. 
 
@@ -50,13 +46,6 @@
     funciton. More functionality can obviously be achieved by exploiting the behaviour
     of mustache library
 
-- Write a public API named Plugin that will handle the object fetching from the
-    `_plugins` directory by adding them to the classpath. Also it will handle the
-    object initialization so that they are properly processed. Will need an API for
-    this as well.
-
-- Plugins: 
-    [This answer seems very promising](https://stackoverflow.com/questions/23874281/scala-how-to-compile-code-from-an-external-file-at-runtime)
 - Localized theming for layouts? Is it possible?
 
 - Generators: takes charge of automatically generated pages.
