@@ -17,13 +17,32 @@ import java.nio.charset.StandardCharsets
   */
 trait Page:
 
-  /** Specify the parent template name */
+  /** Specify the parent template name. Mandate calling it if visible needs to
+    * be changed
+    */
   protected val parentName: String
 
-  /** Make it Option[Layout] and also remove redundancies
+  /** Make it Option[Layout] and also remove redundancies */
+  protected lazy val parent: Option[Layout] =
+    Layouts.layouts.get(parentName)
+
+  /** Relative permanent link to this page */
+  protected lazy val permalink: String
+
+  /** Should this page be rendered and wrote to the disk? */
+  lazy val visible: Boolean
+
+  /** The extension of the output file */
+  protected lazy val outputExt: String // this will have to be in urlObj, no?
+
+  /** Renders the content of this page, converting the user provided content and
+    * rendering mustache. This results in a HTML formatted string holding the
+    * content of the page.
+    *
+    * @returns
+    *   The ready to publish content of this page.
     */
-  protected var _parent: Option[Layout] = None
-  def parent = _parent
+  protected lazy val render: String
 
   /** Method to write the content returned by the render method to the output
     * file at a relative path given by the relative permalink.
@@ -34,21 +53,3 @@ trait Page:
       if permalink.endsWith(outputExt) then permalink
       else permalink + outputExt
     Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))
-
-  /** Relative permanent link to this page */
-  def permalink: String
-
-  /** Should this page be rendered and wrote to the disk? */
-  def visible: Boolean
-
-  /** The extension of the output file */
-  protected def outputExt: String // this will have to be in urlObj, no?
-
-  /** Renders the content of this page, converting the user provided content and
-    * rendering mustache. This results in a HTML formatted string holding the
-    * content of the page.
-    *
-    * @returns
-    *   The ready to publish content of this page.
-    */
-  protected def render: String

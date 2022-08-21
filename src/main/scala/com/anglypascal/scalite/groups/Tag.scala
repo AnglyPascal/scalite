@@ -37,8 +37,7 @@ object Tag extends Group("tag"):
     )
 
     lazy val permalink: String = ???
-
-    def outputExt = ".html"
+    protected lazy val outputExt = ".html"
 
 
 

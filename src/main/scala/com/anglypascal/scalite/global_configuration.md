@@ -77,8 +77,8 @@ visible: false          # should this post be rendered
 tags: null              # space separated list of tags
 categories: null        # comma separated list of categories
 outputExt: ".html"      # extension of the output file
-date_format: yyyy-MM-dd # format in which to rendered the date in the output
-permalink: "/{{>pretty}}" # template for the permalink 
+dateFormat: yyyy-MM-dd # format in which to rendered the date in the output
+permalinkTemplate: "/{{>pretty}}" # template for the permalink 
 ```
 
 

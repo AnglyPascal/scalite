@@ -22,16 +22,22 @@ import com.anglypascal.scalite.documents.Reader
 abstract class Item(
     val parentDir: String,
     val relativePath: String,
-    private val globals: DObj
+    private val globals: DObj,
+    private val collection: DObj
 ) extends Reader(parentDir + relativePath):
 
   /** local variales for this item */
   def locals: DObj
 
   /** Process the contents of this item */
-  protected def render: String
+  protected lazy val render: String
 
-  def visible: Boolean
+  lazy val visible: Boolean
 
 trait ItemConstructor[A <: Item]:
-  def apply(parentDir: String, relativePath: String, globals: DObj): A
+  def apply(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): A

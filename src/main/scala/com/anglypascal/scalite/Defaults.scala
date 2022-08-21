@@ -24,6 +24,7 @@ object Defaults:
     val sassDir = "/_sass"
     val dataDir = "/_data"
     val pluginsDir = "/_plugins"
+    val assetsDir = "/_assets"
 
   object Reading:
     val include = Arr(".htaccess")

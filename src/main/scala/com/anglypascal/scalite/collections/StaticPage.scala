@@ -15,8 +15,9 @@ import com.rallyhealth.weejson.v1.Obj
 class StaticPage(
     parentDir: String,
     relativePath: String,
-    globals: DObj
-) extends Item(parentDir, relativePath, globals)
+    globals: DObj,
+    collection: DObj
+) extends Item(parentDir, relativePath, globals, collection)
     with Page:
   /** */
 
@@ -52,19 +53,17 @@ class StaticPage(
           )
         )
     )
-  private lazy val _permalink = URL(permalinkTemplate)(locals)
-  def permalink = purifyUrl(_permalink)
+  protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
-  private lazy val _outputExt: String =
+  protected lazy val outputExt = 
     front_matter.extractOrElse("outputExt")(
       Converters
         .findByExt(filepath)
         .map(_.outputExt)
         .getOrElse(".html")
     )
-  def outputExt = _outputExt
 
-  protected def render: String =
+  protected lazy val render: String =
     val str = Converters.convert(main_matter, filepath)
     val context = DObj(
       "site" -> globals,
@@ -74,15 +73,16 @@ class StaticPage(
       case Some(l) => l.render(context, str)
       case None    => str
 
-  val visible: Boolean = front_matter.extractOrElse("visible")(true)
+  lazy val visible: Boolean = front_matter.extractOrElse("visible")(true)
 
 object StaticPage extends ItemConstructor[StaticPage]:
   def apply(
       parentDir: String,
       relativePath: String,
-      globals: DObj
+      globals: DObj,
+      collection: DObj
   ): StaticPage =
-    new StaticPage(parentDir, relativePath, globals)
+    new StaticPage(parentDir, relativePath, globals, collection)
 
 object StaticPages extends Collection[StaticPage](StaticPage):
   /** */

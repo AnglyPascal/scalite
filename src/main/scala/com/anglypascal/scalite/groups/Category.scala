@@ -35,7 +35,7 @@ object Category extends Group("category"):
     /** */
     lazy val permalink: String = ???
 
-    def outputExt = ".html"
+    protected lazy val outputExt = ".html"
 
   /** Map holding all the categories in this website */
   private val categories = LinkedHashMap[String, Category]()

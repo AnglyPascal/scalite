@@ -34,18 +34,3 @@ trait Reader(val filepath: String):
     src match
       case yaml_regex(a, b) => (yamlParser(a), b)
       case _                => (Obj(), src)
-
-// /** To provide support for extension methods on a Reader
-//   */
-// trait ReaderOps extends Reader:
-//   import org.joda.time.DateTime
-
-//   /** Gets the last modified time of a file in the given date format */
-//   def lastModifiedTime(dateFormat: String): String =
-//     val path = Paths.get(filepath)
-//     val modTime =
-//       Files.getLastModifiedTime(path).toInstant().getEpochSecond()
-//     val date = new DateTime(modTime)
-//     dateToString(date, dateFormat)
-
-//   val p = 2

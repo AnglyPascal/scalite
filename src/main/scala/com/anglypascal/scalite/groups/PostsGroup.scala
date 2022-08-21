@@ -31,15 +31,16 @@ trait PostsGroup(
 ) extends Page:
 
   /** Set of posts that belong to this collection. */
-  val posts: Set[Post] = Set()
+  private val _posts: Set[Post] = Set()
+  def posts = _posts.toList
 
   /** Add a new post to this collection */
-  def addPost(post: Post) = posts += post
+  def addPost(post: Post) = _posts += post
 
   /** Name of the layout to be used for rendering the page for this PostsGroup.
     * If not specified in the global settings, this defaults back to "ctype"
     */
-  val parentName = globals.getOrElse(ctype + "Layout")(ctype)
+  protected val parentName = globals.getOrElse(ctype + "Layout")(ctype)
 
   /** Convert the given post to a weeJson obj that will be used to render this
     * post's representative in the page of this PostsGroup. Is intended for
@@ -61,8 +62,7 @@ trait PostsGroup(
   )
 
   /** Should the tag be rendered in a separate page? */
-  protected var _visible: Boolean = true
-  def visible = _visible
+  lazy val visible = true
 
   /** Render the page of this PostsGroup.
     *
@@ -71,15 +71,15 @@ trait PostsGroup(
     * @return
     *   the rendered page string
     */
-  def render: String =
+  protected lazy val render: String =
     val context = DObj(
       "site" -> globals,
       "page" -> locals,
       "items" -> DArr(posts.toList.map(postToItem))
     )
     parent match
-      case Some(l) =>
-        l.render(context)
+      case Some(paren) =>
+        paren.render(context)
       case None =>
         throw NoLayoutException(s"No layout found for $ctype collections")
 

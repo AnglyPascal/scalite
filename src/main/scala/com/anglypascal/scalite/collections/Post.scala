@@ -36,8 +36,9 @@ import scala.collection.mutable.LinkedHashMap
 class Post(
     parentDir: String,
     relativePath: String,
-    globals: DObj
-) extends Item(parentDir, relativePath, globals)
+    globals: DObj,
+    collection: DObj
+) extends Item(parentDir, relativePath, globals, collection)
     // with ReaderOps
     with Page:
 
@@ -59,14 +60,13 @@ class Post(
             "post"
       case None => "post"
 
-  /** Search for the parent layout in Layout.layouts */
-  _parent = Layouts.layouts.get(parentName)
+  private lazy val filename = getFileName(filepath)
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
     * name this post "untitled"
     */
-  val title: String =
+  lazy val title: String =
     front_matter.extractOrElse("title")(
       titleParser(filepath)
         .map(titlify(_))
@@ -95,31 +95,30 @@ class Post(
     obj("title") = title
     obj("modifiedTime") = lastModifiedTime(filepath, dateFormat)
     obj("outputExt") = outputExt
-    obj("collection") =
-      globals.getOrElse("collection")(DObj()).getOrElse("name")("posts")
-    obj("filename") = getFileName(filepath)
+    obj("filename") = filename
+    obj("collection") = collection.getOrElse("name")("posts")
     // TODO slugs
     DObj(obj)
 
   /** Template for the permalink of the post */
-  private lazy val permalinkTemplate =
-    front_matter.extractOrElse("permalinkTemplate")(
-      globals
-        .getOrElse("collection")(DObj())
-        .getOrElse("permalinkTemplate")(
-          globals.getOrElse("permalinkTemplate")(
-            Defaults.permalinkTemplate
-          )
+  protected lazy val permalink = 
+    val permalinkTemplate =
+        front_matter.extractOrElse("permalinkTemplate")(
+          globals
+            .getOrElse("collection")(DObj())
+            .getOrElse("permalinkTemplate")(
+              globals.getOrElse("permalinkTemplate")(
+                Defaults.permalinkTemplate
+              )
+            )
         )
-    )
-  private lazy val _permalink = URL(permalinkTemplate)(urlObj)
-  def permalink = purifyUrl(_permalink)
+    purifyUrl(URL(permalinkTemplate)(urlObj))
 
   /** Returns whether to render this post or not. Default is true. Putting
     * output: false inside collection.post complete turns off rendering of
     * posts.
     */
-  val visible: Boolean = front_matter.extractOrElse("visible")(true)
+  lazy val visible: Boolean = front_matter.extractOrElse("visible")(true)
 
   private lazy val _outputExt: String =
     front_matter.extractOrElse("outputExt")(
@@ -128,23 +127,19 @@ class Post(
         .map(_.outputExt)
         .getOrElse(".html")
     )
-  def outputExt = _outputExt
+  protected lazy val outputExt = _outputExt
 
   lazy val locals =
     front_matter.obj ++= List(
       "title" -> title,
       "date" -> date,
-      "url" -> permalink
+      "url" -> permalink,
+      "filename" -> filename
     )
-    front_matter.obj.get("showExcerpt") match
-      case Some(some) =>
-        some match
-          case some: Bool =>
-            if some.bool then front_matter("excerpt") = excerpt
-          case _ => ()
-      case _ => ()
+    if front_matter.extractOrElse("showExcerpt")(false) then
+      front_matter("excerpt") = excerpt
 
-    DObj(front_matter)
+    DObj(front_matter).add("collection" -> collection)
 
   /** Get the posts from the front\_matter and get their permalinks
     * @example
@@ -155,7 +150,7 @@ class Post(
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  def postUrls: Map[String, String] =
+  lazy val postUrls: Map[String, String] =
     def f(p: (String, Value)): List[(String, String)] =
       p._2 match
         case str: Str =>
@@ -173,12 +168,15 @@ class Post(
 
   /** Convert the contents of the post to HTML, throwing an exception on failure
     */
-  protected def render: String =
+  protected lazy val render: String =
     /** call to postUrls */
     val str = Converters.convert(main_matter, filepath)
     val context = DObj(
       postUrls.map(p => (p._1, DStr(p._2))) ++
-        Map("site" -> globals, "page" -> locals)
+        Map(
+          "site" -> globals,
+          "page" -> locals
+        )
     )
     parent match
       case Some(l) => l.render(context, str)
@@ -213,5 +211,10 @@ class Post(
   for groupObj <- Group.availableGroups do groupObj.addToGroups(this, globals)
 
 object Post extends ItemConstructor[Post]:
-  def apply(parentDir: String, relativePath: String, globals: DObj): Post =
-    new Post(parentDir, relativePath, globals)
+  def apply(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): Post =
+    new Post(parentDir, relativePath, globals, collection)

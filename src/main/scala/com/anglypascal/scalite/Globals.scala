@@ -42,18 +42,20 @@ object Globals:
       "includesDir" -> includesDir,
       "sassDir" -> sassDir,
       "dataDir" -> dataDir,
-      "pluginsDir" -> pluginsDir
+      "pluginsDir" -> pluginsDir,
     )
 
   /** Which files to read */
-  private lazy val reading = Obj(
-    "include" -> Arr(".htaccess"),
-    "exclude" -> Arr("build.sbt"),
-    "keepFiles" -> Arr(".git", ".svn"), // give regex list
-    "markdownExt" -> "markdown,mkdown,mkdn,mkd,md",
-    "textileExt" -> "textile",
-    "encoding" -> "utf-8"
-  )
+  private lazy val reading =
+    import Defaults.Reading.*
+    Obj(
+      "include" -> Defaults.Reading.include,
+      "exclude" -> Defaults.Reading.exclude,
+      "keepFiles" -> Defaults.Reading.keepFiles, // give regex list
+      "markdownExt" -> Defaults.Reading.markdownExt,
+      "textileExt" -> Defaults.Reading.textileExt,
+      "encoding" -> Defaults.Reading.encoding,
+    )
 
   /** Details about this website */
   private lazy val site = Obj(

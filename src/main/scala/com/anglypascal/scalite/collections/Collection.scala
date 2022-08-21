@@ -13,6 +13,7 @@ import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
+import com.anglypascal.scalite.utils.cmpOpt
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -29,8 +30,21 @@ import java.nio.file.Paths
   * @tparam A
   *   subclass of [[com.anglypascal.scalite.collections.Item]]
   */
-trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
-    extends Plugin
+trait Collection[A <: Item](itemConstructor: ItemConstructor[A])(
+    colDir: String,
+    /** Store a reference to the global configs */
+    protected val globals: DObj,
+    /** Sort the items of this collection by this key */
+    protected val sortBy: String,
+    toc: Boolean,
+    /** Template for the permalink. This will override the permalink template
+      * for the entire collection.
+      */
+    protected val permalinkTemplate: String,
+    /** Collection metadata other than sortBy, toc, folder, directory, output.
+      */
+    protected val locals: DObj
+) extends Plugin
     with Page:
 
   /** Name of the collection */
@@ -38,84 +52,22 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
 
   protected val parentName = name
 
-  /** Set of posts or other elements for use in context for rendering pages. */
-  def items = _items
-  protected def items_=(its: Map[String, A]) = _items = its
-  private var _items: Map[String, A] = _
-
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
-    *
-    * @param directory
-    *   where files containting items of this collection will be
-    * @param globals
-    *   global configs
     */
-  def setup(directory: String, _globals: DObj) =
-    globals = _globals
-    val files = getListOfFilepaths(directory)
+  lazy val items =
+    val files = getListOfFilepaths(colDir)
     def f(fn: String) =
-      (getFileName(fn), itemConstructor(directory, fn, globals))
-    items = files.filter(Converters.hasConverter).map(f).toMap
+      (getFileName(fn), itemConstructor(colDir, fn, globals, locals))
+    files.filter(Converters.hasConverter).map(f).toMap
 
-  /** Collect all the elements of this collection from the given directory, will
-    * the given global configs, set the sortBy and toc variables, and receive
-    * local variables for the rendering of this collection page.
-    */
-  def setup(
-      directory: String,
-      _globals: DObj,
-      _sortBy: String,
-      _toc: Boolean,
-      _permalinkTemplate: String,
-      _locals: DObj
-  ): Unit =
-    _visible = _toc
-    sortBy = _sortBy
-    // We don't need the collections section of globals to render this collection
-    // The necessary info is already in locals
-    globals = _globals.removed("collection")
-    permalinkTemplate = _permalinkTemplate
-    locals = _locals
-    this.setup(directory, _globals)
-
-  /** Template for the permalink. This will override the permalink template for
-    * the entire collection.
-    */
-  private var permalinkTemplate: String = Defaults.permalinkTemplate
-  private lazy val _permalink: String = URL(permalinkTemplate)(locals)
-  def permalink = purifyUrl(_permalink)
-
-  /** Sort the items of this collection by this key */
-  protected var sortBy: String = Defaults.Collection.sortBy
+  protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
   /** Should this collection have a separate page? */
-  protected var _visible: Boolean = Defaults.Collection.toc
-  def visible = _visible
-
-  /** Collection metadata other than sortBy, toc, folder, directory, output. */
-  protected var locals: DObj = DObj()
+  lazy val visible = toc || Defaults.Collection.toc
 
   /** The toc will have default output extension html */
-  protected def outputExt = ".html"
-
-  /** Store a reference to the global configs */
-  protected var globals: DObj = _
-
-  /** Compare two options */
-  private def cmpOpt[T](
-      o1: Option[T],
-      o2: Option[T]
-  )(using ord: Ordering[T]): Int =
-    o1 match
-      case None =>
-        o2 match
-          case None    => 0
-          case Some(_) => -1
-      case Some(a) =>
-        o2 match
-          case None    => 1
-          case Some(b) => ord.compare(a, b)
+  protected lazy val outputExt = ".html"
 
   /** Compare two given items by the given key */
   private def compareBy(fst: A, snd: A, key: String): Int =
@@ -133,7 +85,7 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
     if c != 0 then return c < 0
     compareBy(fst, snd, "title") < 0
 
-  protected def render: String =
+  protected lazy val render: String =
     parent match
       case None => ""
       case Some(p) =>
@@ -154,3 +106,35 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
         case item: Page => item.write()
         case _          => ()
     write()
+
+object Collection:
+  def apply[A <: Item](itemConstructor: ItemConstructor[A])(name: String)(
+      colDir: String,
+      globals: DObj,
+      sortBy: String,
+      toc: Boolean,
+      permalinkTemplate: String,
+      locals: DObj
+  ): Collection[A] =
+    object Col
+        extends Collection(itemConstructor)(
+          colDir,
+          globals,
+          sortBy,
+          toc,
+          permalinkTemplate,
+          locals
+        ):
+      /** */
+      val name = name
+    Col
+
+  type Constructor[A <: Item] =
+    String => (String, DObj, String, Boolean, String, DObj) => Collection[A]
+
+  val constructors: List[Constructor[?]] = ???
+
+  val Posts = apply[Post](Post)("posts")
+  val Drafts = apply[Draft](Draft)("drafts")
+  val Statics = apply[StaticPage](StaticPage)("statics")
+  val Generic = apply[GenericItem](GenericItem)

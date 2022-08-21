@@ -15,8 +15,10 @@ import com.rallyhealth.weejson.v1.Obj
 class GenericItem(
     parentDir: String,
     relativePath: String,
-    globals: DObj
-) extends Item(parentDir, relativePath, globals):
+    globals: DObj,
+    collection: DObj
+) extends Item(parentDir, relativePath, globals, collection):
+
   /** Title of this item */
   val title: String =
     front_matter.extractOrElse("title")(
@@ -36,24 +38,25 @@ class GenericItem(
     obj.obj ++= List("title" -> title)
     DObj(obj)
 
-  val visible: Boolean = front_matter.extractOrElse("visible")(false)
+  lazy val visible: Boolean = front_matter.extractOrElse("visible")(false)
 
   /** If there's some front\_matter, then the main\_matter will be conerted with
     * appropriate converter. Otherwise, the identity will be returned
     */
-  protected def render: String =
+  protected lazy val render: String =
     // TODO what if frontmatter is deleted by the process
-    if front_matter.obj.isEmpty then main_matter 
+    if front_matter.obj.isEmpty then main_matter
     else Converters.convert(main_matter, filepath)
 
 object GenericItem extends ItemConstructor[GenericItem]:
   def apply(
       parentDir: String,
       relativePath: String,
-      globals: DObj
+      globals: DObj,
+      collection: DObj
   ): GenericItem =
-    new GenericItem(parentDir, relativePath, globals)
+    new GenericItem(parentDir, relativePath, globals, collection)
 
 /** Defines the collection of generic item */
-class GenericCollection(val name: String)
-    extends Collection[GenericItem](GenericItem)
+// class GenericCollection(val name: String)
+//     extends Collection[GenericItem](GenericItem)
