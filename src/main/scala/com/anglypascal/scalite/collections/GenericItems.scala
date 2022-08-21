@@ -58,5 +58,5 @@ object GenericItem extends ItemConstructor[GenericItem]:
     new GenericItem(parentDir, relativePath, globals, collection)
 
 /** Defines the collection of generic item */
-// class GenericCollection(val name: String)
-//     extends Collection[GenericItem](GenericItem)
+class GenericCollection(val name: String)
+    extends Collection[GenericItem](GenericItem)

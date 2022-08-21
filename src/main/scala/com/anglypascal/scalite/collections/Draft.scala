@@ -26,5 +26,5 @@ object Draft extends ItemConstructor[Draft]:
 
 /** TODO: date will be the motified date collected from the file informations.
   */
-// object Drafts extends Collection[Draft](Draft):
-//   val name = "drafts"
+object Drafts extends Collection[Draft](Draft):
+  val name = "drafts"

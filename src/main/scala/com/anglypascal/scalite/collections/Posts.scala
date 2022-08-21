@@ -1,12 +1,10 @@
 package com.anglypascal.scalite.collections
 
 /** Companion object that creates the Posts collection. */
-// object Posts extends Collection[Post](Post):
+object Posts extends Collection[Post](Post):
 
-//   /** name of posts collection */
-//   val name = "posts"
+  /** name of posts collection */
+  val name = "posts"
 
-//   // Default value of sortBy. Updated by the configuration
-//   sortBy = "date"
-//
-// trait Posts extends Collection[Post](Post)
+  // Default value of sortBy. Updated by the configuration
+  sortBy = "date"
