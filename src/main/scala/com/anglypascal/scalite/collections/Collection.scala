@@ -7,7 +7,7 @@ import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DNum
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
-import com.anglypascal.scalite.documents.Layouts
+import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
@@ -30,12 +30,10 @@ import java.nio.file.Paths
   * @tparam A
   *   subclass of [[com.anglypascal.scalite.collections.Item]]
   */
-trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
-    extends Plugin
+abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
+    val name: String
+) extends Plugin
     with Page:
-
-  /** Name of the collection */
-  val name: String
 
   protected val parentName = name
 
@@ -86,7 +84,7 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
   protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
   /** Sort the items of this collection by this key */
-  protected[this] var sortBy: String = Defaults.Collection.sortBy
+  protected var sortBy: String = Defaults.Collection.sortBy
 
   /** Should this collection have a separate page? */
   private var _visible: Boolean = Defaults.Collection.toc
@@ -132,9 +130,14 @@ trait Collection[A <: Item](itemConstructor: ItemConstructor[A])
         p.render(context)
 
   /** This sorts out the items, renders them, and writes them to the disk */
-  private[collections] def process(): Unit =
+  protected[collections] def process(): Unit =
     for (_, item) <- items do
       item match
         case item: Page => item.write()
         case _          => ()
     write()
+
+  /** TODO: add config options to ask to cache the collection instead of writing
+    * it
+    */
+  protected[collections] def cache(): Unit = ???

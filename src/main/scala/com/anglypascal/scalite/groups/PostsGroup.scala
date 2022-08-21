@@ -6,7 +6,7 @@ import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
-import com.anglypascal.scalite.documents.Layout
+import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.rallyhealth.weejson.v1.Arr

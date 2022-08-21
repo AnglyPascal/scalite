@@ -20,7 +20,11 @@ object Collections:
   /** Map of predefined collections that will later be populated by
     * "\_config.yml"
     */
-  private val collections = LinkedHashMap[String, Collection[?]]()
+  private val collections = LinkedHashMap[String, Collection[?]](
+    "posts" -> Posts,
+    "drafts" -> Drafts,
+    "statics" -> StaticPages
+  )
 
   def addCollection(col: Collection[?]): Unit =
     collections += (col.name -> col)
@@ -122,5 +126,5 @@ object Collections:
       collections("posts").setup(colsDir + "/_posts", globals)
 
   /** Process all the collections */
-  def process: Unit =
+  def process(): Unit =
     for (_, col) <- collections do col.process()

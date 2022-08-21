@@ -1,4 +1,4 @@
-package com.anglypascal.scalite.documents
+package com.anglypascal.scalite.layouts
 
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.DObj
@@ -9,6 +9,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.documents.Reader
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
@@ -106,11 +107,10 @@ object MustacheLayout extends LayoutObject with Plugin:
     * front matter.
     */
   def createLayouts(
-      layoutsPath: String,
-      partialsPath: String
+      layoutFiles: Array[String],
+      partialFiles: Array[String]
   ): Map[String, Layout] =
-    val files = getListOfFilepaths(layoutsPath)
-    val ls = files
+    val ls = layoutFiles
       .filter(matches(_))
       .map(f => {
         val fn = getFileName(f)
@@ -118,16 +118,15 @@ object MustacheLayout extends LayoutObject with Plugin:
       })
       .toMap
 
-    _partials = getPartials(partialsPath)
+    _partials = getPartials(partialFiles)
     logger.debug("Got the layouts: " + ls.map(_._2.name).mkString(", "))
     ls.map((s, l) => l.setParent(ls))
     _layouts = ls.toMap
     layouts
 
   /** Process all the partials in "/\_partials" directory. */
-  private def getPartials(directory: String): Map[String, Mustache] =
-    val files = getListOfFilepaths(directory)
-    val ls = files
+  private def getPartials(partialFiles: Array[String]): Map[String, Mustache] =
+    val ls = partialFiles
       .filter(matches(_))
       .map(f => {
         object R extends Reader(f)

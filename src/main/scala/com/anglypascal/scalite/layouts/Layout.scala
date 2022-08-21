@@ -1,10 +1,12 @@
-package com.anglypascal.scalite.documents
+package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.data.DObj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.Set
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.utils.DirectoryReader.{getListOfFilepaths}
 
 /** Defines an abstract Layout.
   *
@@ -50,12 +52,21 @@ object Layouts:
   def addEngine(engine: LayoutObject) = layoutConstructors += engine
 
   /** Fetch all the layouts and partials in the given paths. */
-  def apply(layoutPath: String, partialsPath: String) =
+  def apply(layoutsPath: String, partialsPath: String) =
+    val layoutFiles = getListOfFilepaths(layoutsPath)
+    val partialFiles = getListOfFilepaths(partialsPath)
     _layouts = Map(
       layoutConstructors
-        .flatMap(_.createLayouts(layoutPath, partialsPath).toList)
+        .flatMap(_.createLayouts(layoutFiles, partialFiles).toList)
         .toList: _*
     )
+
+  def get(name: String): Option[Layout] =
+    layouts.get(name) match
+      case None =>
+        logger.debug(s"Layout named $name not found")
+        None
+      case some => some
 
 /** A trait for generic layout object. Specifies which files this layout will
   * match, and how it will create layouts from the files in the given
@@ -63,21 +74,15 @@ object Layouts:
   */
 trait LayoutObject extends Plugin:
 
-  /** Add this object to the layoutConstructors */
-  Layouts.addEngine(this)
-
   /** The extensions of the files this converter is able to convert */
   def ext: util.matching.Regex
 
-  /** Does this converter accepts the file? this will tell whether this filetype
-    * is compatible with this renderer.
-    */
+  /** Does this constructor recognize this filepath? */
   def matches(filepath: String): Boolean =
     ext.matches(filepath)
 
-  /** Create a layout that this constructor matches from the given directories
-    */
+  /** Create a layout this constructor matches from the given directories */
   def createLayouts(
-      layoutsPath: String,
-      partialsDir: String
+      layoutFiles: Array[String],
+      partialFiles: Array[String]
   ): Map[String, Layout]

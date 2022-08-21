@@ -55,7 +55,7 @@ class StaticPage(
     )
   protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
-  protected lazy val outputExt = 
+  protected lazy val outputExt =
     front_matter.extractOrElse("outputExt")(
       Converters
         .findByExt(filepath)
@@ -84,6 +84,4 @@ object StaticPage extends ItemConstructor[StaticPage]:
   ): StaticPage =
     new StaticPage(parentDir, relativePath, globals, collection)
 
-object StaticPages extends Collection[StaticPage](StaticPage):
-  /** */
-  val name = "statics"
+object StaticPages extends Collection[StaticPage](StaticPage)("statics")

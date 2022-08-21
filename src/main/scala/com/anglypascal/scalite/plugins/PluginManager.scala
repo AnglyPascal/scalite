@@ -7,8 +7,8 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
-import com.anglypascal.scalite.documents.LayoutObject
-import com.anglypascal.scalite.documents.Layouts
+import com.anglypascal.scalite.layouts.LayoutObject
+import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 
@@ -84,7 +84,7 @@ object PluginManager:
                 s"Found plugin $key " +
                   "and initiated with the customization options"
               )
-              return some.map(_.addConfigs(obj(key)))
+              return some.map(_.addConfigs(obj.getOrElse(key)(DObj())))
         case _ => ()
     logger.error(
       s"Plugin $objName not found inside module com.anglypascal.scalite.plugins"

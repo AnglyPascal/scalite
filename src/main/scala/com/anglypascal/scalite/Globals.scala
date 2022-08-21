@@ -7,7 +7,7 @@ import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
-import com.anglypascal.scalite.documents.*
+import com.anglypascal.scalite.layouts.*
 import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.utils.yamlParser
@@ -42,7 +42,7 @@ object Globals:
       "includesDir" -> includesDir,
       "sassDir" -> sassDir,
       "dataDir" -> dataDir,
-      "pluginsDir" -> pluginsDir,
+      "pluginsDir" -> pluginsDir
     )
 
   /** Which files to read */
@@ -54,7 +54,7 @@ object Globals:
       "keepFiles" -> Defaults.Reading.keepFiles, // give regex list
       "markdownExt" -> Defaults.Reading.markdownExt,
       "textileExt" -> Defaults.Reading.textileExt,
-      "encoding" -> Defaults.Reading.encoding,
+      "encoding" -> Defaults.Reading.encoding
     )
 
   /** Details about this website */
@@ -126,7 +126,7 @@ object Globals:
 
   /** Process the groups fro the updated config */
   private def processAssets() =
-    val dataMap = configs.extractOrElse("data")(MMap[String, Value]())
+    val dataMap = configs.extractOrElse("assets")(MMap[String, Value]())
 
   /** Load all the plugins, defaults and custom */
   private def loadPlugins(): Unit =
@@ -158,8 +158,12 @@ object Globals:
     processDefaults()
     processCollections()
     processGroups()
+
     processAssets()
-    glbsObj("assets") = Assets("???")
+    glbsObj("assets") = Assets(
+      Defaults.Directories.base + Defaults.Directories.assetsDir,
+      Defaults.Directories.destination + "assets"
+    )
 
     for (key, value) <- configs.obj do glbsObj(key) = value
 

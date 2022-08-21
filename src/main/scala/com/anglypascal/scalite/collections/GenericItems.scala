@@ -4,7 +4,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
-import com.anglypascal.scalite.documents.Layout
+import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
 
@@ -58,5 +58,5 @@ object GenericItem extends ItemConstructor[GenericItem]:
     new GenericItem(parentDir, relativePath, globals, collection)
 
 /** Defines the collection of generic item */
-class GenericCollection(val name: String)
-    extends Collection[GenericItem](GenericItem)
+class GenericCollection(name: String)
+    extends Collection[GenericItem](GenericItem)(name)

@@ -1,8 +1,11 @@
 package com.anglypascal.scalite.documents
 
+import com.anglypascal.scalite.layouts.Layouts
+
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.charset.StandardCharsets
+import com.typesafe.scalalogging.Logger
 
 /** Page represents a page of the website.
   *
@@ -23,8 +26,7 @@ trait Page:
   protected val parentName: String
 
   /** Make it Option[Layout] and also remove redundancies */
-  protected lazy val parent: Option[Layout] =
-    Layouts.layouts.get(parentName)
+  protected lazy val parent = Layouts.get(parentName)
 
   /** Relative permanent link to this page */
   protected lazy val permalink: String
@@ -52,4 +54,5 @@ trait Page:
     val path =
       if permalink.endsWith(outputExt) then permalink
       else permalink + outputExt
-    Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))
+    Logger("Page writer").debug(s"Writing page to $path")
+    // Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))

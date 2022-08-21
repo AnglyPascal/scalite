@@ -14,6 +14,7 @@ object Build extends Command:
     val globals = Globals(sitePath)
     // Clean the build site
     Cleaner(globals)
+    Collections.process()
 
     /** Where should posts go?
       *
@@ -21,8 +22,6 @@ object Build extends Command:
       */
 
     /** things:
-      *
-      *   - process all collecitons
       *   - process all groups
       *   - compile _sass
       *   - move static files
