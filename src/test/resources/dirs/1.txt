@@ -1,0 +1,1 @@
+/home/ahsan/git/scalite/src/test/resources/dirs/readFrom/1.txt
