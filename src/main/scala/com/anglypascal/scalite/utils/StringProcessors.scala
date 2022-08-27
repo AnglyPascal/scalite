@@ -2,15 +2,18 @@ package com.anglypascal.scalite.utils
 
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.converters.Converter
+import java.text.Normalizer
 
 object StringProcessors:
 
   /** during the rendering of a post, (or potentially anything), fetch the first
     * paragraph and return an excerpt.
+    *
+    * TODO Write all the different cases
     */
-  def getExcerpt(str: String, separator: String = "\n\n"): String = 
+  def getExcerpt(str: String, separator: String = "\n\n"): String =
     str.split(separator).headOption match
-      case Some(head) => 
+      case Some(head) =>
         head
       case None =>
         logger.warn("method excerpt received an empty string")
@@ -61,17 +64,17 @@ object StringProcessors:
     *   slugify("The _config.yml file")
     *   # => "the-config-yml-file"
     *
-    *   slugify("The _config.yml file", "pretty")
-    *   # => "the-_config.yml-file"
+    *   slugify("A title _with Spaces! & other chars@procs,", "pretty")
+    *   # => "a-title-_with-spaces!-&-other-chars@procs,"
     *
-    *   slugify("The _config.yml file", "pretty", true)
-    *   # => "The-_config.yml file"
+    *   slugify("A title _with Spaces! & other chars@procs,", "pretty", true)
+    *   # => "A-title-_with-Spaces!-&-other-chars@procs,"
     *
-    *   slugify("The _config.yml file", "ascii")
-    *   # => "the-config-yml-file"
+    *   slugify("A title _with SpacÈs! & Ùther chars@procs,", "ascii")
+    *   # => "a-title-with-spac-s-ther-chars-procs-"
     *
-    *   slugify("The _config.yml file", "latin")
-    *   # => "the-config-yml-file"
+    *   slugify("A title _with SpacÈs! & Ùther chars@procs,", "latin")
+    *   # => "a-title-with-spaces-uther-chars-procs-"
     * }}}
     */
   def slugify(
@@ -93,7 +96,8 @@ object StringProcessors:
         case "pretty"  => str.replaceAll(prettyRegex, "-")
         case "ascii"   => str.replaceAll(asciiRegex, "-")
         case "latin" =>
-          str.replaceAll("\\p{M}", "").replaceAll(defaultRegex, "-")
+          val latin = Normalizer.normalize(str, Normalizer.Form.NFD);
+          latin.replaceAll("[^\\p{ASCII}]", "").replaceAll(defaultRegex, "-")
         case _ =>
           logger.error(
             "Slugify mode has to be an element of " +
@@ -104,22 +108,19 @@ object StringProcessors:
       else uncased.toLowerCase
 
   /** Turns a slug into a simple title */
-  def titlify(slug: String, allCaps: Boolean = true): String =
+  def titlify(slug: String, allCaps: Boolean = false): String =
     if allCaps then slug.split('-').map(_.capitalize).mkString(" ")
     else slug.split('-').mkString(" ").capitalize
 
-  def titleParser(fn: String): Option[String] = 
-    val title = raw"\d{4}-\d{2}-\d{2}(.*)".r
-    fn match 
+  /** Parses title from the filenames with the pattern "yyyy-MM-dd-title" */
+  def titleParser(fn: String): Option[String] =
+    val title = raw"\d{4}-\d{2}-\d{2}-(.*)".r
+    fn match
       case title(t) => Some(titlify(t))
-      case _ => None
+      case _        => None
 
-  // @main
-  def stringProcessor =
-    val s = "Import _config.yml"
-    slugifyModes.map(m => m -> slugify(s, m)).map(println(_))
-    slugifyModes.map(slugify(s, _, true)).map(println(_))
-
-
-  // removes double backslashes and some encoding issues from urls
-  def purifyUrl(str: String): String = ???
+  /** Removes double backslashes and encodes the url to ascii */
+  def purifyUrl(str: String): String =
+    import io.lemonlabs.uri.Url
+    val s = str.replaceAll("[/]+", "/")
+    Url.parse(s).toString

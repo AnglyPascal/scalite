@@ -1,3 +1,17 @@
+# First run
+
+- first try out the configs and logger from the different modules
+- test that the objects are being initiated, they are fetching the files.
+- do not process in this run. 
+- for this, write a new command, dryrun, that will only log stuff, and write where 
+  things will end up 
+- test collections are properly fetching files
+
+# Second run
+
+- test converters, layout rendering
+- test permalink rendering
+
 # TODO List
 
 ## Context Handler

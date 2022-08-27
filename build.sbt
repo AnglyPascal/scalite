@@ -16,7 +16,8 @@ lazy val root = project
       "com.rallyhealth" %% "weeyaml-v1" % "1.7.2",
       "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
       "org.planet42" %% "laika-core" % "0.18.2", 
-      "com.github.nscala-time" %% "nscala-time" % "2.30.0"
+      "com.github.nscala-time" %% "nscala-time" % "2.30.0",
+      "io.lemonlabs" %% "scala-uri" % "4.0.2"
     ),
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.2.10",

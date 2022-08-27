@@ -10,7 +10,8 @@ import scala.collection.mutable.Map
 object Converters:
 
   /** Set of all the avaiable converters. When an object implements the
-    * Converter trait, it gets added to this set.
+    * Converter trait, it gets added to this set. Each converter is mapped to the
+    * filetype it converts.
     */
   private val _converters = Map[String, Converter]()
 

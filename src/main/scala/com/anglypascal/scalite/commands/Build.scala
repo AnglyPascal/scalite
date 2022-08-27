@@ -6,10 +6,10 @@ import com.anglypascal.scalite.utils.Cleaner
 
 object Build extends Command:
 
-  def build(): Unit =
-    build(System.getProperty("user.dir"))
+  def run(): Unit =
+    run(System.getProperty("user.dir"))
 
-  def build(sitePath: String): Unit =
+  def run(sitePath: String): Unit =
     // Get the global configs
     val globals = Globals(sitePath)
     // Clean the build site

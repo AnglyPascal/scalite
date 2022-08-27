@@ -75,7 +75,7 @@ object DataExtensions:
         logger.trace(s"didn't find key in $data")
         default
 
-@main
+// @main
 def dataExtensionsTest =
   import DataExtensions.*
 

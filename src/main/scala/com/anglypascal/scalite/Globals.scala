@@ -7,6 +7,7 @@ import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
+import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.layouts.*
 import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.plugins.PluginManager
@@ -124,23 +125,27 @@ object Globals:
   private def processGroups() =
     val grpMap = configs.extractOrElse("groups")(MMap[String, Value]())
 
-  /** Process the groups fro the updated config */
-  private def processAssets() =
+  /** Process the groups fro the updated config 
+   *
+   *  FIXME: pass in the dataMap
+   *  */
+  private def processAssets: Obj =
     val dataMap = configs.extractOrElse("assets")(MMap[String, Value]())
+    Assets(
+      dirs("base").str + dirs.getOrElse("assetsDir")(Defaults.Directories.assetsDir),
+      dirs("destination").str + "/assets"
+    )
 
   /** Load all the plugins, defaults and custom */
   private def loadPlugins(): Unit =
     // default plugins
     Converters.addConverter(Markdown)
     Converters.addConverter(Identity)
-    Collections.addCollection(Posts)
-    Collections.addCollection(Drafts)
-    Collections.addCollection(StaticPages)
     Layouts.addEngine(MustacheLayout)
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
-    PluginManager(dirs("pluginsDir").str, DObj(plugMap))
+    PluginManager(dirs("base").str + dirs("pluginsDir").str, DObj(plugMap))
 
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =
@@ -159,12 +164,10 @@ object Globals:
     processCollections()
     processGroups()
 
-    processAssets()
-    glbsObj("assets") = Assets(
-      Defaults.Directories.base + Defaults.Directories.assetsDir,
-      Defaults.Directories.destination + "assets"
-    )
+    glbsObj("assets") = processAssets
 
+    /** FIXME needs to be done before processing can happen LMAO
+     */
     for (key, value) <- configs.obj do glbsObj(key) = value
 
     val _globals = DObj(glbsObj)
@@ -178,6 +181,7 @@ object Globals:
     )
 
     _globals
+
 
 /** need to make a new list_map that will define the name of the list in yaml,
   * and the value name to assign to each of it's value.
