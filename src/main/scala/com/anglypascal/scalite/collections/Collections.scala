@@ -127,6 +127,11 @@ object Collections:
       logger.debug("posts are being renderd by default")
       collections("posts").setup(colsDir + "/_posts", globals)
 
+    if !collectionData.obj.contains("statics") then
+      if !collections.contains("statics") then collections("statics") = Posts
+      logger.debug("statics are being renderd by default")
+      collections("statics").setup(colsDir + "/_statics", globals)
+
   /** Process all the collections */
   def process(): Unit =
     for (_, col) <- collections do col.process()
@@ -137,4 +142,4 @@ object Collections:
         Console.RED + k + Console.YELLOW + " -> " +
           Console.RESET + v.toString
       )
-      .mkString(", ")
+      .mkString("\n")

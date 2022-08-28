@@ -20,7 +20,7 @@ object Defaults:
     val collectionsDir = ""
     val destination = "/_site"
     val layoutsDir = "/_layouts"
-    val includesDir = "/_includes"
+    val partialsDir = "/_partials"
     val sassDir = "/_sass"
     val dataDir = "/_data"
     val pluginsDir = "/_plugins"

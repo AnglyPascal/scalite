@@ -15,16 +15,18 @@ object DirectoryReader:
     * TODO: By default will follow symlinks. Should we ask the user if symlinks
     * should be read?
     */
-  def readFile(filepath: String): Source =
+  def readFile(filepath: String): String =
     val logger = Logger("File reader")
-    try Source.fromFile(filepath)
+    try Source.fromFile(filepath).getLines.mkString("\n")
     catch
       case fnf: java.io.FileNotFoundException =>
-        logger.error(s"File at $filepath not found")
-        Source.fromString("")
+        logger.error(
+          s"File at ${Console.RED + filepath + Console.RESET} not found"
+        )
+        ""
       case e =>
         logger.error(e.toString)
-        Source.fromString("")
+        ""
 
   /** Recover just the filename without the exteions from a file path */
   def getFileName(filepath: String): String =

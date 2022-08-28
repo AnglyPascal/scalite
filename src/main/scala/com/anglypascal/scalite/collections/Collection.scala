@@ -41,7 +41,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
-  private var _items: Map[String, A] = Map()
+  private var _items: Map[String, A] = _
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
@@ -147,4 +147,4 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
   protected[collections] def cache(): Unit = ???
 
   override def toString(): String = 
-    "[ " + items.map((_, v) => v.toString).mkString(", ") + " ]"
+    "\n" + items.map((_, v) => "  " + v.toString).mkString("\n")

@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.data.DObj
+import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.Set
@@ -17,8 +18,15 @@ import com.anglypascal.scalite.utils.DirectoryReader.{getListOfFilepaths}
   * @param layoutPath
   *   path to the layout file
   */
-abstract class Layout(val name: String, layoutPath: String)
-    extends Reader(layoutPath):
+abstract class Layout(
+    val lang: String,
+    val name: String,
+    layoutDir: String,
+    layoutPath: String
+) extends Reader(layoutDir + layoutPath):
+
+  /** */
+  private val logger = Logger("Mustache Layout")
 
   /** Render the layout with the given Data object as context
     *
@@ -31,9 +39,38 @@ abstract class Layout(val name: String, layoutPath: String)
     */
   def render(context: DObj, contentPartial: String = ""): String
 
-  /** Parent of this layout, specified in the front matter
-    */
-  def parent: Option[Layout]
+  /** Parent of this layout, specified in the front matter */
+  def parent: Option[Layout] = _parent
+  private var _parent: Option[Layout] = None
+
+  /** Take a list of layouts, and find the parent layout */
+  def setParent(layouts: Map[String, Layout]): Unit =
+    _parent =
+      if front_matter.obj.contains("layout") then
+        front_matter("layout") match
+          case s: Str =>
+            logger.trace(s"layout $name has a parent layout named $s")
+            val pn = s.str
+            layouts.get(pn) match
+              case Some(v) =>
+                v match
+                  case v: MustacheLayout => Some(v)
+                  case _                 => None
+              case None =>
+                logger.trace(s"parent layout $pn of layout $name doesn't exist")
+                None
+          case _ =>
+            logger.trace("layout field of the front matter must be a string")
+            None
+      else
+        logger.trace(s"layout $name doesn't have a specified parent layout")
+        None
+
+  override def toString(): String =
+    Console.GREEN + name + Console.RESET +
+      parent
+        .map(Console.YELLOW + " -> " + Console.GREEN + _.toString)
+        .getOrElse("") + Console.RESET
 
 /** Layout Object holding all the defined LayoutObjects. During construction
   * with apply(), it fetches all the files in layoutPath and uses the
@@ -52,12 +89,19 @@ object Layouts:
   def addEngine(engine: LayoutObject) = layoutConstructors += engine
 
   /** Fetch all the layouts and partials in the given paths. */
-  def apply(layoutsPath: String, partialsPath: String) =
-    val layoutFiles = getListOfFilepaths(layoutsPath)
-    val partialFiles = getListOfFilepaths(partialsPath)
+  def apply(layoutsDir: String, partialsDir: String) =
+    val layoutFiles = getListOfFilepaths(layoutsDir)
+    val partialFiles = getListOfFilepaths(partialsDir)
     _layouts = Map(
       layoutConstructors
-        .flatMap(_.createLayouts(layoutFiles, partialFiles).toList)
+        .flatMap(
+          _.createLayouts(
+            layoutsDir,
+            partialsDir,
+            layoutFiles,
+            partialFiles
+          ).toList
+        )
         .toList: _*
     )
 
@@ -68,11 +112,22 @@ object Layouts:
         None
       case some => some
 
+  override def toString(): String =
+    layouts
+      .map((k, v) =>
+        v.lang + ": " + Console.RED + k
+          + Console.YELLOW + " -> " + v.toString
+      )
+      .mkString("\n")
+
 /** A trait for generic layout object. Specifies which files this layout will
   * match, and how it will create layouts from the files in the given
   * directories.
   */
 trait LayoutObject extends Plugin:
+
+  /** Get the layouts of this type */
+  def layouts: Map[String, Layout]
 
   /** The extensions of the files this converter is able to convert */
   def ext: util.matching.Regex
@@ -83,6 +138,8 @@ trait LayoutObject extends Plugin:
 
   /** Create a layout this constructor matches from the given directories */
   def createLayouts(
+      layoutsDir: String,
+      partialsDir: String,
       layoutFiles: Array[String],
       partialFiles: Array[String]
   ): Map[String, Layout]

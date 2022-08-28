@@ -6,7 +6,7 @@ import com.typesafe.scalalogging.Logger
 
 def yamlFileParser(path: String): Obj = 
   val logger = Logger("YAML File Parser")
-  val str = DirectoryReader.readFile(path).getLines.mkString("\n")
+  val str = DirectoryReader.readFile(path)
   try
     FromYaml(str).transform(Value) match
       case v: Obj => v

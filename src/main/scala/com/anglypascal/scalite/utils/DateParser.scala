@@ -104,6 +104,7 @@ object DateParser:
     catch
       case e =>
         logger.error(
-          s"${e.toString} thrown while getting the last modified time of $filepath"
+          Console.RED + e.getClass.getSimpleName + Console.RESET +
+            " thrown for " + Console.RED + filepath + Console.RESET
         )
         ""

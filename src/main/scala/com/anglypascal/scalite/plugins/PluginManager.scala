@@ -33,7 +33,7 @@ object PluginManager:
       )
     catch
       case e: SecurityException =>
-        logger.error("SecurityException was thrown with message " + e.toString)
+        logger.error("SecurityException was thrown" + e.getMessage)
         None
       case e =>
         logger.error(s"Loading $jarPath threw " + e.toString)

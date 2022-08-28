@@ -1,4 +1,4 @@
-package com.anglypascal.scalite.assets
+package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.DObj

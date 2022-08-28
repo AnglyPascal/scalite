@@ -20,7 +20,7 @@ import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
-import com.anglypascal.scalite.assets.Assets
+import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.collections.StaticPages
 import com.anglypascal.scalite.collections.Drafts
@@ -43,7 +43,7 @@ object Globals:
       "collectionsDir" -> collectionsDir,
       "destination" -> destination,
       "layoutsDir" -> layoutsDir,
-      "includesDir" -> includesDir,
+      "partialsDir" -> partialsDir,
       "sassDir" -> sassDir,
       "dataDir" -> dataDir,
       "pluginsDir" -> pluginsDir
@@ -121,7 +121,7 @@ object Globals:
     val colMap = configs.extractOrElse("collections")(MMap[String, Value]())
     colMap.remove("collectionsDir") match
       case Some(s) => dirs("collectionsDir") = s
-      case None => ()
+      case None    => ()
     for (key, value) <- colMap do collections(key) = value
 
   /** Process the defaults fro the updated config */
@@ -154,7 +154,7 @@ object Globals:
     // default plugins
     val dataAST = DataAST
     Converters.addConverter(Markdown)
-    Layouts.addEngine(MustacheLayout)
+    Layouts.addEngine(MustacheLayouts)
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
@@ -166,7 +166,7 @@ object Globals:
     val glbsObj = MMap[String, Value]()
     dirs("base") = base
 
-    for key <- dirs.obj.keys if configs.obj.contains(key) do 
+    for key <- dirs.obj.keys if configs.obj.contains(key) do
       dirs(key) = configs(key)
 
     loadPlugins()
@@ -191,6 +191,10 @@ object Globals:
       dirs("base").str + dirs("collectionsDir").str,
       collections,
       _globals
+    )
+    Layouts(
+      dirs("base").str + dirs("layoutsDir").str,
+      dirs("base").str + dirs("partialsDir").str
     )
 
     _globals

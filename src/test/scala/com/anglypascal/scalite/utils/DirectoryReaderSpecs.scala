@@ -72,15 +72,15 @@ class DirectoryReaderSpecs extends AnyFlatSpec:
   behavior of "readFile"
   it should "read existing files properly" in {
     val s1 = readFile(root + "/1.txt")
-    assert(s1.getLines.mkString("\n") == "hello world!")
+    assert(s1 == "hello world!")
   }
 
   it should "read from symlinks properly" in {
     val s1 = readFile(root + "/../1.txt")
-    assert(s1.getLines.mkString("\n") == "hello world!")
+    assert(s1 == "hello world!")
   }
 
   it should "return empty string for non-existing files" in {
     val s1 = readFile(root + "/2.txt")
-    assert(s1.getLines.mkString("\n") == "")
+    assert(s1 == "")
   }
