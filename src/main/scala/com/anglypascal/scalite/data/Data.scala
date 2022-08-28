@@ -44,6 +44,8 @@ sealed trait Data:
       case data: DObj => Some(data._obj)
       case _          => None
 
+  protected[data] def toString(depth: Int): String = toString()
+
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
@@ -126,7 +128,18 @@ final class DObj(private[data] val _obj: Map[String, Data])
       case Some(s) => DObj(s)
       case _       => default
 
-  override def toString(): String = _obj.toString
+  override def toString(): String = toString(0)
+
+  override protected[data] def toString(depth: Int): String =
+    "  " * depth + Console.GREEN + "{\n" + Console.RESET +
+      _obj
+        .map((k, v) =>
+          "  " * (depth + 1) + Console.RED + k + Console.YELLOW
+            + " -> " + Console.RESET + v.toString(depth + 1)
+        )
+        .mkString(
+          "\n"
+        ) + Console.GREEN + "\n" + "  " * depth + "}" + Console.RESET
 
 /** Companion object to provide factory constructors. */
 object DObj:
@@ -163,7 +176,9 @@ final class DArr(private[data] val _arr: List[Data])
 
   def filter[B >: Data](f: B => Boolean): List[Data] = _arr.filter(f)
 
-  override def toString(): String = _arr.mkString(", ")
+  override def toString(): String =
+    Console.GREEN + "[ " + Console.RESET + _arr.mkString(", ") +
+      Console.GREEN + " ]" + Console.RESET
 
 /** Companion object to DArr to provide factory constructors */
 object DArr:
@@ -192,7 +207,8 @@ final class DStr(private val _str: String) extends Data:
   /** Add the string of another DStr to this DStr */
   def +(dstr: DStr) = DStr(_str + dstr.str)
 
-  override def toString(): String = _str
+  override def toString(): String =
+    "\"" + Console.BLUE + _str + Console.RESET + "\""
 
 /** Factory methods for constructing a DStr */
 object DStr:
@@ -212,7 +228,8 @@ final class DNum(private val _num: BigDecimal) extends Data:
   /** Return a new DNum with the updated BigDecimal */
   def num_=(n: BigDecimal) = DNum(n)
 
-  override def toString(): String = _num.toString
+  override def toString(): String =
+    Console.GREEN + _num.toString + Console.RESET
 
 /** Factory methods for constructing a DNum */
 object DNum:
@@ -232,7 +249,8 @@ final class DBool(private val _bool: Boolean) extends Data:
   /** Return a new DBool with the updated Boolean */
   def bool_=(b: Boolean) = DBool(b)
 
-  override def toString(): String = _bool.toString
+  override def toString(): String =
+    Console.YELLOW + _bool.toString + Console.RESET
 
 /** Factory methods for constructing a DBool */
 object DBool:

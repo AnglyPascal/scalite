@@ -88,7 +88,9 @@ object Collections:
             logger.debug(s"output set to false, won't process collection $key")
             collections.remove(key)
           else
-            val dir = cobj.extractOrElse("directory")(colsDir + s"/_$key")
+            val prn = cobj.extractOrElse("directory")(colsDir)
+            val fld = cobj.extractOrElse("folder")(s"/_$key")
+            val dir = prn + (if fld.startsWith("/") then fld else "/" + fld)
             logger.debug(s"fetching files from $dir for collection $key")
 
             val sortBy =
@@ -128,3 +130,11 @@ object Collections:
   /** Process all the collections */
   def process(): Unit =
     for (_, col) <- collections do col.process()
+
+  override def toString(): String =
+    collections
+      .map((k, v) =>
+        Console.RED + k + Console.YELLOW + " -> " +
+          Console.RESET + v.toString
+      )
+      .mkString(", ")

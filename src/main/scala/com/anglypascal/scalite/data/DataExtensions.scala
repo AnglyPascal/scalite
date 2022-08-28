@@ -11,7 +11,7 @@ import scala.collection.mutable.Map
 import com.typesafe.scalalogging.Logger
 
 object DataExtensions:
-  val logger = Logger("Value extensions")
+  private val logger = Logger("Value extensions")
 
   extension (data: Obj)
     final def getOrElse(key: String)(default: String): String =
@@ -74,10 +74,3 @@ object DataExtensions:
       else
         logger.trace(s"didn't find key in $data")
         default
-
-// @main
-def dataExtensionsTest =
-  import DataExtensions.*
-
-  val d = DNum(5)
-  println(d.toString)

@@ -12,11 +12,12 @@ import com.typesafe.scalalogging.Logger
 object DateParser:
   import com.anglypascal.scalite.data.DataExtensions.*
 
+  private val logger = Logger("Date parser")
+
   def dateParseObj(dateString: String, dateFormat: String): Obj =
-    val logger = Logger("Date parser")
-    val reg1 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}\.\d{3})".r
-    val reg2 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2})".r
-    val reg3 = raw"(\d{4}-\d{2}-\d{2})".r
+    val reg1 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}\.\d{3}).*".r
+    val reg2 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}).*".r
+    val reg3 = raw"(\d{4}-\d{2}-\d{2}).*".r
     val fmt1 = "yyyy-MM-dd HH:mm:ss.SSS"
     val fmt2 = "yyyy-MM-dd HH:mm:ss"
     val fmt3 = "yyyy-MM-dd"
@@ -25,15 +26,15 @@ object DateParser:
       val dt: Option[DateTime] =
         dateString match
           case reg1(d) =>
-            logger.warn("The date and time was parsed successfully.")
+            logger.trace("The date and time was parsed successfully.")
             Some(DateTimeFormat.forPattern(fmt1).parseDateTime(d))
           case reg2(d) =>
-            logger.warn(
+            logger.trace(
               "The date was parsed successfully wthout the millisecond."
             )
             Some(DateTimeFormat.forPattern(fmt2).parseDateTime(d))
           case reg3(d) =>
-            logger.warn("The date was parsed successfully wthout the time.")
+            logger.trace("The date was parsed successfully wthout the time.")
             Some(DateTimeFormat.forPattern(fmt3).parseDateTime(d))
           case _ =>
             logger.warn(

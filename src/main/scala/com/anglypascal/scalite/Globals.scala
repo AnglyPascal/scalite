@@ -8,10 +8,11 @@ import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
+import com.anglypascal.scalite.data.DataAST
 import com.anglypascal.scalite.layouts.*
 import com.anglypascal.scalite.groups.*
 import com.anglypascal.scalite.plugins.PluginManager
-import com.anglypascal.scalite.utils.yamlParser
+import com.anglypascal.scalite.utils.yamlFileParser
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
@@ -31,6 +32,8 @@ import com.anglypascal.scalite.collections.Drafts
   * object, so that I can call those for the getOrElse
   */
 object Globals:
+
+  private val logger = Logger("Globals")
 
   /** Where stuff are */
   private lazy val dirs =
@@ -75,32 +78,33 @@ object Globals:
   private lazy val collections = Obj(
     "posts" -> Obj(
       "output" -> true,
-      "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
       "toc" -> false,
       "permalinkTemplate" -> "/{{> item }}" // TODO how is item going to be rendered?
     ),
     "drafts" -> Obj(
       "output" -> false,
-      "directory" -> dirs("collectionsDir").str,
       "sortBy" -> "dates",
       "toc" -> false,
       "permalinkTemplate" -> "/{{> item }}"
     )
   )
 
+  /** FIXME what do with this? */
   private lazy val build = Obj(
     "logLevel" -> 1
   )
 
   /** Load the configs from "/\_config.yml" file */
   private lazy val configs =
-    yamlParser(dirs("base").str + "/_config.yml")
+    logger.trace("reading config file")
+    yamlFileParser(dirs("base").str + "/_config.yml")
 
   /** Get the updated exteions for the converters. Will move this functionality
     * later to the Converters section
     */
   private def extensions =
+    logger.trace("reading ml extension modifiers")
     reading.obj
       .filter((s, _) => s.endsWith("Ext"))
       .map((s, v) =>
@@ -113,34 +117,43 @@ object Globals:
 
   /** Process the collections from the updated config */
   private def processCollections() =
+    logger.trace("setting up configs for collections")
     val colMap = configs.extractOrElse("collections")(MMap[String, Value]())
-    dirs("collectionsDir") = colMap.extractOrElse("collectionsDir")("")
-    for (key, value) <- colMap.obj do collections(key) = value
+    colMap.remove("collectionsDir") match
+      case Some(s) => dirs("collectionsDir") = s
+      case None => ()
+    for (key, value) <- colMap do collections(key) = value
 
   /** Process the defaults fro the updated config */
   private def processDefaults() =
+    logger.trace("setting the default configurations")
     val defMap = configs.extractOrElse("defaults")(MMap[String, Value]())
 
   /** Process the groups fro the updated config */
   private def processGroups() =
+    logger.trace("setting up configs for groups")
     val grpMap = configs.extractOrElse("groups")(MMap[String, Value]())
 
-  /** Process the groups fro the updated config 
-   *
-   *  FIXME: pass in the dataMap
-   *  */
+  /** Process the groups fro the updated config
+    *
+    * FIXME: pass in the dataMap
+    */
   private def processAssets: Obj =
+    logger.trace("processing the assets")
     val dataMap = configs.extractOrElse("assets")(MMap[String, Value]())
     Assets(
-      dirs("base").str + dirs.getOrElse("assetsDir")(Defaults.Directories.assetsDir),
+      dirs("base").str + dirs.getOrElse("assetsDir")(
+        Defaults.Directories.assetsDir
+      ),
       dirs("destination").str + "/assets"
     )
 
   /** Load all the plugins, defaults and custom */
   private def loadPlugins(): Unit =
+    logger.trace("loading the plugins and instantiating standalone objects")
     // default plugins
+    val dataAST = DataAST
     Converters.addConverter(Markdown)
-    Converters.addConverter(Identity)
     Layouts.addEngine(MustacheLayout)
 
     // custom plugins
@@ -150,13 +163,11 @@ object Globals:
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =
 
-    val glbsObj = Obj()
+    val glbsObj = MMap[String, Value]()
     dirs("base") = base
-    dirs("collecionsDir") = base
 
-    glbsObj.obj ++= dirs.obj
-    glbsObj.obj ++= reading.obj
-    glbsObj.obj ++= site.obj
+    for key <- dirs.obj.keys if configs.obj.contains(key) do 
+      dirs(key) = configs(key)
 
     loadPlugins()
 
@@ -164,10 +175,12 @@ object Globals:
     processCollections()
     processGroups()
 
+    glbsObj ++= dirs.obj
+    glbsObj ++= reading.obj
+    glbsObj ++= site.obj
+
     glbsObj("assets") = processAssets
 
-    /** FIXME needs to be done before processing can happen LMAO
-     */
     for (key, value) <- configs.obj do glbsObj(key) = value
 
     val _globals = DObj(glbsObj)
@@ -181,12 +194,3 @@ object Globals:
     )
 
     _globals
-
-
-/** need to make a new list_map that will define the name of the list in yaml,
-  * and the value name to assign to each of it's value.
-  *
-  * For example, if the yaml is like `authors: [a, b, c]` list_map: authors:
-  * author then the yaml will be rendered as if it were authors: [author: a,
-  * author: b, author: c]
-  */

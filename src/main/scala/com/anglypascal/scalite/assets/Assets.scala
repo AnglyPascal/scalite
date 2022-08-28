@@ -6,12 +6,14 @@ import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.anglypascal.scalite.utils.StringProcessors.slugify
 import com.rallyhealth.weejson.v1.Obj
 
 import java.io.File
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
+import scala.collection.mutable.Set
 
 /** TODO: How to add metadata to assets?
   *   - Maybe the configs will define a new Asset implementation?
@@ -33,6 +35,7 @@ case class Asset(val filepath: String, val destDir: String):
   lazy val locals = Obj(
     "filepath" -> filepath,
     "fileName" -> fileName,
+    "fileNameSlug" -> slugify(fileName, "default", true),
     "fileType" -> fileType,
     "modifiesTime" -> modifiedTime
   )
@@ -44,13 +47,18 @@ case class Asset(val filepath: String, val destDir: String):
 
 object Assets:
 
-  /** Read all the asset files from directory and return a DObj holding metadata
-    * for them
-    */
+  private val assets = Set[Asset]()
+
+  /** Read asset files from directory and return metadata stored in Obj */
   def apply(from: String, to: String): Obj =
     val files = getListOfFilepaths(from)
     val obj = Obj()
-    files.map(f => Asset(f, to)).map(a => { obj(a.fileName) = a.locals })
+    files
+      .map(f => Asset(f, to))
+      .foreach(a => { obj(a.fileName) = a.locals; assets += a })
     obj
+
+  /** Copy all the assets in this object */
+  def copy(): Unit = assets.map(_.copy())
 
   /** TODO: What about online assets? */

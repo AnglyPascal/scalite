@@ -18,6 +18,7 @@ import com.anglypascal.scalite.utils.cmpOpt
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.typesafe.scalalogging.Logger
 
 /** Trait to provide support for collections of things. Each collection can be
   * rendered to a new webpage with a list of all the posts. This can be toggled
@@ -35,11 +36,12 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
 ) extends Plugin
     with Page:
 
+  private val logger = Logger(s"$name collection")
   protected val parentName = name
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
-  private var _items: Map[String, A] = _
+  private var _items: Map[String, A] = Map()
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
@@ -50,8 +52,10 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     *   global configs
     */
   def setup(directory: String, _globals: DObj) =
+    logger.debug(s"collecting $name from $directory")
     globals = _globals
     val files = getListOfFilepaths(directory)
+    logger.debug(s"found ${files.length} files in $directory")
     def f(fn: String) =
       (getFileName(fn), itemConstructor(directory, fn, globals, locals))
     _items = files.filter(Converters.hasConverter).map(f).toMap
@@ -141,3 +145,6 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     * it
     */
   protected[collections] def cache(): Unit = ???
+
+  override def toString(): String = 
+    "[ " + items.map((_, v) => v.toString).mkString(", ") + " ]"

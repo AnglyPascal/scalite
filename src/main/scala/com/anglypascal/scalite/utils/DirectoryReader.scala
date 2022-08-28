@@ -39,7 +39,7 @@ object DirectoryReader:
 
   /** Get the relative paths to the files inside this directory */
   def getListOfFilepaths(dir: String): Array[String] =
-    getListOfFiles(dir, ".^".r).map(_.getPath)
+    getListOfFiles(dir, ".^".r).map(_.getPath.stripPrefix(dir))
 
   /** Recursively find the files inside the directory dir that don't match the
     * given regex exr

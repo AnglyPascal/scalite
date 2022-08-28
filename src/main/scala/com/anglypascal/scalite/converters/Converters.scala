@@ -10,8 +10,8 @@ import scala.collection.mutable.Map
 object Converters:
 
   /** Set of all the avaiable converters. When an object implements the
-    * Converter trait, it gets added to this set. Each converter is mapped to the
-    * filetype it converts.
+    * Converter trait, it gets added to this set. Each converter is mapped to
+    * the filetype it converts.
     */
   private val _converters = Map[String, Converter]()
 
@@ -47,12 +47,15 @@ object Converters:
   def hasConverter(ext: String): Boolean =
     findByExt(ext) match
       case None =>
-        logger.warn(s"Converter could not be found for file $ext.")
+        logger.warn(
+          s"Converter could not be found for file ${Console.RED + ext + Console.RESET}"
+        )
         false
       case Some(conv) =>
         logger.debug(
-          s"Converter object {} found for file $ext.",
-          conv.getClass.getName
+          s"Converter ${Console.GREEN + conv.getClass.getName
+              .stripSuffix("$") + Console.RESET} found for " +
+            s"${Console.GREEN + ext + Console.RESET}"
         )
         true
 
@@ -74,7 +77,8 @@ object Converters:
       case None =>
         logger.warn(
           "Converter could not be found, " +
-            s"so no conversion was made for file $filepath."
+            "so no conversion was made for file " +
+            Console.RED + filepath + Console.RESET
         )
         str
 
@@ -83,5 +87,3 @@ object Converters:
     */
   def addConverter(conv: Converter): Unit =
     _converters += ((conv.fileType, conv))
-
-

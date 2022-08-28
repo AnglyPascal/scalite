@@ -7,7 +7,7 @@ import com.anglypascal.mustache.Mustache
 import scala.language.implicitConversions
 
 /** AST Support for the Data implementation to be used in Mustache */
-private[scalite] class DataAST(v: Data) extends AST:
+private[scalite] final class DataAST(v: Data) extends AST:
 
   import DataAST.given_Conversion_Data_AST
 

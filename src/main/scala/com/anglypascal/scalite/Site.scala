@@ -11,10 +11,9 @@ import com.anglypascal.scalite.documents.*
   * used if the file has no date or is in _draft folder the cache structure can
   * be inspired from https://jekyllrb.com/docs/structure/
   */
-case class Site(base_dir: String):
+case class Site(base_dir: String)
 
   /** */
-  val c = DataAST
   // val globals = Globals.globals
 
   // val layouts = MustacheLayout(globals("base").str + globals("layout_dir").str)

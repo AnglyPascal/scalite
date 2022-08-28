@@ -1,6 +1,5 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
@@ -13,6 +12,7 @@ import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 
 import scala.collection.mutable.Set
+import com.typesafe.scalalogging.Logger
 
 /** Each PostsGroup object represents a collection that posts can belong to. Tag
   * and Categories are the two pre-defined sublcasses of this trait.
@@ -29,6 +29,8 @@ trait PostsGroup(
     val name: String,
     globals: DObj
 ) extends Page:
+
+  private val logger = Logger("PostsGroup")
 
   /** Set of posts that belong to this collection. */
   private val _posts: Set[Post] = Set()
@@ -81,7 +83,8 @@ trait PostsGroup(
       case Some(paren) =>
         paren.render(context)
       case None =>
-        throw NoLayoutException(s"No layout found for $ctype collections")
+        logger.warn(s"no layout found for $ctype $name")
+        ""
 
   /** needs its special url
     */

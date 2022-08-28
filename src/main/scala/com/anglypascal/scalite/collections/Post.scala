@@ -1,7 +1,6 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.NoLayoutException
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
@@ -44,6 +43,8 @@ class Post(
 
   private val logger = Logger("Post")
 
+  logger.debug(s"getting post at $parentDir$relativePath")
+
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
     */
@@ -68,7 +69,7 @@ class Post(
     */
   lazy val title: String =
     front_matter.extractOrElse("title")(
-      titleParser(filepath)
+      titleParser(filename)
         .map(titlify(_))
         .getOrElse("Untitled" + this.toString)
     ) // so that titles are always different for different posts
@@ -86,32 +87,35 @@ class Post(
     * Maybe DraftPost will extend Post overriding this time handling thing
     */
   private lazy val urlObj: DObj =
-    val dateString = front_matter.extractOrElse("date")(filepath)
+    val dateString = front_matter.extractOrElse("date")(filename)
     val dateFormat =
       front_matter.extractOrElse("dateFormat")(
         globals.getOrElse("dateFormat")("yyyy-MM-dd")
       )
     val obj = dateParseObj(dateString, dateFormat)
+
     obj("title") = title
-    obj("modifiedTime") = lastModifiedTime(filepath, dateFormat)
+    obj("lastModifiedTime") = lastModifiedTime(filepath, dateFormat)
     obj("outputExt") = outputExt
     obj("filename") = filename
     obj("collection") = collection.getOrElse("name")("posts")
+    for (k, s) <- groups do obj(k) = s.map(_.name).mkString("/")
+
     // TODO slugs
     DObj(obj)
 
   /** Template for the permalink of the post */
-  protected lazy val permalink = 
+  protected lazy val permalink =
     val permalinkTemplate =
-        front_matter.extractOrElse("permalinkTemplate")(
-          globals
-            .getOrElse("collection")(DObj())
-            .getOrElse("permalinkTemplate")(
-              globals.getOrElse("permalinkTemplate")(
-                Defaults.permalinkTemplate
-              )
+      front_matter.extractOrElse("permalinkTemplate")(
+        globals
+          .getOrElse("collection")(DObj())
+          .getOrElse("permalinkTemplate")(
+            globals.getOrElse("permalinkTemplate")(
+              Defaults.permalinkTemplate
             )
-        )
+          )
+      )
     purifyUrl(URL(permalinkTemplate)(urlObj))
 
   /** Returns whether to render this post or not. Default is true. Putting
@@ -209,6 +213,10 @@ class Post(
     * specified in the list in CollectionsHandler companion object
     */
   for groupObj <- Group.availableGroups do groupObj.addToGroups(this, globals)
+
+  override def toString(): String =
+    Console.CYAN + title + Console.RESET + 
+      "(" + Console.GREEN + date + Console.RESET + ")"
 
 object Post extends ItemConstructor[Post]:
   def apply(

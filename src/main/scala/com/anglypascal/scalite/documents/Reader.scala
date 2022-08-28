@@ -2,11 +2,13 @@ package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.utils.DateParser.dateToString
 import com.anglypascal.scalite.utils.DirectoryReader.readFile
+import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.yamlParser
 import com.rallyhealth.weejson.v1.Obj
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.typesafe.scalalogging.Logger
 
 /** Document represents the pages of the site that are generated from the
   * templates and user created content files. This includes all mustache
@@ -19,8 +21,11 @@ import java.nio.file.Paths
   */
 trait Reader(val filepath: String):
 
+  /** */
+  private val logger = Logger("Reader")
+
   /** Strip the filepath to get the filename */
-  private val filename: String = filepath.split("/").last.split(".").head
+  private val filename: String = getFileName(filepath)
 
   /** read the file and get the string from it */
   private val src = readFile(filepath).toString

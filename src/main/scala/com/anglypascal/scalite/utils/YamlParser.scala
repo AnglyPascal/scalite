@@ -1,6 +1,5 @@
 package com.anglypascal.scalite.utils
 
-import com.anglypascal.scalite.YAMLParserException
 import com.rallyhealth.weejson.v1._
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
