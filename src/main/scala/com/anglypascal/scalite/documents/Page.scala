@@ -20,6 +20,8 @@ import com.typesafe.scalalogging.Logger
   */
 trait Page:
 
+  private val logger = Logger("Page writer")
+
   /** Specify the parent template name. Mandate calling it if visible needs to
     * be changed
     */
@@ -49,10 +51,12 @@ trait Page:
   /** Method to write the content returned by the render method to the output
     * file at a relative path given by the relative permalink.
     */
-  def write(): Unit =
+  def write(dryRun: Boolean = false): Unit =
     if !visible then return
     val path =
       if permalink.endsWith(outputExt) then permalink
       else permalink + outputExt
-    Logger("Page writer").debug(s"Writing page to $path")
-    // Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))
+    if !dryRun then
+      logger.trace(s"writing $this to $path")
+      Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))
+    else logger.debug(s"would write $this to $path")

@@ -108,9 +108,11 @@ object Layouts:
   def get(name: String): Option[Layout] =
     layouts.get(name) match
       case None =>
-        logger.debug(s"Layout named $name not found")
+        logger.debug(s"layout $name not found")
         None
-      case some => some
+      case some => 
+        logger.debug(s"layout $name found")
+        some
 
   override def toString(): String =
     layouts

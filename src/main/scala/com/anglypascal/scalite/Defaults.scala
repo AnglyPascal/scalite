@@ -7,7 +7,7 @@ object Defaults:
 
   val title = "A Shiny New Website"
   val description = "Site description"
-  val permalinkTemplate = "{{> default }}"
+  val permalinkTemplate = "{{> none }}"
   val staticFilesPermalink = "/{{title}}.{{outputExt}}"
   val dateFormat = "dd MMM, yyyy"
   val showExceprts = true

@@ -183,8 +183,12 @@ class Post(
         )
     )
     parent match
-      case Some(l) => l.render(context, str)
-      case None    => str
+      case Some(l) =>
+        logger.debug(s"$this has parent layout ${l.name}")
+        l.render(context, str)
+      case None =>
+        logger.debug(s"$this has no parent layout")
+        str
 
   /** TODO: if showExcerpt is true, then create an excerpt object here? And add
     * the excerpt to the obj.
@@ -215,7 +219,7 @@ class Post(
   for groupObj <- Group.availableGroups do groupObj.addToGroups(this, globals)
 
   override def toString(): String =
-    Console.CYAN + title + Console.RESET + 
+    Console.CYAN + title + Console.RESET +
       "(" + Console.GREEN + date + Console.RESET + ")"
 
 object Post extends ItemConstructor[Post]:
