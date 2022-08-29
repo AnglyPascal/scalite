@@ -14,7 +14,7 @@ import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
-import com.anglypascal.scalite.groups.*
+import com.anglypascal.scalite.groups.{Tags, Categories, Groups}
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
@@ -201,8 +201,8 @@ object Globals:
     val dataAST = DataAST
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
-    Groups.addNewGroup(Tag)
-    Groups.addNewGroup(Category)
+    Groups.addNewGroup(Tags)
+    Groups.addNewGroup(Categories)
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())

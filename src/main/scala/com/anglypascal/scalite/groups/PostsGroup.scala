@@ -18,7 +18,7 @@ import com.typesafe.scalalogging.Logger
   * and Categories are the two pre-defined sublcasses of this trait.
   *
   * @param ctype
-  *   the type of this PostsGroup, like "tag" or "category"
+  *   the type of this PostsGroup, like "tags" or "categories"
   * @param name
   *   the name of this PostsGroup
   * @param globals

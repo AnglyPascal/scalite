@@ -10,7 +10,7 @@ import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.LinkedHashMap
 
-object Tag extends Group("tags"):
+object Tags extends Group("tags"):
 
   /** Tag defines a group of posts. A post can have multiple tags, and each tag
     * can have multiple posts with this tag.

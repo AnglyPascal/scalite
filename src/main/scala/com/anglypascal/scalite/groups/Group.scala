@@ -6,16 +6,17 @@ package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.data.DObj
-
-import scala.collection.mutable.{LinkedHashMap, ListBuffer}
 import com.rallyhealth.weejson.v1.Obj
+
+import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.ListBuffer
 
 /** Creates a new type of Group. Needs the implementation of addToGroups which
   * defines how a post is added to the Group.
   *
   * To define a new Group with custom behavior, extend this trait by creating a
-  * GroupType class/object that can override behavior of PostsGroup. The addToGroups
-  * method defines the way posts adds themselves to this Group.
+  * GroupType class/object that can override behavior of PostsGroup. The
+  * addToGroups method defines the way posts adds themselves to this Group.
   */
 trait Group(val ctype: String):
 
@@ -45,9 +46,9 @@ trait Group(val ctype: String):
     */
   def addToGroups(post: Post, globals: DObj): Unit
 
-/** Object that holds all the Groups defined for this website. By
-  * default these are Tag and Category. New groups can be added by creating a
-  * object of the trait Group.
+/** Object that holds all the Groups defined for this website. By default these
+  * are Tag and Category. New groups can be added by creating a object of the
+  * trait Group.
   */
 object Groups:
 
@@ -57,3 +58,11 @@ object Groups:
 
   /** Add a new Group to this site */
   def addNewGroup(group: Group) = _availableGroups += group
+
+  /** TODO: Add global configs, which options do we need to add? Groups can
+    * potentially be more powerful I guess
+    */
+  def apply(grpObj: Obj): Unit = ???
+
+  /** Create pages for each PostsGroup that wishes to be rendered */
+  def process(): Unit = ???
