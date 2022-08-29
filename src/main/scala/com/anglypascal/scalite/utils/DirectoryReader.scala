@@ -5,6 +5,9 @@ import com.typesafe.scalalogging.Logger
 import java.io.File
 import scala.io.Source
 import scala.util.matching.Regex
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.charset.StandardCharsets
 
 object DirectoryReader:
 
@@ -31,12 +34,16 @@ object DirectoryReader:
   /** Recover just the filename without the exteions from a file path */
   def getFileName(filepath: String): String =
     if filepath == "" || filepath.endsWith("/") || filepath.endsWith(".") then
-      logger.warn(s"Couldn't find valid filename in $filepath")
+      logger.warn(
+        s"filename invalid for ${Console.RED + filepath + Console.RESET}"
+      )
       return ""
     filepath.split('/').last.split('.').headOption match
       case Some(s) => s
       case None =>
-        logger.warn(s"Couldn't find valid filename in $filepath")
+        logger.warn(
+          s"filename invalid for ${Console.RED + filepath + Console.RESET}"
+        )
         ""
 
   /** Get the relative paths to the files inside this directory */
@@ -48,12 +55,18 @@ object DirectoryReader:
     */
   def getListOfFiles(dir: File, exr: Regex): Array[File] =
     if !dir.isDirectory then
-      logger.error(s"Path ${dir.getAbsolutePath} is not a directory")
+      logger.error(
+        s"Path ${Console.RED + dir.getAbsolutePath + Console.RESET}" +
+          " is not a directory"
+      )
       return Array()
 
     val these = dir.listFiles()
     if these == null then
-      logger.error(s"IO error while accessing ${dir.getAbsolutePath}")
+      logger.error(
+        "IO error while accessing " +
+          Console.RED + dir.getAbsolutePath + Console.RESET
+      )
       return Array()
 
     val good = these.filter(f => !exr.matches(f.getPath))
@@ -61,3 +74,23 @@ object DirectoryReader:
 
   def getListOfFiles(dir: String, exr: Regex): Array[File] =
     getListOfFiles(new File(dir), exr)
+
+  private val _writeTo: String => (String, String) => Unit = base =>
+    (path, render) =>
+      val dir = Paths.get(base + path)
+      if !Files.exists(dir) then
+        logger.debug(
+          Console.GREEN + base + path + Console.RESET + " doesn't exist, creating it"
+        )
+        Files.createDirectories(dir.getParent)
+        Files.createFile(dir)
+        Files.write(dir, render.getBytes(StandardCharsets.UTF_8))
+      else
+        logger.debug(
+          Console.YELLOW + base + path + Console.RESET + " exists, ignoring"
+        )
+
+  var writeTo: (String, String) => Unit = _
+
+  def apply(base: String) =
+    writeTo = _writeTo(base)

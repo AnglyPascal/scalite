@@ -24,6 +24,7 @@ import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.collections.StaticPages
 import com.anglypascal.scalite.collections.Drafts
+import com.anglypascal.scalite.utils.DirectoryReader
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -185,16 +186,17 @@ object Globals:
 
     val _globals = DObj(glbsObj)
 
+    val _base = dirs.getOrElse("base")(Defaults.Directories.base)
+    val _dest = dirs.getOrElse("destination")(Defaults.Directories.destination)
+    val _colD =
+      dirs.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
+    val _layD = dirs.getOrElse("layoutsDir")(Defaults.Directories.layoutsDir)
+    val _parD = dirs.getOrElse("partialsDir")(Defaults.Directories.partialsDir)
+
     // TODO collection templates
+    DirectoryReader(_base + _dest)
     Converters.modifyExtensions(extensions)
-    Collections(
-      dirs("base").str + dirs("collectionsDir").str,
-      collections,
-      _globals
-    )
-    Layouts(
-      dirs("base").str + dirs("layoutsDir").str,
-      dirs("base").str + dirs("partialsDir").str
-    )
+    Collections(_base + _colD, collections, _globals)
+    Layouts(_base + _layD, _base + _parD)
 
     _globals

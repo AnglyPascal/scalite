@@ -1,10 +1,8 @@
 package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.layouts.Layouts
+import com.anglypascal.scalite.utils.DirectoryReader.writeTo
 
-import java.nio.file.Files
-import java.nio.file.Paths
-import java.nio.charset.StandardCharsets
 import com.typesafe.scalalogging.Logger
 
 /** Page represents a page of the website.
@@ -58,5 +56,5 @@ trait Page:
       else permalink + outputExt
     if !dryRun then
       logger.trace(s"writing $this to $path")
-      Files.write(Paths.get(path), render.getBytes(StandardCharsets.UTF_8))
+      writeTo(path, render)
     else logger.debug(s"would write $this to $path")

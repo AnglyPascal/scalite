@@ -7,6 +7,9 @@ import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Markdown
+import com.anglypascal.scalite.utils.DirectoryReader
+import java.nio.file.Files
+import java.nio.file.Paths
 
 class PostSpecs extends AnyFlatSpec:
 
@@ -37,13 +40,24 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  it should "handle layout rendering properly" in {
+  it should "handle rendering and file creation properly" in {
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
+    DirectoryReader("src/test/resources/site_template/_site")
     Layouts(
       "src/test/resources/site_template/_layouts",
       "src/test/resources/site_template/_partials"
     )
+
     val pst = new Post(pDir, rPth, glb1, clcs)
-    pst.write(true)
+    pst.write()
+    val p = Paths.get(
+      "src/test/resources/site_template" +
+        "/_site/05_19/super-short-article.html"
+    )
+    assert(Files.exists(p))
+    Files.delete(p)
+    assert(!Files.exists(p))
   }
+
+

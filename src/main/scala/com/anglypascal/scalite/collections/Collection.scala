@@ -63,6 +63,10 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs, set the sortBy and toc variables, and receive
     * local variables for the rendering of this collection page.
+    *
+    * TODO: i think there should be a better sortby option. there should be a
+    * categorize option, that asks for a field in posts oject, and will categorize the
+    * posts based on that field in this toc page.
     */
   def setup(
       directory: String,

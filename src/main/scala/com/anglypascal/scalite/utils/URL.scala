@@ -22,7 +22,7 @@ case class URL(str: String):
       "weekdate" ->
         "{{categories}}/{{year}}/W{{week}}/{{short_day}}/{{title}}{{output_ext}}",
       "none" ->
-        "{{categories}}/{{title}}{{output_ext}}"
+        "{{categories}}/{{slugTitle}}{{output_ext}}"
     ).map((s, m) => (s, new Mustache(m)))
 
 /** TODO: The permalink url will be given in form of an absolute link or a

@@ -82,6 +82,9 @@ object Converters:
         )
         str
 
+  def findExt(filepath: String) =
+    findByExt(filepath).map(_.outputExt).getOrElse(".html")
+
   /** The given converter to the converters set, mapped to its filetype. This
     * overrides previously defined converter for this filetype.
     */

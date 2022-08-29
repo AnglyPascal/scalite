@@ -43,7 +43,9 @@ class Post(
 
   private val logger = Logger("Post")
 
-  logger.debug(s"getting post at $parentDir$relativePath")
+  logger.debug(
+    "getting post at " + Console.GREEN + parentDir + relativePath + Console.RESET
+  )
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -101,7 +103,10 @@ class Post(
     obj("collection") = collection.getOrElse("name")("posts")
     for (k, s) <- groups do obj(k) = s.map(_.name).mkString("/")
 
-    // TODO slugs
+    obj("slugTitle") = slugify(title)
+    obj("slugTitlePretty") = slugify(title, "pretty")
+    obj("slugTitleCased") = slugify(title, "default", true)
+
     DObj(obj)
 
   /** Template for the permalink of the post */
@@ -122,16 +127,11 @@ class Post(
     * output: false inside collection.post complete turns off rendering of
     * posts.
     */
-  lazy val visible: Boolean = front_matter.extractOrElse("visible")(true)
+  lazy val visible =
+    front_matter.extractOrElse("visible")(collection.getOrElse("visible")(true))
 
-  private lazy val _outputExt: String =
-    front_matter.extractOrElse("outputExt")(
-      Converters
-        .findByExt(filepath)
-        .map(_.outputExt)
-        .getOrElse(".html")
-    )
-  protected lazy val outputExt = _outputExt
+  protected lazy val outputExt =
+    front_matter.extractOrElse("outputExt")(Converters.findExt(filepath))
 
   lazy val locals =
     front_matter.obj ++= List(
