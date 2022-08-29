@@ -1,0 +1,36 @@
+<header>
+  <div class="flexbox">
+    <div class="center-on-mobiles">
+      <h1>
+        <a href="/" class="logo">
+          <span class="sr-only">{{#site}}{{name}}{{/site}}</span>
+          <img src="img/logo-2x.png" 
+               width="140" height="65" alt="Jekyll Logo">
+        </a>
+      </h1>
+    </div>
+    <nav class="main-nav hide-on-mobiles">
+      {{> primary_nav_items }}
+    </nav>
+    <div class="search hide-on-mobiles">
+      {{> search_input }}
+    </div>
+    <div class="meta hide-on-mobiles">
+      {{#site}}
+      <ul>
+        <li>
+          <a href="{{ repository }}/releases/tag/v{{ version }}">
+            v{{ version }}
+          </a>
+        </li>
+        <li>
+          <a href="{{ repository }}">GitHub</a>
+        </li>
+      </ul>
+      {{/site}}
+    </div>
+  </div>
+  <nav class="mobile-nav show-on-mobiles">
+    {{> mobile_nav_items }}
+  </nav>
+</header>

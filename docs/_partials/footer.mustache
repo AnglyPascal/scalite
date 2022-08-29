@@ -1,0 +1,12 @@
+<footer>
+  <div class="grid">
+    <div class="unit one-third center-on-mobiles">
+      <p>Scalite is lovingly maintained by 
+        {{#site}}{{#author}}{{name}}, {{github}}{{/author}}{{/site}}
+      </p>
+      <p>The contents of this website are <br />
+        &copy;&nbsp;{{ site.time | date: '%Y' }} under the terms of the 
+        <a href="{{ site.repository }}/blob/master/LICENSE">MIT&nbsp;License</a>.
+      </p>
+    </div>
+</footer>
