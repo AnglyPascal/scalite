@@ -7,23 +7,25 @@ class Draft(
     parentDir: String,
     relativePath: String,
     globals: DObj,
-    collection: DObj
+    collection: DObj,
+    rType: String
 ) extends Post(
       parentDir,
       relativePath,
       globals,
-      collection
-    ) // except for the date
+      collection,
+      rType
+    )
 
 object Draft extends ItemConstructor[Draft]:
   def apply(
       parentDir: String,
       relativePath: String,
       globals: DObj,
-      collection: DObj
+      collection: DObj,
+      rType: String
   ): Draft =
-    new Draft(parentDir, relativePath, globals, collection)
+    new Draft(parentDir, relativePath, globals, collection, rType)
 
-/** TODO: date will be the motified date collected from the file informations.
-  */
+/** TODO: date will be the motified date */
 object Drafts extends Collection[Draft](Draft)("drafts")

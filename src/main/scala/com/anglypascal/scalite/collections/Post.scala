@@ -36,8 +36,9 @@ class Post(
     parentDir: String,
     relativePath: String,
     globals: DObj,
-    collection: DObj
-) extends Item(parentDir, relativePath, globals, collection)
+    collection: DObj,
+    rType: String = "posts"
+) extends Item(parentDir, relativePath, globals, collection, rType)
     // with ReaderOps
     with Page:
 
@@ -227,6 +228,7 @@ object Post extends ItemConstructor[Post]:
       parentDir: String,
       relativePath: String,
       globals: DObj,
-      collection: DObj
+      collection: DObj,
+      rType: String
   ): Post =
-    new Post(parentDir, relativePath, globals, collection)
+    new Post(parentDir, relativePath, globals, collection, rType)

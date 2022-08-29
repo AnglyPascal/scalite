@@ -1,17 +1,24 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.collections.Drafts
 import com.anglypascal.scalite.collections.Posts
+import com.anglypascal.scalite.collections.StaticPages
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.DataAST
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
-import com.anglypascal.scalite.data.DataAST
-import com.anglypascal.scalite.layouts.*
+import com.anglypascal.scalite.documents.Assets
+import com.anglypascal.scalite.documents.DataFiles
 import com.anglypascal.scalite.groups.*
+import com.anglypascal.scalite.layouts.Layouts
+import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
+import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.utils.yamlFileParser
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
@@ -20,17 +27,9 @@ import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
-import com.anglypascal.scalite.documents.Assets
-import com.anglypascal.scalite.converters.Identity
-import com.anglypascal.scalite.collections.StaticPages
-import com.anglypascal.scalite.collections.Drafts
-import com.anglypascal.scalite.utils.DirectoryReader
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
-  *
-  * TODO I really should define all these defaults in a separate immutable
-  * object, so that I can call those for the getOrElse
   */
 object Globals:
 
@@ -96,10 +95,33 @@ object Globals:
     "logLevel" -> 1
   )
 
+  private def _base =
+    dirs.getOrElse("base")(Defaults.Directories.base)
+  private def _dest =
+    dirs.getOrElse("destination")(Defaults.Directories.destination)
+  private def _colD =
+    dirs.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
+  private def _layD =
+    dirs.getOrElse("layoutsDir")(Defaults.Directories.layoutsDir)
+  private def _parD =
+    dirs.getOrElse("partialsDir")(Defaults.Directories.partialsDir)
+  private def _plugD =
+    dirs.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
+  private def _dataD =
+    dirs.getOrElse("dataDir")(Defaults.Directories.dataDir)
+  private def _assetD =
+    dirs.getOrElse("assetsDir")(Defaults.Directories.assetsDir)
+
   /** Load the configs from "/\_config.yml" file */
   private lazy val configs =
     logger.trace("reading config file")
-    yamlFileParser(dirs("base").str + "/_config.yml")
+    yamlFileParser(dirs("base").str + "/_config.yml") match
+      case v: Obj => v
+      case _ =>
+        logger.error(
+          s"yaml file ${dirs("base").str} could not be read into an weejson Obj"
+        )
+        Obj()
 
   /** Get the updated exteions for the converters. Will move this functionality
     * later to the Converters section
@@ -115,6 +137,15 @@ object Globals:
           case _      => ""
         (s.dropRight(3), ext)
       )
+
+  private def processScopedDefaults() =
+    logger.trace("setting up scoped defaults")
+    configs.obj.remove("defaults").getOrElse(null) match
+      case v: Arr => ScopedDefaults(_base, v)
+      case _ => ()
+    
+
+    
 
   /** Process the collections from the updated config */
   private def processCollections() =
@@ -142,12 +173,7 @@ object Globals:
   private def processAssets: Obj =
     logger.trace("processing the assets")
     val dataMap = configs.extractOrElse("assets")(MMap[String, Value]())
-    Assets(
-      dirs("base").str + dirs.getOrElse("assetsDir")(
-        Defaults.Directories.assetsDir
-      ),
-      dirs("destination").str + "/assets"
-    )
+    Assets(_base + _assetD, _dest + "/assets")
 
   /** Load all the plugins, defaults and custom */
   private def loadPlugins(): Unit =
@@ -159,7 +185,7 @@ object Globals:
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
-    PluginManager(dirs("base").str + dirs("pluginsDir").str, DObj(plugMap))
+    PluginManager(_base + _plugD, DObj(plugMap))
 
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =
@@ -181,19 +207,12 @@ object Globals:
     glbsObj ++= site.obj
 
     glbsObj("assets") = processAssets
+    glbsObj("data") = DataFiles(_base + _dataD)
 
     for (key, value) <- configs.obj do glbsObj(key) = value
 
     val _globals = DObj(glbsObj)
 
-    val _base = dirs.getOrElse("base")(Defaults.Directories.base)
-    val _dest = dirs.getOrElse("destination")(Defaults.Directories.destination)
-    val _colD =
-      dirs.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
-    val _layD = dirs.getOrElse("layoutsDir")(Defaults.Directories.layoutsDir)
-    val _parD = dirs.getOrElse("partialsDir")(Defaults.Directories.partialsDir)
-
-    // TODO collection templates
     DirectoryReader(_base + _dest)
     Converters.modifyExtensions(extensions)
     Collections(_base + _colD, collections, _globals)

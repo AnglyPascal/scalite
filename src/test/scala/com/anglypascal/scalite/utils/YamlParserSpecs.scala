@@ -6,7 +6,7 @@ class YamlParserSpecs extends AnyFlatSpec:
 
   it should "parser yaml properly" in {
     val yaml = "hello: world"
-    val obj = yamlParser(yaml)
+    val obj = frontMatterParser(yaml)
     assert(obj("hello").str === "world")
   }
   

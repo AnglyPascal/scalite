@@ -3,7 +3,8 @@ package com.anglypascal.scalite.documents
 import com.anglypascal.scalite.utils.DateParser.dateToString
 import com.anglypascal.scalite.utils.DirectoryReader.readFile
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
-import com.anglypascal.scalite.utils.yamlParser
+import com.anglypascal.scalite.utils.frontMatterParser
+import com.anglypascal.scalite.ScopedDefaults
 import com.rallyhealth.weejson.v1.Obj
 
 import java.nio.file.Files
@@ -18,7 +19,7 @@ import java.nio.file.Paths
   * @param filepath
   *   the path to the file
   */
-trait Reader(val filepath: String):
+trait Reader(val filepath: String, rType: String = null):
 
   /** Strip the filepath to get the filename */
   private val filename: String = getFileName(filepath)
@@ -32,8 +33,9 @@ trait Reader(val filepath: String):
   /** Match the regex and store the results in a weejson Value and content.
     */
   val (front_matter, main_matter) =
+    val scope = ScopedDefaults.getDefaults(filepath, rType)
     src match
-      case yaml_regex(a, b) => 
-        (yamlParser(a), b)
-      case _                => (Obj(), src)
-
+      case yaml_regex(a, b) =>
+        scope.obj ++= frontMatterParser(a).obj
+        (scope, b)
+      case _ => (scope, src)

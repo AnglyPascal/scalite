@@ -16,8 +16,9 @@ class GenericItem(
     parentDir: String,
     relativePath: String,
     globals: DObj,
-    collection: DObj
-) extends Item(parentDir, relativePath, globals, collection):
+    collection: DObj,
+    rType: String
+) extends Item(parentDir, relativePath, globals, collection, rType):
 
   /** Title of this item */
   val title: String =
@@ -53,9 +54,10 @@ object GenericItem extends ItemConstructor[GenericItem]:
       parentDir: String,
       relativePath: String,
       globals: DObj,
-      collection: DObj
+      collection: DObj,
+      rType: String
   ): GenericItem =
-    new GenericItem(parentDir, relativePath, globals, collection)
+    new GenericItem(parentDir, relativePath, globals, collection, rType)
 
 /** Defines the collection of generic item */
 class GenericCollection(name: String)

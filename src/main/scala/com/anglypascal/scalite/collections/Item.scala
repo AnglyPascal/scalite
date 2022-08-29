@@ -23,8 +23,9 @@ abstract class Item(
     val parentDir: String,
     val relativePath: String,
     private val globals: DObj,
-    private val collection: DObj
-) extends Reader(parentDir + relativePath):
+    private val collection: DObj,
+    rType: String
+) extends Reader(parentDir + relativePath, rType):
 
   /** local variales for this item */
   def locals: DObj
@@ -39,5 +40,6 @@ trait ItemConstructor[A <: Item]:
       parentDir: String,
       relativePath: String,
       globals: DObj,
-      collection: DObj
+      collection: DObj,
+      rType: String
   ): A

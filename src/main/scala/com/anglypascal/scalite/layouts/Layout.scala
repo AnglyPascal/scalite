@@ -22,8 +22,9 @@ abstract class Layout(
     val lang: String,
     val name: String,
     layoutDir: String,
-    layoutPath: String
-) extends Reader(layoutDir + layoutPath):
+    layoutPath: String,
+    rType: String
+) extends Reader(layoutDir + layoutPath, rType):
 
   /** */
   private val logger = Logger("Mustache Layout")

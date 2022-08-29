@@ -16,8 +16,9 @@ class StaticPage(
     parentDir: String,
     relativePath: String,
     globals: DObj,
-    collection: DObj
-) extends Item(parentDir, relativePath, globals, collection)
+    collection: DObj,
+    rType: String
+) extends Item(parentDir, relativePath, globals, collection, rType)
     with Page:
   /** */
 
@@ -80,8 +81,9 @@ object StaticPage extends ItemConstructor[StaticPage]:
       parentDir: String,
       relativePath: String,
       globals: DObj,
-      collection: DObj
+      collection: DObj,
+      rType: String
   ): StaticPage =
-    new StaticPage(parentDir, relativePath, globals, collection)
+    new StaticPage(parentDir, relativePath, globals, collection, rType)
 
 object StaticPages extends Collection[StaticPage](StaticPage)("statics")

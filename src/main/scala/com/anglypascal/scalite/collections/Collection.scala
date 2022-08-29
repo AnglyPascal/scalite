@@ -57,7 +57,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     val files = getListOfFilepaths(directory)
     logger.debug(s"found ${files.length} files in $directory")
     def f(fn: String) =
-      (getFileName(fn), itemConstructor(directory, fn, globals, locals))
+      (getFileName(fn), itemConstructor(directory, fn, globals, locals, name))
     _items = files.filter(Converters.hasConverter).map(f).toMap
 
   /** Collect all the elements of this collection from the given directory, will
@@ -138,10 +138,10 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
         p.render(context)
 
   /** This sorts out the items, renders them, and writes them to the disk */
-  protected[collections] def process(): Unit =
+  protected[collections] def process(dryrun: Boolean = false): Unit =
     for (_, item) <- items do
       item match
-        case item: Page => item.write()
+        case item: Page => item.write(dryrun)
         case _          => ()
     write()
 

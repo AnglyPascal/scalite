@@ -1,7 +1,7 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.commands.DryRun
-import com.anglypascal.scalite.utils.yamlParser
+import com.anglypascal.scalite.utils.frontMatterParser
 import scala.io.Source
 
 @main

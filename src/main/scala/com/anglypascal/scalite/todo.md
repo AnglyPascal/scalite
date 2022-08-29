@@ -1,35 +1,14 @@
-# First run
-
-- first try out the configs and logger from the different modules
-- test that the objects are being initiated, they are fetching the files.
-- do not process in this run. 
-- for this, write a new command, dryrun, that will only log stuff, and write where 
-  things will end up 
-- test collections are properly fetching files
-
-# Second run
-
-- test converters, layout rendering
-- test permalink rendering
-
 # TODO List
 
-## Context Handler
+## URGENT
 
 - Write the string handlers:
-    - How are we using `slugify()` and `titlifiy()`?
     - `excerpt()`: creates an excerpt of the post. Copy jekyll for now.
 
 - Start with global settings handling. Write the specification for items
     - We don't need many options to handle posts. Then check the code for posts, and
         test a small case.
     - Check url creation, that it words and the partials work.
-
-- Make a directory builder and file writer
-    - Inside collection items, define the output path. It should be defined by the url.
-    - While you're at it, look into the caching system.
-
-- Write the Assets class for static files
 
 - Write a Main object, with only one option for now: `build`. 
 
@@ -40,9 +19,18 @@
 
 - Front matter documentation, and other documentations. Work on this as you go.
 
-- Check trace of Value extentions to see if the tags used in front matter are consistent
 
-## A bit later
+
+## Less priority
+
+- Generators: takes charge of automatically generated pages.
+
+
+
+## Feature Options
+
+- Emulate liquid filters for mustache using lambdas. Provide built in support for
+    Handlebars and Liquid maybe?
 
 - Give a API that allows a custom function mapped to a placeholder with signature maybe 
     ``` scala
@@ -50,6 +38,9 @@
     String => String
     ```
     which will be used when `{{function_key}}` is used in mustache layouts.
+
+    Check if lambda's can be added to the Data object so that it gets rendered at the
+    same time as other keys, without having to implement mustachehelper support
 
 - We can also allow for custom placeholder classes to be passed to the renderer via the
     MustacheHelper trait. 
@@ -61,8 +52,6 @@
     of mustache library
 
 - Localized theming for layouts? Is it possible?
-
-- Generators: takes charge of automatically generated pages.
 
 - Hooks: fine grained control. These will be done much later
     Hooks can be added via mixinx. There will be a Hooks object with all the hooks
