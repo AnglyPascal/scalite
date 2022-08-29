@@ -12,17 +12,14 @@ case class URL(str: String):
     template.render(placeholders, partials)
 
   private val partials: Map[String, Mustache] =
+    import com.anglypascal.scalite.Defaults.URLPartials.*
     Map(
-      "date" ->
-        "{{categories}}/{{year}}/{{month}}/{{day}}/{{title}}{{output_ext}}",
-      "pretty" ->
-        "{{categories}}/{{year}}/{{month}}/{{day}}/{{title}}",
-      "ordinal" ->
-        "{{categories}}/{{year}}/{{y_day}}/{{title}}{{output_ext}}",
-      "weekdate" ->
-        "{{categories}}/{{year}}/W{{week}}/{{short_day}}/{{title}}{{output_ext}}",
-      "none" ->
-        "{{categories}}/{{slugTitle}}{{output_ext}}"
+      "date" -> date,
+      "slugDate" -> slugDate,
+      "pretty" -> pretty,
+      "ordinal" -> ordinal,
+      "weekdate" -> weekdate,
+      "none" -> none
     ).map((s, m) => (s, new Mustache(m)))
 
 /** TODO: The permalink url will be given in form of an absolute link or a

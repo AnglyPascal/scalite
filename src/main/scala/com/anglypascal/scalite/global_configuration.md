@@ -67,7 +67,7 @@ The front-matter defaults should be placed inside Globals: defaults. Scope
 option will define the scope of these defaults.
 
 
-#### Post front_matter
+#### Post frontMatter
 
 In the front matter, the following entries are standard:
 ``` yaml

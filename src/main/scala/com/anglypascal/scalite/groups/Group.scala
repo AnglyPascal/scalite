@@ -7,7 +7,7 @@ package com.anglypascal.scalite.groups
 import com.anglypascal.scalite.collections.Post
 import com.anglypascal.scalite.data.DObj
 
-import scala.collection.mutable.{LinkedHashMap, Set}
+import scala.collection.mutable.{LinkedHashMap, ListBuffer}
 import com.rallyhealth.weejson.v1.Obj
 
 /** Creates a new type of Group. Needs the implementation of addToGroups which
@@ -17,7 +17,7 @@ import com.rallyhealth.weejson.v1.Obj
   * GroupType class/object that can override behavior of PostsGroup. The addToGroups
   * method defines the way posts adds themselves to this Group.
   */
-trait Group(ctype: String):
+trait Group(val ctype: String):
 
   /** Underlying PostsGroup class which will take care of generating individual
     * page for the groups of this type.
@@ -30,7 +30,8 @@ trait Group(ctype: String):
     *   a weejson obj containing the global options for this site
     */
   abstract class GroupType(name: String, globals: DObj)
-      extends PostsGroup(ctype, name, globals)
+      extends PostsGroup(ctype, name, globals):
+    override def toString(): String = s"$name"
 
   /** Defines how posts add themselves to this group type. Usually it's by a
     * combination of specifying group names in the front matter as a string or
@@ -44,17 +45,15 @@ trait Group(ctype: String):
     */
   def addToGroups(post: Post, globals: DObj): Unit
 
-  // add this Group to Group.availableGroups
-  Group.addNewGroup(this)
-
-/** Companion object that holds all the Groups defined for this website. By
+/** Object that holds all the Groups defined for this website. By
   * default these are Tag and Category. New groups can be added by creating a
   * object of the trait Group.
   */
-object Group:
+object Groups:
 
   /** Set of the available Groups for this site */
-  val availableGroups: Set[Group] = Set()
+  private val _availableGroups: ListBuffer[Group] = ListBuffer()
+  def availableGroups = _availableGroups.toList
 
   /** Add a new Group to this site */
-  def addNewGroup(group: Group) = availableGroups += group
+  def addNewGroup(group: Group) = _availableGroups += group

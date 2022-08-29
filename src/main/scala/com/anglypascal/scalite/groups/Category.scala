@@ -9,7 +9,7 @@ import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.LinkedHashMap
 
-object Category extends Group("category"):
+object Category extends Group("categories"):
 
   /** Category defines a group of posts. A post can belong to multiple
     * categories, and each Category can have multiple posts belong to it.
@@ -57,11 +57,11 @@ object Category extends Group("category"):
       categories.get(cat) match
         case Some(t) =>
           t.addPost(post)
-          post.addGroup("category")(t)
+          post.addGroup(ctype)(t)
         case None =>
           val t = new Category(cat, globals)
           categories(cat) = t
-          post.addGroup("category")(t)
+          post.addGroup(ctype)(t)
 
   /** Process the names of the categories this post belongs to by examining it's
     * categories front matter entry and it's filepath. It also slugifies the
@@ -74,9 +74,9 @@ object Category extends Group("category"):
     */
   private def getGroupNames(post: Post): Iterable[String] =
     // process the filepath first
-    val arr = post.relativePath.split("/").init
+    val arr = post.relativePath.split("/").init.filter(_ != "")
     // check the entry in the front matter
-    val unslugged = post.getGroupsList("categories") match
+    val unslugged = post.getGroupsList(ctype) match
       case s: Str => arr ++ s.str.split(",").map(_.trim) // more options?
       case a: Arr => arr ++ a.arr.map(s => s.str) // error-prone
       case _      => arr

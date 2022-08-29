@@ -13,17 +13,15 @@ import java.nio.file.Paths
 
 class PostSpecs extends AnyFlatSpec:
 
-  val pDir = "src/test/resources/site_template"
-  val rPth = "/_posts/2016-05-19-super-short-article.md"
-  val rPthNon = "/_posts/post-that-never-was.md"
-  val rPthInv = "/_posts/2016-05-post-without-valid-date.md"
+  val pDir = "src/test/resources/site_template/_posts"
+  val rPth = "/2016-05-19-super-short-article.md"
   val glb1 = DObj()
   val glb2 = DObj(
     "dateFormat" -> DStr("dd MMM, yyyy")
   )
   val clcs = DObj()
 
-  ignore should "read valid file properly" in {
+  it should "read valid file properly" in {
     val pst = new Post(pDir, rPth, glb1, clcs)
     assert(
       pst.title === "Super Short Article" &&
@@ -40,7 +38,18 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  it should "handle rendering and file creation properly" in {
+  it should "read files with groups properly" in {
+  val rPth1 = "/2022-08-29-categories-test.md"
+    val pst = new Post(pDir, rPth1, glb1, clcs)
+    assert(
+      pst.title === "A page with categories" &&
+        pst.date === "2022-08-29" &&
+        pst.locals("date").getStr.getOrElse("") === "2022-08-29" &&
+        pst.visible
+    )
+  }
+
+  ignore should "handle rendering and file creation properly" in {
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
     DirectoryReader("src/test/resources/site_template/_site")
@@ -48,12 +57,11 @@ class PostSpecs extends AnyFlatSpec:
       "src/test/resources/site_template/_layouts",
       "src/test/resources/site_template/_partials"
     )
-
     val pst = new Post(pDir, rPth, glb1, clcs)
     pst.write()
     val p = Paths.get(
       "src/test/resources/site_template" +
-        "/_site/05_19/super-short-article.html"
+        "/_site/posts/2016/05/19/super-short-article.html"
     )
     assert(Files.exists(p))
     Files.delete(p)

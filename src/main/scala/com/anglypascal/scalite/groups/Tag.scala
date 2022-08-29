@@ -10,7 +10,7 @@ import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.LinkedHashMap
 
-object Tag extends Group("tag"):
+object Tag extends Group("tags"):
 
   /** Tag defines a group of posts. A post can have multiple tags, and each tag
     * can have multiple posts with this tag.
@@ -31,15 +31,13 @@ object Tag extends Group("tag"):
     *   a weejson obj containing the global options for this site
     */
   class Tag(name: String, globals: DObj) extends GroupType(name, globals):
-    // define the abstract memebers 
-    override val locals: DObj = DObj (
-      "title" -> DStr(name),
+    // define the abstract memebers
+    override val locals: DObj = DObj(
+      "title" -> DStr(name)
     )
 
     lazy val permalink: String = ???
     protected lazy val outputExt = ".html"
-
-
 
   /** Map holding all the tags in this website */
   private val tags = LinkedHashMap[String, Tag]()
@@ -60,11 +58,11 @@ object Tag extends Group("tag"):
       tags.get(tag) match
         case Some(t) =>
           t.addPost(post)
-          post.addGroup("tag")(t)
+          post.addGroup(ctype)(t)
         case None =>
           val t = new Tag(tag, globals)
           tags(tag) = t
-          post.addGroup("tag")(t)
+          post.addGroup(ctype)(t)
 
   /** Process the names of the tags this post belongs to by examining it's tags
     * front matter entry. It also slugifies the category names to make it
@@ -77,9 +75,9 @@ object Tag extends Group("tag"):
     */
   private def getGroupNames(post: Post): Iterable[String] =
     // check the entry in the front matter
-    val unslugged = post.getGroupsList("tags") match
-      case s: Str => s.str.split(" ").toList
-      case a: Arr => a.arr.flatMap(s => s.str.split(" ")).toList
+    val unslugged = post.getGroupsList(ctype) match
+      case s: Str => s.str.trim.split(",").flatMap(_.trim.split(" ")).toList
+      case a: Arr => a.arr.flatMap(s => s.str.trim.split(" ")).toList
       case _      => List()
     // slugify the category names
     unslugged.map(slugify(_))

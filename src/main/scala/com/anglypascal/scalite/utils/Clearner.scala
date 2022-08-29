@@ -62,12 +62,3 @@ object Cleaner:
         .foldLeft(List[String]())(f)
 
     clean(cleanSite, excludes)
-
-// @main
-def cleanerTest =
-  val dobj = Obj(
-    "base" -> "/home/ahsan/haha",
-    "destination" -> "/tata",
-    "keepFiles" -> Arr(".*\\.md", ".*\\.txt")
-  )
-  Cleaner(DObj(dobj))

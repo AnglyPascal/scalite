@@ -53,12 +53,12 @@ object Globals:
   private lazy val reading =
     import Defaults.Reading.*
     Obj(
-      "include" -> Defaults.Reading.include,
-      "exclude" -> Defaults.Reading.exclude,
-      "keepFiles" -> Defaults.Reading.keepFiles, // give regex list
-      "markdownExt" -> Defaults.Reading.markdownExt,
-      "textileExt" -> Defaults.Reading.textileExt,
-      "encoding" -> Defaults.Reading.encoding
+      "include" -> include,
+      "exclude" -> exclude,
+      "keepFiles" -> keepFiles, // give regex list
+      "markdownExt" -> markdownExt,
+      "textileExt" -> textileExt,
+      "encoding" -> encoding
     )
 
   /** Details about this website */
@@ -71,24 +71,46 @@ object Globals:
     "paginate" -> Defaults.paginate,
     "showExcerpts" -> Defaults.showExceprts,
     "dateFormat" -> Defaults.dateFormat,
-    "permalinkTemplate" -> Defaults.permalinkTemplate
+    "permalink" -> Defaults.permalink
   )
 
   /** Defaults of the `collection` section. */
-  private lazy val collections = Obj(
-    "posts" -> Obj(
-      "output" -> true,
-      "sortBy" -> "dates",
-      "toc" -> false,
-      "permalinkTemplate" -> "/{{> item }}" // TODO how is item going to be rendered?
-    ),
-    "drafts" -> Obj(
-      "output" -> false,
-      "sortBy" -> "dates",
-      "toc" -> false,
-      "permalinkTemplate" -> "/{{> item }}"
+  private lazy val collections =
+    import Defaults.Posts
+    import Defaults.Drafts
+    import Defaults.Statics
+    Obj(
+      "posts" -> Obj(
+        "output" -> Posts.output,
+        "folder" -> Posts.folder,
+        "name" -> Posts.name,
+        "directory" -> Posts.directory,
+        "sortBy" -> Posts.sortBy,
+        "toc" -> Posts.toc,
+        "permalink" -> Posts.permalink,
+        "layout" -> Posts.layout
+      ),
+      "drafts" -> Obj(
+        "output" -> Drafts.output,
+        "folder" -> Drafts.folder,
+        "name" -> Drafts.name,
+        "directory" -> Drafts.directory,
+        "sortBy" -> Drafts.sortBy,
+        "toc" -> Drafts.toc,
+        "permalink" -> Drafts.permalink,
+        "layout" -> Drafts.layout
+      ),
+      "statics" -> Obj(
+        "output" -> Statics.output,
+        "folder" -> Statics.folder,
+        "name" -> Statics.name,
+        "directory" -> Statics.directory,
+        "sortBy" -> Statics.sortBy,
+        "toc" -> Statics.toc,
+        "permalink" -> Statics.permalink,
+        "layout" -> Statics.layout
+      )
     )
-  )
 
   /** FIXME what do with this? */
   private lazy val build = Obj(
@@ -142,10 +164,7 @@ object Globals:
     logger.trace("setting up scoped defaults")
     configs.obj.remove("defaults").getOrElse(null) match
       case v: Arr => ScopedDefaults(_base, v)
-      case _ => ()
-    
-
-    
+      case _      => ()
 
   /** Process the collections from the updated config */
   private def processCollections() =
@@ -182,6 +201,8 @@ object Globals:
     val dataAST = DataAST
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
+    Groups.addNewGroup(Tag)
+    Groups.addNewGroup(Category)
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())

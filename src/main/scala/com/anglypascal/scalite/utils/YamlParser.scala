@@ -4,6 +4,7 @@ import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Value
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.utils.StringProcessors.quote
 
 def yamlFileParser(path: String): Value =
   val logger = Logger("YAML File Parser")
@@ -26,6 +27,9 @@ def frontMatterParser(yaml: String): Obj =
         )
         Obj()
   catch
+    case e: com.rallyhealth.weepickle.v1.core.TransformException =>
+      logger.error("failed to parse yaml string: " + quote(yaml))
+      Obj()
     case e =>
-      logger.error(e.toString)
+      logger.error(e.getMessage())
       Obj()

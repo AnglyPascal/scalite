@@ -8,7 +8,7 @@ class ReaderSpecs extends AnyFlatSpec:
   val R = new Reader("src/test/resources/dirs/readFrom/3.md"){}
 
   it should "read front matter and main matter properly" in {
-    val o = R.front_matter
+    val o = R.frontMatter
     assert(o("a").str === "hello" && o("b").str === "bye")
     assert(R.main_matter === "\nSome text to go along.")
   }

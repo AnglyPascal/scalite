@@ -6,7 +6,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.data.*
 import com.anglypascal.scalite.documents.*
-import com.anglypascal.scalite.groups.Group
+import com.anglypascal.scalite.groups.Groups
 import com.anglypascal.scalite.groups.PostsGroup
 import com.anglypascal.scalite.utils.DateParser.*
 import com.anglypascal.scalite.utils.StringProcessors.*
@@ -22,6 +22,7 @@ import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.ListBuffer
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -52,7 +53,7 @@ class Post(
     * layout, but each post needs to have one.
     */
   protected val parentName =
-    front_matter.obj.remove("layout") match
+    frontMatter.obj.remove("layout") match
       case Some(s) =>
         s match
           case s: Str => s.str
@@ -71,13 +72,13 @@ class Post(
     * name this post "untitled"
     */
   lazy val title: String =
-    front_matter.extractOrElse("title")(
+    frontMatter.extractOrElse("title")(
       titleParser(filename)
         .map(titlify(_))
         .getOrElse("Untitled" + this.toString)
     ) // so that titles are always different for different posts
 
-  /** The date in front_matter may have extra information like time and
+  /** The date in frontMatter may have extra information like time and
     * time-zone. Nothing is necessary, but if date is being given, it has to be
     * given in full, if time is given, it has to be given in full.
     */
@@ -85,15 +86,15 @@ class Post(
 
   /** TODO: Will later add support for getting the modified time values in the
     * case when the date/time is not specified in either the title name or the
-    * front_matter
+    * frontMatter
     *
     * Maybe DraftPost will extend Post overriding this time handling thing
     */
   private lazy val urlObj: DObj =
-    val dateString = front_matter.extractOrElse("date")(filename)
+    val dateString = frontMatter.extractOrElse("date")(filename)
     val dateFormat =
-      front_matter.extractOrElse("dateFormat")(
-        globals.getOrElse("dateFormat")("yyyy-MM-dd")
+      frontMatter.extractOrElse("dateFormat")(
+        globals.getOrElse("dateFormat")(Defaults.dateFormat)
       )
     val obj = dateParseObj(dateString, dateFormat)
 
@@ -113,12 +114,13 @@ class Post(
   /** Template for the permalink of the post */
   protected lazy val permalink =
     val permalinkTemplate =
-      front_matter.extractOrElse("permalinkTemplate")(
+      frontMatter.extractOrElse("permalink")(
         globals
           .getOrElse("collection")(DObj())
-          .getOrElse("permalinkTemplate")(
-            globals.getOrElse("permalinkTemplate")(
-              Defaults.permalinkTemplate
+          .getOrElse("permalink")(
+            globals.getOrElse("permalink")(
+              Defaults.Posts.permalink
+              // TODO the scope got a bit messed up here
             )
           )
       )
@@ -129,22 +131,22 @@ class Post(
     * posts.
     */
   lazy val visible =
-    front_matter.extractOrElse("visible")(collection.getOrElse("visible")(true))
+    frontMatter.extractOrElse("visible")(collection.getOrElse("visible")(true))
 
   protected lazy val outputExt =
-    front_matter.extractOrElse("outputExt")(Converters.findExt(filepath))
+    frontMatter.extractOrElse("outputExt")(Converters.findExt(filepath))
 
   lazy val locals =
-    front_matter.obj ++= List(
+    frontMatter.obj ++= List(
       "title" -> title,
       "date" -> date,
       "url" -> permalink,
       "filename" -> filename
     )
-    if front_matter.extractOrElse("showExcerpt")(false) then
-      front_matter("excerpt") = excerpt
+    if frontMatter.extractOrElse("showExcerpt")(false) then
+      frontMatter("excerpt") = excerpt
 
-    DObj(front_matter).add("collection" -> collection)
+    DObj(frontMatter).add("collection" -> collection)
 
   /** Get the posts from the front\_matter and get their permalinks
     * @example
@@ -164,7 +166,7 @@ class Post(
               List(p._1 -> post.permalink)
             case None => List()
         case _ => List()
-    front_matter.obj.remove("postUrls") match
+    frontMatter.obj.remove("postUrls") match
       case None => Map()
       case Some(v) =>
         v match
@@ -202,26 +204,28 @@ class Post(
 
   /** Return the global settings for the collection-type grpType */
   def getGroupsList(grpType: String): Value =
-    front_matter.obj.remove(grpType) match
+    frontMatter.obj.remove(grpType) match
       case Some(v) => v
       case None    => null
 
   /** Adds the collection in the set of this collection-type */
   def addGroup[A <: PostsGroup](grpType: String)(a: A): Unit =
     if groups.contains(grpType) then groups(grpType) += a
-    else groups += grpType -> Set(a)
+    else groups += grpType -> ListBuffer(a)
 
   /** The map holding sets of collection-types */
-  private val groups = LinkedHashMap[String, Set[PostsGroup]]()
+  private val groups = LinkedHashMap[String, ListBuffer[PostsGroup]]()
 
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
-  for groupObj <- Group.availableGroups do groupObj.addToGroups(this, globals)
+  for groupObj <- Groups.availableGroups do groupObj.addToGroups(this, globals)
 
   override def toString(): String =
     Console.CYAN + title + Console.RESET +
       "(" + Console.GREEN + date + Console.RESET + ")"
+    // "[" + Console.GREEN + permalink + Console.RESET + "]"
+    // "{" + Console.BLUE + groups.mkString(", ") + Console.RESET + "}"
 
 object Post extends ItemConstructor[Post]:
   def apply(

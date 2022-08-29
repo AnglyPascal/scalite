@@ -47,8 +47,8 @@ abstract class Layout(
   /** Take a list of layouts, and find the parent layout */
   def setParent(layouts: Map[String, Layout]): Unit =
     _parent =
-      if front_matter.obj.contains("layout") then
-        front_matter("layout") match
+      if frontMatter.obj.contains("layout") then
+        frontMatter("layout") match
           case s: Str =>
             logger.trace(s"layout $name has a parent layout named $s")
             val pn = s.str

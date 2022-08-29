@@ -22,8 +22,8 @@ class GenericItem(
 
   /** Title of this item */
   val title: String =
-    front_matter.extractOrElse("title")(
-      front_matter.extractOrElse("name")(
+    frontMatter.extractOrElse("title")(
+      frontMatter.extractOrElse("name")(
         titleParser(filepath).getOrElse("untitled" + this.toString)
       )
     ) // so that titles are always different for different items
@@ -33,20 +33,20 @@ class GenericItem(
     val used = List("title")
     val obj = Obj()
     for
-      (s, v) <- front_matter.obj
+      (s, v) <- frontMatter.obj
       if !used.contains(s)
     do obj(s) = v
     obj.obj ++= List("title" -> title)
     DObj(obj)
 
-  lazy val visible: Boolean = front_matter.extractOrElse("visible")(false)
+  lazy val visible: Boolean = frontMatter.extractOrElse("visible")(false)
 
   /** If there's some front\_matter, then the main\_matter will be conerted with
     * appropriate converter. Otherwise, the identity will be returned
     */
   protected lazy val render: String =
     // TODO what if frontmatter is deleted by the process
-    if front_matter.obj.isEmpty then main_matter
+    if frontMatter.obj.isEmpty then main_matter
     else Converters.convert(main_matter, filepath)
 
 object GenericItem extends ItemConstructor[GenericItem]:

@@ -88,7 +88,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
   /** Template for the permalink. This will override the permalink template for
     * the entire collection.
     */
-  private var permalinkTemplate: String = Defaults.permalinkTemplate
+  private var permalinkTemplate: String = Defaults.permalink
   protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
   /** Sort the items of this collection by this key */

@@ -9,7 +9,7 @@ package com.anglypascal.layouts
   * `render`, which given a [[com.anglypascal.scalite.data.DObj]] will render
   * the contents of the template using the values of the DObj, and `parent`,
   * which defines the parent Layout of this one. The parent is set in the
-  * front_matter of layout file under the layout option.
+  * frontMatter of layout file under the layout option.
   *
   * [[com.anglypascal.scalite.documents.Layouts]] standalone object that
   * provides methods to initiate all the Layout objects from a given layouts

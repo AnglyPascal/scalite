@@ -96,8 +96,8 @@ object Collections:
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
             val toc = cobj.extractOrElse("sortBy")(Defaults.Collection.toc)
-            val permalinkTemplate = cobj.extractOrElse("permalinkTemplate")(
-              globals.getOrElse("permalinkTemplate")(Defaults.permalinkTemplate)
+            val permalinkTemplate = cobj.extractOrElse("permalink")(
+              globals.getOrElse("permalink")(Defaults.permalink)
             ) // FIXME the same permalink issues
 
             logger.debug(
@@ -108,7 +108,7 @@ object Collections:
             val _globals = globals.add(
               "collection" -> DObj(
                 "name" -> DStr(key),
-                "permalinkTemplate" -> DStr(permalinkTemplate)
+                "permalink" -> DStr(permalinkTemplate)
               )
             )
 

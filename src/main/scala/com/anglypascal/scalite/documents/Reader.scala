@@ -32,7 +32,7 @@ trait Reader(val filepath: String, rType: String = null):
 
   /** Match the regex and store the results in a weejson Value and content.
     */
-  val (front_matter, main_matter) =
+  val (frontMatter, main_matter) =
     val scope = ScopedDefaults.getDefaults(filepath, rType)
     src match
       case yaml_regex(a, b) =>
