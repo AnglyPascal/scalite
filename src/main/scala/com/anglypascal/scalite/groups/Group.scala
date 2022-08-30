@@ -4,12 +4,14 @@ package com.anglypascal.scalite.groups
   * subclasses Tag and Category are defined.
   */
 
+import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.DObj
 import com.rallyhealth.weejson.v1.Obj
 
 import scala.collection.mutable.LinkedHashMap
-import scala.collection.mutable.ListBuffer
+import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.plugins.Plugin
 
 /** Creates a new type of Group. Needs the implementation of addToGroups which
   * defines how a post is added to the Group.
@@ -18,21 +20,9 @@ import scala.collection.mutable.ListBuffer
   * GroupType class/object that can override behavior of PostsGroup. The
   * addToGroups method defines the way posts adds themselves to this Group.
   */
-trait Group(val ctype: String):
+class GroupType(style: GroupStyle, globals: DObj):
 
-  /** Underlying PostsGroup class which will take care of generating individual
-    * page for the groups of this type.
-    *
-    * @constructor
-    *   Create a new element of this group type
-    * @param name
-    *   name of this element
-    * @param globals
-    *   a weejson obj containing the global options for this site
-    */
-  abstract class GroupType(name: String, globals: DObj)
-      extends PostsGroup(ctype, name, globals):
-    override def toString(): String = s"$name"
+  protected val groups = LinkedHashMap[String, PostsGroup]()
 
   /** Defines how posts add themselves to this group type. Usually it's by a
     * combination of specifying group names in the front matter as a string or
@@ -44,25 +34,32 @@ trait Group(val ctype: String):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  def addToGroups(post: PostLike, globals: DObj): Unit
+  def addToGroups(post: PostLike, globals: DObj): Unit =
+    // names of categories this post belongs to
+    val catNames = style.getGroupNames(post)
+    // for each category, add this post to it and add this category back to the post
+    for cat <- catNames do
+      groups.get(cat) match
+        case Some(t) =>
+          t.addPost(post)
+        case None =>
+          groups(cat) = style.groupConstructor(cat, globals)
+          groups(cat).addPost(post)
 
-/** Object that holds all the Groups defined for this website. By default these
-  * are Tag and Category. New groups can be added by creating a object of the
-  * trait Group.
-  */
-object Groups:
+trait GroupStyle extends Plugin:
+  /** */
+  def groupConstructor(name: String, globals: DObj): PostsGroup
 
-  /** Set of the available Groups for this site */
-  private val _availableGroups: ListBuffer[Group] = ListBuffer()
-  def availableGroups = _availableGroups.toList
-
-  /** Add a new Group to this site */
-  def addNewGroup(group: Group) = _availableGroups += group
-
-  /** TODO: Add global configs, which options do we need to add? Groups can
-    * potentially be more powerful I guess
+  /** Process the names of the tags this post belongs to by examining it's tags
+    * front matter entry. It also slugifies the category names to make it
+    * universal.
+    *
+    * @param post
+    *   a post to be added to the tags
+    * @return
+    *   an iterator with all the names of the tags
     */
-  def apply(grpObj: Obj): Unit = ???
+  def getGroupNames(post: PostLike): Iterable[String]
 
-  /** Create pages for each PostsGroup that wishes to be rendered */
-  def process(): Unit = ???
+trait GroupConstructor:
+  def apply(cType: String, configs: Obj): GroupStyle

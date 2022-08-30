@@ -84,10 +84,11 @@ class PageLike(val rType: String)(
   override def toString(): String =
     Console.CYAN + title + Console.RESET
 
-def pageConstructor(rType: String)(
-    parentDir: String,
-    relativePath: String,
-    globals: DObj,
-    collection: DObj
-): Element =
-  new PageLike(rType)(parentDir, relativePath, globals, collection)
+object PageConstructor extends ElemConstructor:
+  def apply(rType: String)(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): Element =
+    new PageLike(rType)(parentDir, relativePath, globals, collection)

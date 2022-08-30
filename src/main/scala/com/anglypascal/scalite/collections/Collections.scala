@@ -25,9 +25,9 @@ object Collections:
   private val collections = ListBuffer[Collection]()
 
   private val styles = LinkedHashMap[String, ElemConstructor](
-    "post" -> postConstructor,
-    "page" -> pageConstructor,
-    "item" -> itemConstructor
+    "post" -> PostConstructor,
+    "page" -> PageConstructor,
+    "item" -> ItemConstructor
   )
 
   def addCollection(col: Collection): Unit = collections += col
@@ -72,21 +72,7 @@ object Collections:
       //     logger.debug(s"created new collection object for $key")
       //     new GenericCollection(key)
       collectionData(key) match
-        // collections:
-        //     drafts: true
-        // case cbool: Bool if cbool.bool =>
-        //   logger.debug(s"rendering the collection $key")
-        //   val dir = colsDir + s"/_$key"
-        //   Col.setup(dir, globals)
-        //   addCollection(Col)
-
-        // collections:
-        //     drafts: false
-        // case cbool: Bool if !cbool.bool =>
-        //   logger.debug(s"won't process the collection $key")
-        //   collections.remove(key)
-
-        // full configuration
+        /** the collectionObj that comes in will be an Obj type */
         case cobj: Obj =>
           val style = cobj.extractOrElse("style")("item")
           val output =

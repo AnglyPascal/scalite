@@ -4,9 +4,9 @@
 
 1. **Complete implementation of Groups:**
 
-    Write the configuration, rendering, permalink logic for PostsGroup. Then add a list
-    of groups that will be available to the Posts or any other object during render
-    time. This should include group name, permalink, group type. I think that's it.
+    Group
+      - Has a type like Tags or Categories
+      - This is where we can add extensibility. Should all group be similar?
 
 2. **Test the rendering of Groups' pages**
 
@@ -42,14 +42,6 @@
 7. **Defaults in Assets**
 
     Add the defaults configuration to Assets
-
-8. **Site class/object**
-
-    Initiates global variables, then processes the pages. First it reads all the
-    assets. Then reads all the collection items (here i'll add more functionality) and
-    stores them in a collection. Then it renders the pages in parallel, with reference
-    to the collection of pages, to handle cross reference. Then it writes all the pages
-    in parallel.
 
 ## Finished
 

@@ -13,4 +13,10 @@ trait Element extends Reader with Renderable:
   /** local variales for this item */
   def locals: DObj
 
-type ElemConstructor = String => (String, String, DObj, DObj) => Element
+trait ElemConstructor:
+  def apply(rType: String)(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): Element

@@ -89,3 +89,28 @@ object Defaults:
       "{{categories}}/{{year}}/W{{week}}/{{short_day}}/{{title}}{{output_ext}}"
     val none =
       "{{categories}}/{{slugTitle}}{{output_ext}}"
+
+  object Group:
+    val permalink = "/{{ctype}}/{{name}}"
+
+  object PostsGroup:
+    val outputExt = ".html"
+    val permalink = "/{{ctype}}/{{name}}"
+    val sortBy = "title"
+
+  object Tags:
+    val title = "Tags"
+    val gType = "tags"
+    val sortBy = "title"
+    val permalink = "/{{ctype}}/{{name}}"
+    val separator = List(" ", ",")
+    val style = "tags"
+
+  object Categories:
+    val title = "Categories"
+    val gType = "categories"
+    val sortBy = "title"
+    val permalink = "/{{ctype}}/{{name}}"
+    val separator = List(",")
+    val style = "categories"
+

@@ -157,7 +157,7 @@ class PostLike(val rType: String)(
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  lazy val postUrls: Map[String, String] = 
+  lazy val postUrls: Map[String, String] =
     def f(p: (String, Value)): List[(String, String)] =
       p._2 match
         case str: Str =>
@@ -226,10 +226,11 @@ class PostLike(val rType: String)(
   override def toString(): String =
     CYAN(title) + "(" + GREEN(date) + ")" + "[" + BLUE(permalink) + "]"
 
-def postConstructor(rType: String)(
-    parentDir: String,
-    relativePath: String,
-    globals: DObj,
-    collection: DObj
-): Element =
-  new PostLike(rType)(parentDir, relativePath, globals, collection)
+object PostConstructor extends ElemConstructor:
+  def apply(rType: String)(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): Element =
+    new PostLike(rType)(parentDir, relativePath, globals, collection)

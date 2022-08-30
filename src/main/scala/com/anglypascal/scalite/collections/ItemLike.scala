@@ -46,10 +46,11 @@ class ItemLike(val rType: String)(
     if frontMatter.obj.isEmpty then mainMatter
     else Converters.convert(mainMatter, filepath)
 
-def itemConstructor(rType: String)(
-    parentDir: String,
-    relativePath: String,
-    globals: DObj,
-    collection: DObj
-): Element =
-  new ItemLike(rType)(parentDir, relativePath, globals, collection)
+object ItemConstructor extends ElemConstructor:
+  def apply(rType: String)(
+      parentDir: String,
+      relativePath: String,
+      globals: DObj,
+      collection: DObj
+  ): Element =
+    new ItemLike(rType)(parentDir, relativePath, globals, collection)

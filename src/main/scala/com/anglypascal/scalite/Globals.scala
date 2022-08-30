@@ -11,7 +11,7 @@ import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
-import com.anglypascal.scalite.groups.{Tags, Categories, Groups}
+// import com.anglypascal.scalite.groups.{Tags, Categories, Groups}
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
@@ -24,12 +24,13 @@ import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
+import com.rallyhealth.weejson.v1.Bool
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
   *
-  * FIXME: Turn it into a function or a class. This object would otherwise live forever during
-  * the program life time, where it's no longer needed
+  * FIXME: Turn it into a function or a class. This object would otherwise live
+  * forever during the program life time, where it's no longer needed
   */
 object Globals:
 
@@ -88,7 +89,8 @@ object Globals:
         "sortBy" -> Posts.sortBy,
         "toc" -> Posts.toc,
         "permalink" -> Posts.permalink,
-        "layout" -> Posts.layout
+        "layout" -> Posts.layout,
+        "style" -> Posts.style
       ),
       "drafts" -> Obj(
         "output" -> Drafts.output,
@@ -98,7 +100,8 @@ object Globals:
         "sortBy" -> Drafts.sortBy,
         "toc" -> Drafts.toc,
         "permalink" -> Drafts.permalink,
-        "layout" -> Drafts.layout
+        "layout" -> Drafts.layout,
+        "style" -> Drafts.style
       ),
       "statics" -> Obj(
         "output" -> Statics.output,
@@ -108,7 +111,31 @@ object Globals:
         "sortBy" -> Statics.sortBy,
         "toc" -> Statics.toc,
         "permalink" -> Statics.permalink,
-        "layout" -> Statics.layout
+        "layout" -> Statics.layout,
+        "style" -> Statics.style
+      )
+    )
+
+  private lazy val groups: MMap[String, Obj] =
+    import Defaults.Group
+    import Defaults.Tags
+    import Defaults.Categories
+    MMap(
+      "tags" -> Obj(
+        "title" -> Tags.title,
+        "gType" -> Tags.gType,
+        "sortBy" -> Tags.sortBy,
+        "permalink" -> Tags.permalink,
+        "separator" -> Tags.separator,
+        "style" -> Tags.style
+      ),
+      "categories" -> Obj(
+        "title" -> Categories.title,
+        "gType" -> Categories.gType,
+        "sortBy" -> Categories.sortBy,
+        "permalink" -> Categories.permalink,
+        "separator" -> Categories.separator,
+        "style" -> Categories.style
       )
     )
 
@@ -173,7 +200,17 @@ object Globals:
     colMap.remove("collectionsDir") match
       case Some(s) => dirs("collectionsDir") = s
       case None    => ()
-    for (key, value) <- colMap do collections(key) = value
+    for (key, value) <- colMap do
+      if collections.obj.contains(key) then
+        value match
+          case value: Obj  => for (k, v) <- value.obj do collections(key)(k) = v
+          case value: Bool => collections(key)("output") = value
+          case _           => ()
+      else
+        value match
+          case value: Obj  => collections(key) = value
+          case value: Bool => collections(key) = Obj("output" -> value)
+          case _           => ()
 
   /** Process the defaults fro the updated config */
   private def processDefaults() =
@@ -184,11 +221,14 @@ object Globals:
   private def processGroups() =
     logger.trace("setting up configs for groups")
     val grpMap = configs.extractOrElse("groups")(MMap[String, Value]())
+    for (k, v) <- grpMap do
+      v match
+        case v: Obj =>
+          if !groups.obj.contains(k) then groups(k) = v
+          else for (kk, vv) <- v.obj do groups(k)(kk) = vv
+        case _ => ()
 
-  /** Process the groups fro the updated config
-    *
-    * FIXME: pass in the dataMap
-    */
+  /** Process the assets */
   private def processAssets: Obj =
     logger.trace("processing the assets")
     val dataMap = configs.extractOrElse("assets")(MMap[String, Value]())
@@ -201,8 +241,8 @@ object Globals:
     val dataAST = DataAST
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
-    Groups.addNewGroup(Tags)
-    Groups.addNewGroup(Categories)
+    // Groups.addNewGroup(Tags)
+    // Groups.addNewGroup(Categories)
 
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
