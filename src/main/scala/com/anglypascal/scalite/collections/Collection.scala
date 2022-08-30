@@ -14,6 +14,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.cmpOpt
+import scala.collection.parallel.CollectionConverters._
 
 import java.nio.charset.StandardCharsets
 import java.nio.file.Files
@@ -139,7 +140,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
 
   /** This sorts out the items, renders them, and writes them to the disk */
   protected[collections] def process(dryrun: Boolean = false): Unit =
-    for (_, item) <- items do
+    for (_, item) <- items.par do
       item match
         case item: Page => item.write(dryrun)
         case _          => ()

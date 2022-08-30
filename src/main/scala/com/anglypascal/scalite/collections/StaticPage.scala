@@ -80,6 +80,9 @@ class StaticPage(
 
   lazy val visible: Boolean = frontMatter.extractOrElse("visible")(true)
 
+  override def toString(): String =
+    Console.CYAN + title + Console.RESET
+
 object StaticPage extends ItemConstructor[StaticPage]:
   def apply(
       parentDir: String,

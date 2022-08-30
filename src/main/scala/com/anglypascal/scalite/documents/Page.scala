@@ -55,6 +55,11 @@ trait Page:
       if permalink.endsWith(outputExt) then permalink
       else permalink + outputExt
     if !dryRun then
-      logger.trace(s"writing $this to $path")
+      logger.debug(s"writing $this to $path")
       writeTo(path, render)
+      // val thread = new Thread:
+      //   override def run(): Unit =
+      //     Logger(classOf[Thread]).debug("started a new thread")
+      //     writeTo(path, render)
+      // thread.start()
     else logger.debug(s"would write $this to $path")

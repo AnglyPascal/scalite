@@ -22,7 +22,7 @@ class PostSpecs extends AnyFlatSpec:
   )
   val clcs = DObj()
 
-  it should "read valid file properly" in {
+  ignore should "read valid file properly" in {
     val pst = new Post(pDir, rPth, glb1, clcs)
     assert(
       pst.title === "Super Short Article" &&
@@ -39,7 +39,7 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  it should "read files with groups properly" in {
+  ignore should "read files with groups properly" in {
     Groups.addNewGroup(Tags)
     Groups.addNewGroup(Categories)
     val rPth1 = "/2022-08-29-categories-test.md"
@@ -52,7 +52,7 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  ignore should "handle rendering and file creation properly" in {
+  it should "handle rendering and file creation properly" in {
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
     DirectoryReader("src/test/resources/site_template/_site")
@@ -61,10 +61,10 @@ class PostSpecs extends AnyFlatSpec:
       "src/test/resources/site_template/_partials"
     )
     val pst = new Post(pDir, rPth, glb1, clcs)
-    pst.write()
+    pst.write(false)
     val p = Paths.get(
-      "src/test/resources/site_template" +
-        "/_site/posts/2016/05/19/super-short-article.html"
+      "src/test/resources/site_template/_site" + 
+        "/posts/2016/05/19/super-short-article.html"
     )
     assert(Files.exists(p))
     Files.delete(p)

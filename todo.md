@@ -39,6 +39,28 @@
     file. Also figure out if it's possible to create separate style files for different
     layouts.
 
+7. **Defaults in Assets**
+
+    Add the defaults configuration to Assets
+
+8. **Site class/object**
+
+    Initiates global variables, then processes the pages. First it reads all the
+    assets. Then reads all the collection items (here i'll add more functionality) and
+    stores them in a collection. Then it renders the pages in parallel, with reference
+    to the collection of pages, to handle cross reference. Then it writes all the pages
+    in parallel.
+
+9. **Collection style**
+
+    Write several different styles a collection can have. For now: PostItem, PageItem,
+    ListItem. These can be selected in the config setting under collections.name.style.
+    Posts, Drafts are impl of PostItem, StaticPages impl PageItem, GenericItem impls
+    ListItem.
+
+    Collections will keep a map of (styleName, style), and new implementations will
+    provide a new style basically.
+
 ## Documentation
 
 1. **Skeleton of the site**

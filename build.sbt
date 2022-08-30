@@ -17,7 +17,8 @@ lazy val root = project
       "com.softwaremill.sttp.client3" %% "core" % "3.6.2",
       "org.planet42" %% "laika-core" % "0.18.2", 
       "com.github.nscala-time" %% "nscala-time" % "2.30.0",
-      "io.lemonlabs" %% "scala-uri" % "4.0.2"
+      "io.lemonlabs" %% "scala-uri" % "4.0.2",
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
     ),
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.2.10",
