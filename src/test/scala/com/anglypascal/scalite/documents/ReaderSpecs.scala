@@ -5,7 +5,10 @@ import com.anglypascal.scalite.documents.Reader
 import org.scalatest.flatspec.AnyFlatSpec
 
 class ReaderSpecs extends AnyFlatSpec:
-  val R = new Reader("src/test/resources/dirs/readFrom/3.md"){}
+  val R = new Reader{
+    val filepath = "src/test/resources/dirs/readFrom/3.md"
+    val rType = null
+  }
 
   it should "read front matter and main matter properly" in {
     val o = R.frontMatter

@@ -1,9 +1,6 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
-import com.anglypascal.scalite.collections.Drafts
-import com.anglypascal.scalite.collections.Posts
-import com.anglypascal.scalite.collections.StaticPages
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown

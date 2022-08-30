@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
@@ -33,16 +33,16 @@ trait PostsGroup(
   private val logger = Logger("PostsGroup")
 
   /** Set of posts that belong to this collection. */
-  private val _posts: Set[Post] = Set()
+  private val _posts: Set[PostLike] = Set()
   def posts = _posts.toList
 
   /** Add a new post to this collection */
-  def addPost(post: Post) = _posts += post
+  def addPost(post: PostLike) = _posts += post
 
   /** Name of the layout to be used for rendering the page for this PostsGroup.
     * If not specified in the global settings, this defaults back to "ctype"
     */
-  protected val parentName = globals.getOrElse(ctype + "Layout")(ctype)
+  protected val layoutName = globals.getOrElse(ctype + "Layout")(ctype)
 
   /** Convert the given post to a weeJson obj that will be used to render this
     * post's representative in the page of this PostsGroup. Is intended for
@@ -53,7 +53,7 @@ trait PostsGroup(
     * @return
     *   weeJson obj, with the required mappings for the rendering
     */
-  protected def postToItem(post: Post): DObj =
+  protected def postToItem(post: PostLike): DObj =
     post.locals match
       case a: DObj => a
       case null    => DObj()
@@ -79,9 +79,9 @@ trait PostsGroup(
       "page" -> locals,
       "items" -> DArr(posts.toList.map(postToItem))
     )
-    parent match
-      case Some(paren) =>
-        paren.render(context)
+    layout match
+      case Some(l) =>
+        l.render(context)
       case None =>
         logger.warn(s"no layout found for $ctype $name")
         ""

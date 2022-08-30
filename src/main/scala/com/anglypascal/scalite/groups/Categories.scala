@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.rallyhealth.weejson.v1.Arr
@@ -49,7 +49,7 @@ object Categories extends Group("categories"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToGroups(post: Post, globals: DObj): Unit =
+  def addToGroups(post: PostLike, globals: DObj): Unit =
     // names of categories this post belongs to
     val catNames = getGroupNames(post)
     // for each category, add this post to it and add this category back to the post
@@ -72,7 +72,7 @@ object Categories extends Group("categories"):
     * @return
     *   an iterator with all the names of the categories
     */
-  private def getGroupNames(post: Post): Iterable[String] =
+  private def getGroupNames(post: PostLike): Iterable[String] =
     // process the filepath first
     val arr = post.relativePath.split("/").init.filter(_ != "")
     // check the entry in the front matter

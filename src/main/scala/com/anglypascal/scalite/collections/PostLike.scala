@@ -9,6 +9,7 @@ import com.anglypascal.scalite.documents.*
 import com.anglypascal.scalite.groups.Groups
 import com.anglypascal.scalite.groups.PostsGroup
 import com.anglypascal.scalite.utils.DateParser.*
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.rallyhealth.weejson.v1.Arr
@@ -26,46 +27,43 @@ import scala.collection.mutable.ListBuffer
 
 /** Reads the content of a post file and prepares a Post object.
   *
+  * @param rType
+  *   type of this post, used in ScopedDefaults
   * @param parentDir
   *   absolute path to the root folder containing posts
   * @param relativePath
   *   path to the post file relative to the parentDir
   * @param globals
   *   a weejson object passed through the "_config.yml" file
+  * @param collection
+  *   the configurations passed to the whole collection
   */
-class Post(
-    parentDir: String,
-    relativePath: String,
+class PostLike(val rType: String)(
+    val parentDir: String,
+    val relativePath: String,
     globals: DObj,
-    collection: DObj,
-    rType: String = "posts"
-) extends Item(parentDir, relativePath, globals, collection, rType)
-    // with ReaderOps
+    collection: DObj
+) extends Element
     with Page:
 
-  private val logger = Logger("Post")
-
-  logger.debug(
-    "getting post at " + Console.GREEN + parentDir + relativePath + Console.RESET
-  )
+  private val logger = Logger(rType)
+  logger.debug("creating from " + GREEN(filepath))
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
     */
-  protected val parentName =
+  protected val layoutName =
     frontMatter.obj.remove("layout") match
       case Some(s) =>
         s match
           case s: Str => s.str
           case _ =>
             logger.error(
-              s"Please specify a valid layout for post $filepath" +
-                "falling back to default layout: post"
+              s"Invalid layout in ${ERROR(filepath)}" +
+                s"using default layout: ${GREEN(rType)}"
             )
-            "post"
-      case None => "post"
-
-  private lazy val filename = getFileName(filepath)
+            rType
+      case None => rType
 
   /** Get the title of the post from the front matter, defaulting back to the
     * title parsed from the filepath. If the filepath has no title given, simply
@@ -157,27 +155,27 @@ class Post(
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  lazy val postUrls: Map[String, String] =
-    def f(p: (String, Value)): List[(String, String)] =
-      p._2 match
-        case str: Str =>
-          Posts.items.get(str.str) match
-            case Some(post) =>
-              List(p._1 -> post.permalink)
-            case None => List()
-        case _ => List()
-    frontMatter.obj.remove("postUrls") match
-      case None => Map()
-      case Some(v) =>
-        v match
-          case v: Obj => v.obj.flatMap(f).toMap
-          case _      => Map()
+  lazy val postUrls: Map[String, String] = ???
+  //   def f(p: (String, Value)): List[(String, String)] =
+  //     p._2 match
+  //       case str: Str =>
+  //         Posts.items.get(str.str) match
+  //           case Some(post) =>
+  //             List(p._1 -> post.permalink)
+  //           case None => List()
+  //       case _ => List()
+  //   frontMatter.obj.remove("postUrls") match
+  //     case None => Map()
+  //     case Some(v) =>
+  //       v match
+  //         case v: Obj => v.obj.flatMap(f).toMap
+  //         case _      => Map()
 
   /** Convert the contents of the post to HTML, throwing an exception on failure
     */
   protected lazy val render: String =
     /** call to postUrls */
-    val str = Converters.convert(main_matter, filepath)
+    val str = Converters.convert(mainMatter, filepath)
     val context = DObj(
       postUrls.map(p => (p._1, DStr(p._2))) ++
         Map(
@@ -185,7 +183,7 @@ class Post(
           "page" -> locals
         )
     )
-    parent match
+    layout match
       case Some(l) =>
         logger.debug(s"$this has parent layout ${l.name}")
         l.render(context, str)
@@ -199,7 +197,7 @@ class Post(
     * For now, leave it simple like this
     */
   def excerpt: String =
-    val head = getExcerpt(main_matter, "separateor")
+    val head = getExcerpt(mainMatter, "separateor")
     Converters.convert(head, filepath)
 
   /** Return the global settings for the collection-type grpType */
@@ -218,21 +216,18 @@ class Post(
 
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
+    *
+    * TODO
     */
-  for groupObj <- Groups.availableGroups do groupObj.addToGroups(this, globals)
+  // for groupObj <- Groups.availableGroups do groupObj.addToGroups(this, globals)
 
   override def toString(): String =
-    Console.CYAN + title + Console.RESET +
-      "(" + Console.GREEN + date + Console.RESET + ")"
-    // "[" + Console.GREEN + permalink + Console.RESET + "]"
-    // "{" + Console.BLUE + groups.mkString(", ") + Console.RESET + "}"
+    CYAN(title) + "(" + GREEN(date) + ")" + "[" + BLUE(permalink) + "]"
 
-object Post extends ItemConstructor[Post]:
-  def apply(
-      parentDir: String,
-      relativePath: String,
-      globals: DObj,
-      collection: DObj,
-      rType: String
-  ): Post =
-    new Post(parentDir, relativePath, globals, collection, rType)
+def postConstructor(rType: String)(
+    parentDir: String,
+    relativePath: String,
+    globals: DObj,
+    collection: DObj
+): Element =
+  new PostLike(rType)(parentDir, relativePath, globals, collection)

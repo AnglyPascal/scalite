@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.utils.StringProcessors.*
@@ -50,7 +50,7 @@ object Tags extends Group("tags"):
     * @param globals
     *   a weejson obj containing the global options
     */
-  def addToGroups(post: Post, globals: DObj): Unit =
+  def addToGroups(post: PostLike, globals: DObj): Unit =
     // names of tags this post has
     val tagNames = getGroupNames(post)
     // for each tag, add this post to it and add this tag back to the post
@@ -73,7 +73,7 @@ object Tags extends Group("tags"):
     * @return
     *   an iterator with all the names of the tags
     */
-  private def getGroupNames(post: Post): Iterable[String] =
+  private def getGroupNames(post: PostLike): Iterable[String] =
     // check the entry in the front matter
     val unslugged = post.getGroupsList(ctype) match
       case s: Str => s.str.trim.split(",").flatMap(_.trim.split(" ")).toList

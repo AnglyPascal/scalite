@@ -8,17 +8,12 @@ import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
 
-/** A generic implementation of the Item class. Defines title or name of the
-  * Item, and depending on whether it has a front matter or not, converters the
-  * contents with a Converter
-  */
-class GenericItem(
-    parentDir: String,
-    relativePath: String,
+class ItemLike(val rType: String)(
+    val parentDir: String,
+    val relativePath: String,
     globals: DObj,
-    collection: DObj,
-    rType: String
-) extends Item(parentDir, relativePath, globals, collection, rType):
+    collection: DObj
+) extends Element:
 
   /** Title of this item */
   val title: String =
@@ -46,19 +41,13 @@ class GenericItem(
     */
   protected lazy val render: String =
     // TODO what if frontmatter is deleted by the process
-    if frontMatter.obj.isEmpty then main_matter
-    else Converters.convert(main_matter, filepath)
+    if frontMatter.obj.isEmpty then mainMatter
+    else Converters.convert(mainMatter, filepath)
 
-object GenericItem extends ItemConstructor[GenericItem]:
-  def apply(
-      parentDir: String,
-      relativePath: String,
-      globals: DObj,
-      collection: DObj,
-      rType: String
-  ): GenericItem =
-    new GenericItem(parentDir, relativePath, globals, collection, rType)
-
-/** Defines the collection of generic item */
-class GenericCollection(name: String)
-    extends Collection[GenericItem](GenericItem)(name)
+def itemConstructor(rType: String)(
+    parentDir: String,
+    relativePath: String,
+    globals: DObj,
+    collection: DObj
+): Element =
+  new ItemLike(rType)(parentDir, relativePath, globals, collection)

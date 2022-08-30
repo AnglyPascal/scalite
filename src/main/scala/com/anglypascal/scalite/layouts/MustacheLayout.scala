@@ -22,14 +22,19 @@ import com.anglypascal.scalite.documents.Reader
   * @param layoutPath
   *   path to the layout file inside "/\_layouts"
   */
-class MustacheLayout(name: String, layoutDir: String, layoutPath: String)
-    extends Layout("mustache", name, layoutDir, layoutPath, "mustacheLayouts"):
-
+class MustacheLayout(name: String, parentDir: String, relativePath: String)
+    extends Layout(
+      "mustache",
+      name,
+      parentDir,
+      relativePath,
+      "mustacheLayouts"
+    ):
 
   private val logger = Logger("Mustache Layout")
 
   /** The mustache object for this layout */
-  lazy val mustache = new Mustache(main_matter)
+  lazy val mustache = new Mustache(mainMatter)
 
   /** Evaluate the template by rendering it with it's context and partials
     *
@@ -109,8 +114,12 @@ object MustacheLayouts extends LayoutObject with Plugin:
     val ls = partialFiles
       .filter(matches(_))
       .map(f => {
-        object R extends Reader(partialsDir + f, "mustachePartials")
-        (getFileName(f), new Mustache(R.main_matter))
+        object R extends Reader:
+          val parentDir = partialsDir
+          val relativePath = f
+          val rType = "mustachePartials"
+
+        (getFileName(f), new Mustache(R.mainMatter))
       })
       .toMap
 

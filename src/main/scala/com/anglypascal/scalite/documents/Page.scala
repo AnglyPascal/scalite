@@ -20,13 +20,11 @@ trait Page:
 
   private val logger = Logger("Page writer")
 
-  /** Specify the parent template name. Mandate calling it if visible needs to
-    * be changed
+  /** Specify the parent template name.
+    *
+    * FIXME: What if this page is actually static?
     */
-  protected val parentName: String
-
-  /** Make it Option[Layout] and also remove redundancies */
-  protected lazy val parent = Layouts.get(parentName)
+  protected val layoutName: String
 
   /** Relative permanent link to this page */
   protected lazy val permalink: String
@@ -46,6 +44,9 @@ trait Page:
     */
   protected lazy val render: String
 
+  /** Make it Option[Layout] and also remove redundancies */
+  protected lazy val layout = Layouts.get(layoutName)
+
   /** Method to write the content returned by the render method to the output
     * file at a relative path given by the relative permalink.
     */
@@ -57,9 +58,4 @@ trait Page:
     if !dryRun then
       logger.debug(s"writing $this to $path")
       writeTo(path, render)
-      // val thread = new Thread:
-      //   override def run(): Unit =
-      //     Logger(classOf[Thread]).debug("started a new thread")
-      //     writeTo(path, render)
-      // thread.start()
     else logger.debug(s"would write $this to $path")

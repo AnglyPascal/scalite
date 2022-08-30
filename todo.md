@@ -61,6 +61,22 @@
     Collections will keep a map of (styleName, style), and new implementations will
     provide a new style basically.
 
+    ``` yaml
+    collections:
+        posts:
+            style: post
+            folder: /_posts
+            output: true
+        docs:
+            style: post
+            folder: /_documents
+            output: true
+        employees:
+            style: item
+            folder: /employees
+            output: false
+    ```
+
 ## Documentation
 
 1. **Skeleton of the site**

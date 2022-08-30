@@ -102,8 +102,8 @@ object PluginManager:
     )
 
   private def loadCollections(names: List[DStr | DObj]) =
-    findObjects[Collection[?]](names).map(C =>
-      Collections.addCollection(C.asInstanceOf[Collection[?]])
+    findObjects[Collection](names).map(C =>
+      Collections.addCollection(C.asInstanceOf[Collection])
     )
 
   private def loadLayouts(names: List[DStr | DObj]) =

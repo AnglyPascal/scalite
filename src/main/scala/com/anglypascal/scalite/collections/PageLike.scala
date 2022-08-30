@@ -13,17 +13,15 @@ import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.StringProcessors.slugify
 import com.rallyhealth.weejson.v1.Obj
 
-class StaticPage(
-    parentDir: String,
-    relativePath: String,
+class PageLike(val rType: String)(
+    val parentDir: String,
+    val relativePath: String,
     globals: DObj,
-    collection: DObj,
-    rType: String = "statics"
-) extends Item(parentDir, relativePath, globals, collection, rType)
+    collection: DObj
+) extends Element
     with Page:
-  /** */
 
-  protected val parentName: String = Defaults.Statics.layout
+  protected val layoutName: String = Defaults.Statics.layout
 
   val title: String =
     frontMatter.extractOrElse("title")(
@@ -69,12 +67,12 @@ class StaticPage(
     )
 
   protected lazy val render: String =
-    val str = Converters.convert(main_matter, filepath)
+    val str = Converters.convert(mainMatter, filepath)
     val context = DObj(
       "site" -> globals,
       "page" -> locals
     )
-    parent match
+    layout match
       case Some(l) => l.render(context, str)
       case None    => str
 
@@ -83,14 +81,10 @@ class StaticPage(
   override def toString(): String =
     Console.CYAN + title + Console.RESET
 
-object StaticPage extends ItemConstructor[StaticPage]:
-  def apply(
-      parentDir: String,
-      relativePath: String,
-      globals: DObj,
-      collection: DObj,
-      rType: String
-  ): StaticPage =
-    new StaticPage(parentDir, relativePath, globals, collection, rType)
-
-object StaticPages extends Collection[StaticPage](StaticPage)("statics")
+def pageConstructor(rType: String)(
+    parentDir: String,
+    relativePath: String,
+    globals: DObj,
+    collection: DObj
+): Element =
+  new PageLike(rType)(parentDir, relativePath, globals, collection)

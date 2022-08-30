@@ -4,7 +4,7 @@ package com.anglypascal.scalite.groups
   * subclasses Tag and Category are defined.
   */
 
-import com.anglypascal.scalite.collections.Post
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.DObj
 import com.rallyhealth.weejson.v1.Obj
 
@@ -44,7 +44,7 @@ trait Group(val ctype: String):
     * @param globals
     *   a weejson obj containing the global options for this site
     */
-  def addToGroups(post: Post, globals: DObj): Unit
+  def addToGroups(post: PostLike, globals: DObj): Unit
 
 /** Object that holds all the Groups defined for this website. By default these
   * are Tag and Category. New groups can be added by creating a object of the

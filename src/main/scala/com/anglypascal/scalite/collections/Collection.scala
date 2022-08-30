@@ -28,21 +28,21 @@ import com.typesafe.scalalogging.Logger
   *
   * A collection of posts will be in a separate folder in the home directory,
   * and will be handled separately.
-  *
-  * @tparam A
-  *   subclass of [[com.anglypascal.scalite.collections.Item]]
   */
-abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
-    val name: String
-) extends Plugin
-    with Page:
+class Collection(
+    elemCons: ElemConstructor,
+    val name: String,
+    protected val layoutName: String
+) extends Page
+    with Plugin: // FIXME obsolete
 
   private val logger = Logger(s"$name collection")
-  protected val parentName = name
 
   /** Set of posts or other elements for use in context for rendering pages. */
   def items = _items
-  private var _items: Map[String, A] = _
+  private var _items: Map[String, Element] = _
+
+  private var constructor = elemCons(name)
 
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
@@ -58,7 +58,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     val files = getListOfFilepaths(directory)
     logger.debug(s"found ${files.length} files in $directory")
     def f(fn: String) =
-      (getFileName(fn), itemConstructor(directory, fn, globals, locals, name))
+      (getFileName(fn), constructor(directory, fn, globals, locals))
     _items = files.filter(Converters.hasConverter).map(f).toMap
 
   /** Collect all the elements of this collection from the given directory, will
@@ -66,8 +66,8 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     * local variables for the rendering of this collection page.
     *
     * TODO: i think there should be a better sortby option. there should be a
-    * categorize option, that asks for a field in posts oject, and will categorize the
-    * posts based on that field in this toc page.
+    * categorize option, that asks for a field in posts oject, and will
+    * categorize the posts based on that field in this toc page.
     */
   def setup(
       directory: String,
@@ -109,7 +109,7 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
   protected var globals: DObj = _
 
   /** Compare two given items by the given key */
-  private def compareBy(fst: A, snd: A, key: String): Int =
+  private def compareBy(fst: Element, snd: Element, key: String): Int =
     val s = cmpOpt(fst.locals.getStr, fst.locals.getStr)
     if s != 0 then return s
     val n = cmpOpt(fst.locals.getNum, fst.locals.getNum)
@@ -119,13 +119,13 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
   /** The compare function to be used with sortWith to sort the posts in this
     * collection. This first tries sortBy then falls back to "title".
     */
-  protected def compare(fst: A, snd: A): Boolean =
+  protected def compare(fst: Element, snd: Element): Boolean =
     val c = compareBy(fst, snd, sortBy)
     if c != 0 then return c < 0
     compareBy(fst, snd, "title") < 0
 
   protected lazy val render: String =
-    parent match
+    layout match
       case None => ""
       case Some(p) =>
         val sortedItems =
@@ -151,5 +151,5 @@ abstract class Collection[A <: Item](itemConstructor: ItemConstructor[A])(
     */
   protected[collections] def cache(): Unit = ???
 
-  override def toString(): String = 
+  override def toString(): String =
     "\n" + items.map((_, v) => "  " + v.toString).mkString("\n")
