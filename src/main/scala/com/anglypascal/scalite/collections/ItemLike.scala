@@ -15,6 +15,8 @@ class ItemLike(val rType: String)(
     collection: DObj
 ) extends Element:
 
+  protected val layoutName = ""
+
   /** Title of this item */
   val title: String =
     frontMatter.extractOrElse("title")(

@@ -8,6 +8,7 @@ import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.StringProcessors.slugify
@@ -21,9 +22,11 @@ class PageLike(val rType: String)(
 ) extends Element
     with Page:
 
+  lazy val identifier = filepath
+
   protected val layoutName: String = Defaults.Statics.layout
 
-  val title: String =
+  lazy val title: String =
     frontMatter.extractOrElse("title")(
       frontMatter.extractOrElse("name")(
         getFileName(filepath)
@@ -45,7 +48,7 @@ class PageLike(val rType: String)(
     )
     DObj(obj)
 
-  protected lazy val permalink =
+  lazy val permalink =
     val permalinkTemplate =
       frontMatter.extractOrElse("permalink")(
         globals

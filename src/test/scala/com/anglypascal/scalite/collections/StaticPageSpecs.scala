@@ -26,7 +26,7 @@ class StaticPageSpecs extends AnyFlatSpec:
       "src/test/resources/site_template/_layouts",
       "src/test/resources/site_template/_partials"
     )
-    val pst = new StaticPage(pD, rP, glb1, clcs)
+    val pst = new PageLike("statics")(pD, rP, glb1, clcs)
     pst.write()
     val p = Paths.get("src/test/resources/site_template/_site/index.html")
     assert(Files.exists(p))

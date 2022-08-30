@@ -12,7 +12,7 @@ import com.typesafe.scalalogging.Logger
 import scala.Conversion
 
 /** Immutable wrapper around WeeJson Value AST */
-sealed trait Data:
+sealed trait Data extends Ordered[Data]:
 
   /** If this is a DStr, return the string */
   final def getStr: Option[String] =
@@ -128,6 +128,8 @@ final class DObj(private[data] val _obj: Map[String, Data])
       case Some(s) => DObj(s)
       case _       => default
 
+  def compare(that: Data): Int = 0
+
   override def toString(): String = toString(0)
 
   override protected[data] def toString(depth: Int): String =
@@ -176,6 +178,8 @@ final class DArr(private[data] val _arr: List[Data])
 
   def filter[B >: Data](f: B => Boolean): List[Data] = _arr.filter(f)
 
+  def compare(that: Data): Int = 0
+
   override def toString(): String =
     Console.GREEN + "[ " + Console.RESET + _arr.mkString(", ") +
       Console.GREEN + " ]" + Console.RESET
@@ -210,6 +214,13 @@ final class DStr(private val _str: String) extends Data:
   override def toString(): String =
     "\"" + Console.BLUE + _str + Console.RESET + "\""
 
+  def compare(that: Data): Int =
+    that match
+      case that: DObj => -1
+      case that: DArr => -1
+      case that: DStr => _str.compare(that._str)
+      case _          => 0
+
 /** Factory methods for constructing a DStr */
 object DStr:
 
@@ -230,6 +241,13 @@ final class DNum(private val _num: BigDecimal) extends Data:
 
   override def toString(): String =
     Console.GREEN + _num.toString + Console.RESET
+
+  def compare(that: Data): Int =
+    that match
+      case that: DObj => -1
+      case that: DArr => -1
+      case that: DNum => _num.compare(that._num)
+      case _          => 0
 
 /** Factory methods for constructing a DNum */
 object DNum:
@@ -252,6 +270,13 @@ final class DBool(private val _bool: Boolean) extends Data:
   override def toString(): String =
     Console.YELLOW + _bool.toString + Console.RESET
 
+  def compare(that: Data): Int =
+    that match
+      case that: DObj  => -1
+      case that: DArr  => -1
+      case that: DBool => _bool.compare(that._bool)
+      case _           => 0
+
 /** Factory methods for constructing a DBool */
 object DBool:
 
@@ -264,6 +289,11 @@ object DBool:
 /** Wrapper for Null */
 object DNull extends Data:
   override def toString(): String = "null"
+
+  def compare(that: Data): Int =
+    that match
+      case DNull => 0
+      case _     => -1
 
 /** Provides implicit convertions from Obj To Data, and from Data to primitives
   */

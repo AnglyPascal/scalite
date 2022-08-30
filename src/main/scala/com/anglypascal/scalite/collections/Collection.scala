@@ -44,6 +44,8 @@ class Collection(
 
   private var constructor = elemCons(name)
 
+  lazy val filepath = s"/collections/$name"
+
   /** Collect all the elements of this collection from the given directory, will
     * the given global configs.
     *
@@ -90,7 +92,7 @@ class Collection(
     * the entire collection.
     */
   private var permalinkTemplate: String = Defaults.permalink
-  protected lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
+  lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
   /** Sort the items of this collection by this key */
   protected var sortBy: String = Defaults.Collection.sortBy
@@ -108,11 +110,15 @@ class Collection(
   /** Store a reference to the global configs */
   protected var globals: DObj = _
 
-  /** Compare two given items by the given key */
+  /** Compare two given items by the given key 
+   *
+   *  TODO WTF is this compareBy function? :|
+   *  */
   private def compareBy(fst: Element, snd: Element, key: String): Int =
-    val s = cmpOpt(fst.locals.getStr, fst.locals.getStr)
+    // val s = cmpOpt(fst.locals.get(key), fst.locals.get(key))
+    val s = cmpOpt(fst.locals.get(key), fst.locals.get(key))
     if s != 0 then return s
-    val n = cmpOpt(fst.locals.getNum, fst.locals.getNum)
+    val n = cmpOpt(fst.locals.get("title"), fst.locals.get("title"))
     if n != 0 then return n
     0
 

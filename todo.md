@@ -51,7 +51,9 @@
     to the collection of pages, to handle cross reference. Then it writes all the pages
     in parallel.
 
-9. **Collection style**
+## Finished
+
+1. **Collection style**
 
     Write several different styles a collection can have. For now: PostItem, PageItem,
     ListItem. These can be selected in the config setting under collections.name.style.

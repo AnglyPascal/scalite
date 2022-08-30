@@ -46,6 +46,8 @@ class PostLike(val rType: String)(
 ) extends Element
     with Page:
 
+  lazy val identifier = filepath
+
   private val logger = Logger(rType)
   logger.debug("creating from " + GREEN(filepath))
 
@@ -110,7 +112,7 @@ class PostLike(val rType: String)(
     DObj(obj)
 
   /** Template for the permalink of the post */
-  protected lazy val permalink =
+  lazy val permalink =
     val permalinkTemplate =
       frontMatter.extractOrElse("permalink")(
         globals
@@ -155,21 +157,21 @@ class PostLike(val rType: String)(
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  lazy val postUrls: Map[String, String] = ???
-  //   def f(p: (String, Value)): List[(String, String)] =
-  //     p._2 match
-  //       case str: Str =>
-  //         Posts.items.get(str.str) match
-  //           case Some(post) =>
-  //             List(p._1 -> post.permalink)
-  //           case None => List()
-  //       case _ => List()
-  //   frontMatter.obj.remove("postUrls") match
-  //     case None => Map()
-  //     case Some(v) =>
-  //       v match
-  //         case v: Obj => v.obj.flatMap(f).toMap
-  //         case _      => Map()
+  lazy val postUrls: Map[String, String] = 
+    def f(p: (String, Value)): List[(String, String)] =
+      p._2 match
+        case str: Str =>
+          Pages.pages.get(str.str) match
+            case Some(post) =>
+              List(p._1 -> post.permalink)
+            case None => List()
+        case _ => List()
+    frontMatter.obj.remove("postUrls") match
+      case None => Map()
+      case Some(v) =>
+        v match
+          case v: Obj => v.obj.flatMap(f).toMap
+          case _      => Map()
 
   /** Convert the contents of the post to HTML, throwing an exception on failure
     */

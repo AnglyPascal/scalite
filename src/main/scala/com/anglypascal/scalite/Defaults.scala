@@ -47,6 +47,7 @@ object Defaults:
     val toc = true
     val permalink = "/{{> slugDate}}"
     val layout = "post"
+    val style = "post"
 
   object Drafts:
     val output = false
@@ -57,6 +58,7 @@ object Defaults:
     val toc = false
     val permalink = "/{{collection}}/{{> date}}"
     val layout = "draft"
+    val style = "post"
 
   object Statics:
     val output = true
@@ -67,6 +69,7 @@ object Defaults:
     val toc = false
     val permalink = "/{{> none}}"
     val layout = "default"
+    val style = "page"
 
   object Build:
     val logLevel = 1

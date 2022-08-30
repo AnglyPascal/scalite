@@ -27,6 +27,9 @@ import scala.collection.mutable.{Map => MMap}
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
+  *
+  * FIXME: Turn it into a function or a class. This object would otherwise live forever during
+  * the program life time, where it's no longer needed
   */
 object Globals:
 

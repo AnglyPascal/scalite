@@ -8,6 +8,7 @@ import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.StringProcessors.*
+import com.anglypascal.scalite.utils.Colors.*
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Obj
 
@@ -35,6 +36,8 @@ trait PostsGroup(
   /** Set of posts that belong to this collection. */
   private val _posts: Set[PostLike] = Set()
   def posts = _posts.toList
+
+  lazy val filepath = s"/groups/$ctype/$name"
 
   /** Add a new post to this collection */
   def addPost(post: PostLike) = _posts += post
@@ -83,7 +86,7 @@ trait PostsGroup(
       case Some(l) =>
         l.render(context)
       case None =>
-        logger.warn(s"no layout found for $ctype $name")
+        logger.warn(s"no layout found for $ctype ${ERROR(name)}")
         ""
 
   /** needs its special url
