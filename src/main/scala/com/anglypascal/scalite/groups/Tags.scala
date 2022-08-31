@@ -10,10 +10,10 @@ import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.LinkedHashMap
 
-class TagStyle(ctype: String, configs: Obj) extends GroupStyle:
+class TagStyle(ctype: String, configs: Obj, globals: DObj) extends GroupStyle:
 
-  def groupConstructor(name: String, globals: DObj): PostsGroup = 
-    new PostsGroup(ctype, configs)(name, globals)
+  def groupConstructor(name: String): PostsGroup =
+    new PostsGroup(ctype, configs, globals)(name)
 
   def getGroupNames(post: PostLike): Iterable[String] =
     // check the entry in the front matter
@@ -25,6 +25,8 @@ class TagStyle(ctype: String, configs: Obj) extends GroupStyle:
     unslugged
 
 object TagStyle extends GroupConstructor:
-  def apply(ctype: String, configs: Obj): GroupStyle =
-    new TagStyle(ctype, configs)
 
+  val styleName = "tag"
+
+  def apply(gType: String, configs: Obj, globals: DObj): GroupStyle =
+    new TagStyle(gType, configs, globals)

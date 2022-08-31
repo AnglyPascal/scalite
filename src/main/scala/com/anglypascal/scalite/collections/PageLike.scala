@@ -85,6 +85,9 @@ class PageLike(val rType: String)(
     Console.CYAN + title + Console.RESET
 
 object PageConstructor extends ElemConstructor:
+
+  val styleName = "page"
+
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,

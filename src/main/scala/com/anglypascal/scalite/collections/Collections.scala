@@ -5,14 +5,14 @@ import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DBool
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.utils.Colors.*
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
-
-// type ElemConstructor[A] = (String, String, String, DObj, DObj) => A
+import scala.collection.parallel.CollectionConverters._
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -22,24 +22,20 @@ object Collections:
   /** Map of predefined collections that will later be populated by
     * "\_config.yml"
     */
-  private val collections = ListBuffer[Collection]()
-
   private val styles = LinkedHashMap[String, ElemConstructor](
     "post" -> PostConstructor,
     "page" -> PageConstructor,
     "item" -> ItemConstructor
   )
 
+  def addStyle(elemCons: ElemConstructor): Unit =
+    styles += elemCons.styleName -> elemCons
+
+  private val collections = ListBuffer[Collection]()
+
   def addCollection(col: Collection): Unit = collections += col
 
-  def addStyle(styleName: String, styleCons: ElemConstructor) =
-    styles += styleName -> styleCons
-
-  private val logger = Logger("Collection object")
-
-  /** TODO ADD default collectionData, that way we won't have to treat posts and
-    * statics specially.
-    */
+  private val logger = Logger(BLUE("Collections"))
 
   /** Processes all the collections that are set to output, with posts by
     * default.bakira kichu
@@ -49,10 +45,6 @@ object Collections:
     *   collection section from "\_config.yml"
     * @param globals
     *   global parameters
-    *
-    * FIXME, we are assuming that collectionData holds all the information we
-    * will need for the collections. So assuming that if posts are to be
-    * rendered, they are in this collectionData.
     */
   def apply(collectionsDir: String, collectionData: Obj, globals: DObj): Unit =
     import com.anglypascal.scalite.data.DataExtensions.getOrElse
@@ -63,14 +55,6 @@ object Collections:
 
     // create the collection named "key" for each key in collecionsDir
     for key <- collectionData.obj.keys do
-      // val style = collectionData
-      // val Col =
-      //   if collections.contains(key) then
-      //     logger.debug(s"found predefined collection object for $key")
-      //     collections(key)
-      //   else
-      //     logger.debug(s"created new collection object for $key")
-      //     new GenericCollection(key)
       collectionData(key) match
         /** the collectionObj that comes in will be an Obj type */
         case cobj: Obj =>
@@ -79,14 +63,11 @@ object Collections:
             if key != "posts" && key != "statics" then
               cobj.extractOrElse("output")(false)
             else if key == "posts" || key == "statics" then
-              logger.debug("posts are rendered by default")
               cobj.extractOrElse("output")(true)
-            else
-              logger.debug(s"non posts collections are hidden by default: $key")
-              false
+            else false
 
           if !output then
-            logger.debug(s"output set to false, won't process collection $key")
+            logger.debug(s"output of collection ${RED(key)} is set to false")
           else
             val lout = cobj.extractOrElse("layout")(key)
 
@@ -105,7 +86,9 @@ object Collections:
             ) // FIXME the same permalink issues
 
             logger.debug(
-              s"sorting by $sortBy, toc $toc, permalink $permalinkTemplate for $key"
+              s"collection $key: ${GREEN(
+                  s"sortBy: $sortBy, toc: $toc, permalink: $permalinkTemplate"
+                )}"
             )
 
             /** the variables that needs to be passed to the items */
@@ -124,25 +107,11 @@ object Collections:
         case _ =>
           logger.debug(s"provide the metadata in a table or boolean for $key")
 
-    // // If posts haven't been explicitely configured, render it by default
-    // if !collectionData.obj.contains("posts") then
-    //   if !collections.contains("posts") then collections("posts") = Posts
-    //   logger.debug("posts are being renderd by default")
-    //   collections("posts").setup(colsDir + "/_posts", globals)
-
-    // if !collectionData.obj.contains("statics") then
-    //   if !collections.contains("statics") then collections("statics") = Posts
-    //   logger.debug("statics are being renderd by default")
-    //   collections("statics").setup(colsDir + "/_statics", globals)
-
   /** Process all the collections */
   def process(): Unit =
-    for col <- collections do col.process()
+    for col <- collections.par do col.process()
 
   override def toString(): String =
     collections
-      .map(v =>
-        Console.RED + v.name + Console.YELLOW + " -> " +
-          Console.RESET + v.toString
-      )
+      .map(v => RED(v.name) + YELLOW(" -> ") + v.toString)
       .mkString("\n")

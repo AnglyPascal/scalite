@@ -10,7 +10,6 @@ import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.utils.DirectoryReader
 import java.nio.file.Files
 import java.nio.file.Paths
-import com.anglypascal.scalite.groups.*
 
 class PostSpecs extends AnyFlatSpec:
 
@@ -41,8 +40,6 @@ class PostSpecs extends AnyFlatSpec:
   }
 
   ignore should "read files with groups properly" in {
-    Groups.addNewGroup(Tags)
-    Groups.addNewGroup(Categories)
     val rPth1 = "/2022-08-29-categories-test.md"
     val pst = new PostLike("posts")(pDir, rPth1, glb1, clcs)
     assert(

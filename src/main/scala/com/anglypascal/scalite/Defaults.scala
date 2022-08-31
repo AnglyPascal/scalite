@@ -104,7 +104,7 @@ object Defaults:
     val sortBy = "title"
     val permalink = "/{{ctype}}/{{name}}"
     val separator = List(" ", ",")
-    val style = "tags"
+    val style = "tag"
 
   object Categories:
     val title = "Categories"
@@ -112,5 +112,5 @@ object Defaults:
     val sortBy = "title"
     val permalink = "/{{ctype}}/{{name}}"
     val separator = List(",")
-    val style = "categories"
+    val style = "category"
 

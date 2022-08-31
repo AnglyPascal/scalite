@@ -18,7 +18,7 @@ class PostsSpecs extends AnyFlatSpec:
   DirectoryReader(pDir + "/_site")
   Layouts(pDir + "/_layouts", pDir + "/_partials")
 
-  val Posts = Collection(postConstructor, "posts", "post")
+  val Posts = Collection(PostConstructor, "posts", "post")
 
   ignore should "read all posts properly" in {
     Posts.setup(pDir + pPth, globals)

@@ -2,11 +2,14 @@ package com.anglypascal.scalite.plugins
 
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.collections.ElemConstructor
 import com.anglypascal.scalite.converters.Converter
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.groups.GroupConstructor
+import com.anglypascal.scalite.groups.Groups
 import com.anglypascal.scalite.layouts.LayoutObject
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
@@ -106,6 +109,16 @@ object PluginManager:
       Collections.addCollection(C.asInstanceOf[Collection])
     )
 
+  private def loadElemConstructors(names: List[DStr | DObj]) =
+    findObjects[ElemConstructor](names).map(E =>
+      Collections.addStyle(E.asInstanceOf[ElemConstructor])
+    )
+
+  private def loadGroupConstructors(names: List[DStr | DObj]) =
+    findObjects[GroupConstructor](names).map(C =>
+      Groups.addNewGroupStyle(C.asInstanceOf[GroupConstructor])
+    )
+
   private def loadLayouts(names: List[DStr | DObj]) =
     findObjects[LayoutObject](names).map(L =>
       Layouts.addEngine(L.asInstanceOf[LayoutObject])
@@ -136,4 +149,6 @@ object PluginManager:
 
     loadConverters(getArrStr("converters"))
     loadCollections(getArrStr("collections"))
+    loadElemConstructors(getArrStr("elementConstructors"))
+    loadGroupConstructors(getArrStr("groupConstructors"))
     loadLayouts(getArrStr("layouts"))

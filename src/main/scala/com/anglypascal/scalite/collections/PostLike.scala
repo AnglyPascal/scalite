@@ -34,7 +34,7 @@ import scala.collection.mutable.ListBuffer
   * @param relativePath
   *   path to the post file relative to the parentDir
   * @param globals
-  *   a weejson object passed through the "_config.yml" file
+  *   DObj containing the global setting for this site
   * @param collection
   *   the configurations passed to the whole collection
   */
@@ -218,15 +218,16 @@ class PostLike(val rType: String)(
 
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
-    *
-    * TODO
     */
-  // for groupObj <- Groups.availableGroups do groupObj.addToGroups(this, globals)
+  Groups.addToGroups(this)
 
   override def toString(): String =
     CYAN(title) + "(" + GREEN(date) + ")" + "[" + BLUE(permalink) + "]"
 
 object PostConstructor extends ElemConstructor:
+
+  val styleName = "post"
+
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,

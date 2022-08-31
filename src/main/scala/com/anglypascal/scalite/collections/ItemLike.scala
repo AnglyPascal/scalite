@@ -47,6 +47,9 @@ class ItemLike(val rType: String)(
     else Converters.convert(mainMatter, filepath)
 
 object ItemConstructor extends ElemConstructor:
+
+  val styleName = "item"
+
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,

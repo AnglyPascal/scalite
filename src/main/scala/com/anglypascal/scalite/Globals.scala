@@ -11,7 +11,6 @@ import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
-// import com.anglypascal.scalite.groups.{Tags, Categories, Groups}
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
