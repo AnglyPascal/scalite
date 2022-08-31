@@ -5,31 +5,37 @@ import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DBool
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.utils.Colors.*
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
+import scala.collection.mutable.ListBuffer
+import scala.collection.parallel.CollectionConverters._
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
   * a table of contents like page for the collction.
   */
 object Collections:
-
   /** Map of predefined collections that will later be populated by
     * "\_config.yml"
     */
-  private val collections = LinkedHashMap[String, Collection[?]](
-    "posts" -> Posts,
-    "drafts" -> Drafts,
-    "statics" -> StaticPages
+  private val styles = LinkedHashMap[String, ElemConstructor](
+    "post" -> PostConstructor,
+    "page" -> PageConstructor,
+    "item" -> ItemConstructor
   )
 
-  def addCollection(col: Collection[?]): Unit =
-    collections += (col.name -> col)
+  def addStyle(elemCons: ElemConstructor): Unit =
+    styles += elemCons.styleName -> elemCons
 
-  private val logger = Logger("Collection object")
+  private val collections = ListBuffer[Collection]()
+
+  def addCollection(col: Collection): Unit = collections += col
+
+  private val logger = Logger(BLUE("Collections"))
 
   /** Processes all the collections that are set to output, with posts by
     * default.bakira kichu
@@ -45,53 +51,32 @@ object Collections:
     import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 
     // override the collectionsDir if it's in collectionData
-    val colsDir = collectionData.getOrElse("collectionsDir")(collectionsDir)
+    val colsDir = collectionData.extractOrElse("collectionsDir")(collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
-    for key <- collectionData.obj.keys if key != "collectionsDir" do
-      val Col =
-        if collections.contains(key) then
-          logger.debug(s"found predefined collection object for $key")
-          collections(key)
-        else
-          logger.debug(s"created new collection object for $key")
-          new GenericCollection(key)
-
+    for key <- collectionData.obj.keys do
       collectionData(key) match
-        // collections:
-        //     drafts: true
-        case cbool: Bool if cbool.bool =>
-          logger.debug(s"rendering the collection $key")
-          val dir = colsDir + s"/_$key"
-          Col.setup(dir, globals)
-          addCollection(Col)
-
-        // collections:
-        //     drafts: false
-        case cbool: Bool if !cbool.bool =>
-          logger.debug(s"won't process the collection $key")
-          collections.remove(key)
-
-        // full configuration
+        /** the collectionObj that comes in will be an Obj type */
         case cobj: Obj =>
+          val style = cobj.extractOrElse("style")("item")
           val output =
             if key != "posts" && key != "statics" then
               cobj.extractOrElse("output")(false)
             else if key == "posts" || key == "statics" then
-              logger.debug("posts are rendered by default")
               cobj.extractOrElse("output")(true)
-            else
-              logger.debug(s"non posts collections are hidden by default: $key")
-              false
+            else false
 
           if !output then
-            logger.debug(s"output set to false, won't process collection $key")
-            collections.remove(key)
+            logger.debug(s"output of collection ${RED(key)} is set to false")
           else
+            val lout = cobj.extractOrElse("layout")(key)
+
             val prn = cobj.extractOrElse("directory")(colsDir)
             val fld = cobj.extractOrElse("folder")(s"/_$key")
             val dir = prn + (if fld.startsWith("/") then fld else "/" + fld)
             logger.debug(s"fetching files from $dir for collection $key")
+
+            val Col = new Collection(styles(style), key, lout)
 
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
@@ -101,7 +86,9 @@ object Collections:
             ) // FIXME the same permalink issues
 
             logger.debug(
-              s"sorting by $sortBy, toc $toc, permalink $permalinkTemplate for $key"
+              s"collection $key: ${GREEN(
+                  s"sortBy: $sortBy, toc: $toc, permalink: $permalinkTemplate"
+                )}"
             )
 
             /** the variables that needs to be passed to the items */
@@ -119,27 +106,12 @@ object Collections:
         // wasn't mentioned in the configuration
         case _ =>
           logger.debug(s"provide the metadata in a table or boolean for $key")
-          collections.remove(key)
-
-    // If posts haven't been explicitely configured, render it by default
-    if !collectionData.obj.contains("posts") then
-      if !collections.contains("posts") then collections("posts") = Posts
-      logger.debug("posts are being renderd by default")
-      collections("posts").setup(colsDir + "/_posts", globals)
-
-    if !collectionData.obj.contains("statics") then
-      if !collections.contains("statics") then collections("statics") = Posts
-      logger.debug("statics are being renderd by default")
-      collections("statics").setup(colsDir + "/_statics", globals)
 
   /** Process all the collections */
   def process(): Unit =
-    for (_, col) <- collections do col.process()
+    for col <- collections.par do col.process()
 
   override def toString(): String =
     collections
-      .map((k, v) =>
-        Console.RED + k + Console.YELLOW + " -> " +
-          Console.RESET + v.toString
-      )
+      .map(v => RED(v.name) + YELLOW(" -> ") + v.toString)
       .mkString("\n")

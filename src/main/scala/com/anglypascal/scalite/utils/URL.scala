@@ -2,15 +2,20 @@ package com.anglypascal.scalite
 
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.documents.Page
 
-case class URL(str: String):
-  /** */
-  val template = new Mustache(str)
+object URL:
 
-  def apply(placeholders: DObj) =
+  private var _timeZone: String = ""
+  def setup(timeZone: String): Unit = _timeZone = timeZone
+
+  /** Given the template str and the placeholders, render the template to create
+    * a relative permanent link
+    */
+  def apply(str: String)(placeholders: DObj) =
+    val template = new Mustache(str)
     template.render(placeholders, partials)
 
+  /** Predefined partials to be used with the permalink templates */
   private val partials: Map[String, Mustache] =
     import com.anglypascal.scalite.Defaults.URLPartials.*
     Map(
@@ -21,14 +26,3 @@ case class URL(str: String):
       "weekdate" -> weekdate,
       "none" -> none
     ).map((s, m) => (s, new Mustache(m)))
-
-/** TODO: The permalink url will be given in form of an absolute link or a
-  * mustache template with the placeholders from a list.
-  *
-  * https://jekyllrb.com/docs/permalinks/
-  *
-  * can be specified as a global permalink, where will also be a default, and
-  * then individual posts might override the global setting.
-  *
-  * There are some rules that I need to flesh out still
-  */

@@ -1,4 +1,4 @@
-name: Scalite
+title: Scalite
 subtitle: Scalable, simple, blog-aware static-site generator
 author:
   name: M Ahsan Al Mahir
@@ -12,12 +12,15 @@ timezone: Asia/Dhaka
 
 collections: 
   docs:
+    style: post
     permalink: "/{{collection}}/{{path}}/"
     output: true
   posts:
+    style: post
     permalink: "/news/:year/:month/:day/:title/"
     output: false
   tutorials:
+    style: post
     permalink: "/{{collection}}/{{path}}/"
     output: true
 

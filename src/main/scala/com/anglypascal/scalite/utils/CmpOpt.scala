@@ -1,10 +1,7 @@
 package com.anglypascal.scalite.utils
 
 /** Compare two options */
-def cmpOpt[T](
-    o1: Option[T],
-    o2: Option[T]
-)(using ord: Ordering[T]): Int =
+def cmpOpt[T <: Ordered[T]](o1: Option[T], o2: Option[T]): Int =
   o1 match
     case None =>
       o2 match
@@ -13,4 +10,4 @@ def cmpOpt[T](
     case Some(a) =>
       o2 match
         case None    => 1
-        case Some(b) => ord.compare(a, b)
+        case Some(b) => a compare b

@@ -2,11 +2,9 @@
 
 ## Agenda
 
-1. **Complete implementation of Groups:**
+1. **Defaults in Assets**
 
-    Write the configuration, rendering, permalink logic for PostsGroup. Then add a list
-    of groups that will be available to the Posts or any other object during render
-    time. This should include group name, permalink, group type. I think that's it.
+    Add the defaults configuration to Assets
 
 2. **Test the rendering of Groups' pages**
 
@@ -39,19 +37,10 @@
     file. Also figure out if it's possible to create separate style files for different
     layouts.
 
-7. **Defaults in Assets**
 
-    Add the defaults configuration to Assets
+## Finished
 
-8. **Site class/object**
-
-    Initiates global variables, then processes the pages. First it reads all the
-    assets. Then reads all the collection items (here i'll add more functionality) and
-    stores them in a collection. Then it renders the pages in parallel, with reference
-    to the collection of pages, to handle cross reference. Then it writes all the pages
-    in parallel.
-
-9. **Collection style**
+1. **Collection style**
 
     Write several different styles a collection can have. For now: PostItem, PageItem,
     ListItem. These can be selected in the config setting under collections.name.style.
@@ -60,6 +49,22 @@
 
     Collections will keep a map of (styleName, style), and new implementations will
     provide a new style basically.
+
+    ``` yaml
+    collections:
+        posts:
+            style: post
+            folder: /_posts
+            output: true
+        docs:
+            style: post
+            folder: /_documents
+            output: true
+        employees:
+            style: item
+            folder: /employees
+            output: false
+    ```
 
 ## Documentation
 

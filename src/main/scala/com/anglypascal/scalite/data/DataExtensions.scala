@@ -62,6 +62,21 @@ object DataExtensions:
 
     final def extractOrElse(
         key: String
+    )(default: Obj): Obj =
+      if data.obj.contains(key) then
+        logger.trace(s"found $key in $data")
+        data.obj.remove(key) match
+          case Some(s) =>
+            s match
+              case s: Obj => s
+              case _      => default
+          case _ => default
+      else
+        logger.trace(s"didn't find key in $data")
+        default
+
+    final def extractOrElse(
+        key: String
     )(default: Map[String, Value]): Map[String, Value] =
       if data.obj.contains(key) then
         logger.trace(s"found $key in $data")
@@ -74,3 +89,43 @@ object DataExtensions:
       else
         logger.trace(s"didn't find key in $data")
         default
+
+  def getChain(objs: (Obj | DObj)*)(key: String)(default: Boolean): Boolean =
+    objs match
+      case Nil => default
+      case obj :: tail =>
+        obj match
+          case obj: Obj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+          case obj: DObj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+
+  def getChain(objs: (Obj | DObj)*)(key: String)(default: String): String =
+    objs match
+      case Nil => default
+      case obj :: tail =>
+        obj match
+          case obj: Obj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+          case obj: DObj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+
+  def extractChain(objs: (Obj | DObj)*)(key: String)(default: Boolean): Boolean =
+    objs match
+      case Nil => default
+      case obj :: tail =>
+        obj match
+          case obj: Obj =>
+            obj.extractOrElse(key)(getChain(tail: _*)(key)(default))
+          case obj: DObj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+
+  def extractChain(objs: (Obj | DObj)*)(key: String)(default: String): String =
+    objs match
+      case Nil => default
+      case obj :: tail =>
+        obj match
+          case obj: Obj =>
+            obj.extractOrElse(key)(getChain(tail: _*)(key)(default))
+          case obj: DObj =>
+            obj.getOrElse(key)(getChain(tail: _*)(key)(default))

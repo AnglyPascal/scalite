@@ -21,10 +21,10 @@ import com.anglypascal.scalite.utils.DirectoryReader.{getListOfFilepaths}
 abstract class Layout(
     val lang: String,
     val name: String,
-    layoutDir: String,
-    layoutPath: String,
-    rType: String
-) extends Reader(layoutDir + layoutPath, rType):
+    val parentDir: String,
+    val relativePath: String,
+    val rType: String
+) extends Reader:
 
   /** */
   private val logger = Logger("Mustache Layout")

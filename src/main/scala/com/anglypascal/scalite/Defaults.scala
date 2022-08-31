@@ -14,6 +14,8 @@ object Defaults:
   val lang = "en"
   val paginate = false
   val author = Obj()
+  val timeZone = "Europe/London"
+  val separator = "<--->"
 
   object Directories:
     val base = "."
@@ -47,6 +49,7 @@ object Defaults:
     val toc = true
     val permalink = "/{{> slugDate}}"
     val layout = "post"
+    val style = "post"
 
   object Drafts:
     val output = false
@@ -57,6 +60,7 @@ object Defaults:
     val toc = false
     val permalink = "/{{collection}}/{{> date}}"
     val layout = "draft"
+    val style = "post"
 
   object Statics:
     val output = true
@@ -67,6 +71,7 @@ object Defaults:
     val toc = false
     val permalink = "/{{> none}}"
     val layout = "default"
+    val style = "page"
 
   object Build:
     val logLevel = 1
@@ -86,3 +91,28 @@ object Defaults:
       "{{categories}}/{{year}}/W{{week}}/{{short_day}}/{{title}}{{output_ext}}"
     val none =
       "{{categories}}/{{slugTitle}}{{output_ext}}"
+
+  object Group:
+    val permalink = "/{{ctype}}/{{name}}"
+
+  object PostsGroup:
+    val outputExt = ".html"
+    val permalink = "/{{ctype}}/{{name}}"
+    val sortBy = "title"
+
+  object Tags:
+    val title = "Tags"
+    val gType = "tags"
+    val sortBy = "title"
+    val permalink = "/{{ctype}}/{{name}}"
+    val separator = List(" ", ",")
+    val style = "tag"
+
+  object Categories:
+    val title = "Categories"
+    val gType = "categories"
+    val sortBy = "title"
+    val permalink = "/{{ctype}}/{{name}}"
+    val separator = List(",")
+    val style = "category"
+
