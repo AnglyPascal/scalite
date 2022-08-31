@@ -24,6 +24,7 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
 import com.rallyhealth.weejson.v1.Bool
+import com.anglypascal.scalite.documents.Pages
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -240,9 +241,6 @@ object Globals:
     val dataAST = DataAST
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
-    // Groups.addNewGroup(Tags)
-    // Groups.addNewGroup(Categories)
-
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
     PluginManager(_base + _plugD, DObj(plugMap))
@@ -257,6 +255,8 @@ object Globals:
       dirs(key) = configs(key)
 
     loadPlugins()
+    Pages.setup(_base)
+    URL.setup(configs.extractOrElse("timeZone")(Defaults.timeZone))
 
     processDefaults()
     processCollections()

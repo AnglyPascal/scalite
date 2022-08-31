@@ -3,24 +3,17 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.Renderable
-import com.anglypascal.scalite.plugins.Plugin
 
-/** Abstract class for a generic Item that simply has a source file to read from
-  * and some internal variables defined in locals to process the contents of
-  * that file with method render.
+/** Trait defining an element of a Collection. This can be a post, a static
+  * page, or some small object to be rendered as part of a separate page.
+  *
+  * An Element is a Reader, so it can read files from the filepath and can
+  * separate out the frontMatter and the mainMatter
+  *
+  * An Element is also a Renderable, so it can have a parent layout and it can
+  * be rendered into some HTML string.
   */
 trait Element extends Reader with Renderable:
 
-  /** local variales for this item */
-  def locals: DObj
-
-trait ElemConstructor extends Plugin:
-
-  val styleName: String 
-
-  def apply(rType: String)(
-      parentDir: String,
-      relativePath: String,
-      globals: DObj,
-      collection: DObj
-  ): Element
+  /** An Element also has some internal variables that are publicly visible */
+  lazy val locals: DObj

@@ -5,6 +5,9 @@ import com.anglypascal.scalite.data.DObj
 
 object URL:
 
+  private var _timeZone: String = ""
+  def setup(timeZone: String): Unit = _timeZone = timeZone
+
   /** Given the template str and the placeholders, render the template to create
     * a relative permanent link
     */

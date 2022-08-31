@@ -14,6 +14,8 @@ object Defaults:
   val lang = "en"
   val paginate = false
   val author = Obj()
+  val timeZone = "Europe/London"
+  val separator = "<--->"
 
   object Directories:
     val base = "."

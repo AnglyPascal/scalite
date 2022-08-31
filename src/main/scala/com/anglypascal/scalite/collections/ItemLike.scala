@@ -5,8 +5,10 @@ import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.layouts.Layout
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.rallyhealth.weejson.v1.Obj
+import com.typesafe.scalalogging.Logger
 
 class ItemLike(val rType: String)(
     val parentDir: String,
@@ -14,6 +16,9 @@ class ItemLike(val rType: String)(
     globals: DObj,
     collection: DObj
 ) extends Element:
+
+  private val logger = Logger(s"ItemLike $rType")
+  logger.debug("creating from " + GREEN(filepath))
 
   protected val layoutName = ""
 

@@ -2,11 +2,9 @@
 
 ## Agenda
 
-1. **Complete implementation of Groups:**
+1. **Defaults in Assets**
 
-    Group
-      - Has a type like Tags or Categories
-      - This is where we can add extensibility. Should all group be similar?
+    Add the defaults configuration to Assets
 
 2. **Test the rendering of Groups' pages**
 
@@ -39,9 +37,6 @@
     file. Also figure out if it's possible to create separate style files for different
     layouts.
 
-7. **Defaults in Assets**
-
-    Add the defaults configuration to Assets
 
 ## Finished
 
