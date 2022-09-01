@@ -19,6 +19,7 @@ import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import scala.reflect.ClassTag
+import com.anglypascal.scalite.data.Data
 
 /** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager:
@@ -60,13 +61,14 @@ object PluginManager:
         None
 
   /** Search for the given object in all the loaded jars */
-  private def findObject[T <: Plugin](objName: (DStr | DObj))(using
+  private def findObject[T <: Plugin](objName: (String | Map[String, Data]))(
+      using
       ClassTag[T],
       ClassTag[Plugin]
   ): Option[Plugin] =
     val key = objName match
-      case str: DStr => str.str
-      case obj: DObj =>
+      case str: String => str
+      case obj: Map[String, Data] =>
         obj.keys.headOption match
           case None =>
             logger.error("Plugin customization had wrong syntax.")
@@ -130,6 +132,8 @@ object PluginManager:
       .map(_.get)
       .toList
 
+  /** FIXME make sure that the plugins data is a DObj with name -> Configs map
+    */
   def apply(pluginsDir: String, pluginsData: DObj): Unit =
     getClassLoaders(pluginsDir)
 

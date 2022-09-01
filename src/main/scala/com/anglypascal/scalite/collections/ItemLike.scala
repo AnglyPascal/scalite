@@ -61,4 +61,4 @@ object ItemConstructor extends ElemConstructor:
       globals: DObj,
       collection: DObj
   ): Element =
-    new ItemLike(rType)(parentDir, relativePath, globals, collection)
+    ItemLike(rType)(parentDir, relativePath, globals, collection)

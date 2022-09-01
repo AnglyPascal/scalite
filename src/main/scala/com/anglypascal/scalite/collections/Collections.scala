@@ -89,7 +89,7 @@ object Collections:
                 )}"
             )
 
-            val Col = new Collection(styles(style), key, lout)(
+            val Col = Collection(styles(style), key, lout)(
               dir,
               globals,
               sortBy,

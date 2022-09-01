@@ -20,8 +20,8 @@ private[scalite] final class DataAST(v: Data) extends AST:
   def value: Any =
     v match
       case obj: DObj =>
-        obj._obj.toMap.map(p => (p._1, given_Conversion_Data_AST(p._2)))
-      case arr: DArr  => arr._arr.toSeq.map(given_Conversion_Data_AST)
+        obj.obj.toMap.map(p => (p._1, given_Conversion_Data_AST(p._2)))
+      case arr: DArr  => arr.arr.toSeq.map(given_Conversion_Data_AST)
       case str: DStr  => str.str
       case num: DNum  => num.num
       case boo: DBool => boo.bool
