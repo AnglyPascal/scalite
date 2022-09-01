@@ -14,7 +14,7 @@ trait Renderable:
   protected lazy val layout = Layouts.get(layoutName)
 
   /** Should this object be visible to the reset of the site? */
-  lazy val visible: Boolean
+  val visible: Boolean
 
   /** Renders the contents of this page, using the template in the parent
     * layout, if it exists, and returns a HTML string.

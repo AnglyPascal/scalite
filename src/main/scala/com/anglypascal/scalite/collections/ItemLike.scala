@@ -41,7 +41,7 @@ class ItemLike(val rType: String)(
     obj.obj ++= List("title" -> title)
     DObj(obj)
 
-  lazy val visible: Boolean = frontMatter.extractOrElse("visible")(false)
+  val visible: Boolean = frontMatter.extractOrElse("visible")(false)
 
   /** If there's some front\_matter, then the main\_matter will be conerted with
     * appropriate converter. Otherwise, the identity will be returned

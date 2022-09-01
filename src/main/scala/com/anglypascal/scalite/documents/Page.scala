@@ -4,6 +4,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.writeTo
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.Defaults
 
 /** A Page of the website. It's a Renderable. So it can be rendered into an HTML
   * string.
@@ -25,8 +26,10 @@ trait Page extends Renderable:
 
   private val logger = Logger("Page writer")
 
-  /** Absolute filepath to where to write this page on the disk */
-  lazy val filepath: String
+  /** Unique identifier to map this page to, in order for the cross reference to
+    * work.
+    */
+  lazy val identifier: String
 
   /** Relative permanent link to this page */
   lazy val permalink: String
@@ -52,7 +55,7 @@ trait Page extends Renderable:
     else logger.debug(s"would write $this to $path")
 
   // Add this page to the pages collection.
-  Pages.addPage(this)
+  if visible then Pages.addPage(this)
 
 /** Holds reference to all the pages of this website.
   *
@@ -64,13 +67,13 @@ trait Page extends Renderable:
   */
 object Pages:
 
-  private var base: String = ""
+  private var base: String = Defaults.Directories.base
 
   private val pages = LinkedHashMap[String, Page]()
 
   /** Add the given page to the pages collection */
   def addPage(page: Page) =
-    if page.visible then pages += page.filepath.stripPrefix(base) -> page
+    pages += page.identifier.stripPrefix(base) -> page
 
   /** Find a page.
     *

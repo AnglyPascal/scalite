@@ -110,7 +110,7 @@ class PageLike(val rType: String)(
       case None    => str
 
   /** Should this page be visible to the site? */
-  lazy val visible: Boolean = frontMatter.getOrElse("visible")(true)
+  val visible: Boolean = frontMatter.getOrElse("visible")(true)
 
   override def toString(): String =
     Console.CYAN + title + Console.RESET

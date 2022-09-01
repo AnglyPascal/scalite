@@ -4,6 +4,7 @@ import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.collections.PostLike
+import com.anglypascal.scalite.collections.compareBy
 import com.anglypascal.scalite.data.DArr
 import com.anglypascal.scalite.data.DObj
 import com.anglypascal.scalite.data.DStr
@@ -51,7 +52,7 @@ class PostsGroup(
   protected val _posts: ArrayBuffer[PostLike] = ArrayBuffer()
   def posts = _posts.sortWith(compare)
 
-  lazy val filepath = permalink
+  lazy val identifier = permalink
 
   protected lazy val outputExt: String =
     scopedDefaults.extractOrElse("outputExt")(
@@ -115,7 +116,7 @@ class PostsGroup(
     DObj(obj)
 
   /** Should the tag be rendered in a separate page? */
-  lazy val visible =
+  val visible =
     scopedDefaults.extractOrElse("visible")(
       configs.extractOrElse("visible")(true)
     )
@@ -134,15 +135,6 @@ class PostsGroup(
       case None =>
         logger.warn(s"no layout found for $gType ${ERROR(name)}")
         ""
-
-  /** Sort the PostLike objects according to the given key */
-  protected def compareBy(fst: PostLike, snd: PostLike, key: String): Int =
-    val s = cmpOpt(fst.locals.get(key), fst.locals.get(key))
-    if s != 0 then return s
-    val k = Defaults.PostsGroup.sortBy
-    val n = cmpOpt(fst.locals.get(k), fst.locals.get(k))
-    if n != 0 then return n
-    0
 
   private def compare(fst: PostLike, snd: PostLike): Boolean =
     compareBy(fst, snd, sortBy) < 0

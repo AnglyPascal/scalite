@@ -104,11 +104,6 @@ object PluginManager:
       Converters.addConverter(C.asInstanceOf[Converter])
     )
 
-  private def loadCollections(names: List[DStr | DObj]) =
-    findObjects[Collection](names).map(C =>
-      Collections.addCollection(C.asInstanceOf[Collection])
-    )
-
   private def loadElemConstructors(names: List[DStr | DObj]) =
     findObjects[ElemConstructor](names).map(E =>
       Collections.addStyle(E.asInstanceOf[ElemConstructor])
@@ -148,7 +143,6 @@ object PluginManager:
       else List()
 
     loadConverters(getArrStr("converters"))
-    loadCollections(getArrStr("collections"))
     loadElemConstructors(getArrStr("elementConstructors"))
     loadGroupConstructors(getArrStr("groupConstructors"))
     loadLayouts(getArrStr("layouts"))

@@ -119,7 +119,7 @@ class PostLike(val rType: String)(
     * output: false inside collection.post complete turns off rendering of
     * posts.
     */
-  lazy val visible = extractChain(frontMatter, collection)("visible")(true)
+  val visible = extractChain(frontMatter, collection)("visible")(true)
 
   protected lazy val outputExt =
     extractChain(frontMatter, collection)(

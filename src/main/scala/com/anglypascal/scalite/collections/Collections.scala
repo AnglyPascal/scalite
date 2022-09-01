@@ -76,8 +76,6 @@ object Collections:
             val dir = prn + (if fld.startsWith("/") then fld else "/" + fld)
             logger.debug(s"fetching files from $dir for collection $key")
 
-            val Col = new Collection(styles(style), key, lout)
-
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
             val toc = cobj.extractOrElse("sortBy")(Defaults.Collection.toc)
@@ -91,15 +89,14 @@ object Collections:
                 )}"
             )
 
-            /** the variables that needs to be passed to the items */
-            val _globals = globals.add(
-              "collection" -> DObj(
-                "name" -> DStr(key),
-                "permalink" -> DStr(permalinkTemplate)
-              )
+            val Col = new Collection(styles(style), key, lout)(
+              dir,
+              globals,
+              sortBy,
+              toc,
+              permalinkTemplate,
+              DObj(cobj)
             )
-
-            Col.setup(dir, _globals, sortBy, toc, permalinkTemplate, DObj(cobj))
             // add this collection to the collections map
             addCollection(Col)
 
