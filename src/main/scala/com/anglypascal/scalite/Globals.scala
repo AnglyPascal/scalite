@@ -2,8 +2,6 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.converters.Identity
-import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.data.immutable.{DArr => IArr}
@@ -11,12 +9,10 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.immutable.{DataAST => IAST}
 import com.anglypascal.scalite.data.mutable.{DArr => MArr}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.mutable.{DataAST => MAST}
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
 import com.anglypascal.scalite.documents.Pages
 import com.anglypascal.scalite.layouts.Layouts
-import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.utils.yamlFileParser
@@ -79,30 +75,24 @@ object Globals:
     "permalink" -> Defaults.permalink
   )
 
-
   /** FIXME what do with this? */
   private lazy val build = Obj(
     "logLevel" -> 1
   )
 
-  private val configurables = List[Configurable](Collections, Groups)
+  private val configurables =
+    List[Configurable](PluginManager, Converters, Groups, Collections)
 
-  private def _base =
-    dirs.getOrElse("base")(Defaults.Directories.base)
-  private def _dest =
-    dirs.getOrElse("destination")(Defaults.Directories.destination)
+  import Defaults.Directories
+  private def _base = dirs.getOrElse("base")(Directories.base)
+  private def _dest = dirs.getOrElse("destination")(Directories.destination)
+  private def _layD = dirs.getOrElse("layoutsDir")(Directories.layoutsDir)
+  private def _parD = dirs.getOrElse("partialsDir")(Directories.partialsDir)
+  private def _plugD = dirs.getOrElse("pluginsDir")(Directories.pluginsDir)
+  private def _dataD = dirs.getOrElse("dataDir")(Directories.dataDir)
+  private def _assetD = dirs.getOrElse("assetsDir")(Directories.assetsDir)
   private def _colD =
-    dirs.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
-  private def _layD =
-    dirs.getOrElse("layoutsDir")(Defaults.Directories.layoutsDir)
-  private def _parD =
-    dirs.getOrElse("partialsDir")(Defaults.Directories.partialsDir)
-  private def _plugD =
-    dirs.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
-  private def _dataD =
-    dirs.getOrElse("dataDir")(Defaults.Directories.dataDir)
-  private def _assetD =
-    dirs.getOrElse("assetsDir")(Defaults.Directories.assetsDir)
+    dirs.getOrElse("collectionsDir")(Directories.collectionsDir)
 
   /** Load the configs from "/\_config.yml" file */
   private lazy val configs =
@@ -114,21 +104,6 @@ object Globals:
           s"yaml file ${dirs("base").str} could not be read into an weejson Obj"
         )
         Obj()
-
-  /** Get the updated exteions for the converters. Will move this functionality
-    * later to the Converters section
-    */
-  private def extensions =
-    logger.trace("reading ml extension modifiers")
-    reading.obj
-      .filter((s, _) => s.endsWith("Ext"))
-      .map((s, v) =>
-        val ext = v match
-          case v: Str => v.str
-          case v: Arr => v.arr.map(_.str).mkString(",")
-          case _      => ""
-        (s.dropRight(3), ext)
-      )
 
   private def processScopedDefaults() =
     logger.trace("setting up scoped defaults")
@@ -154,12 +129,6 @@ object Globals:
   private def loadPlugins(): Unit =
     logger.trace("loading the plugins and instantiating standalone objects")
     // default plugins
-    val dataAST = IAST
-    Converters.addConverter(Markdown)
-    Layouts.addEngine(MustacheLayouts)
-    // custom plugins
-    val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
-    PluginManager(_base + _plugD, plugMap)
 
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =
@@ -192,7 +161,6 @@ object Globals:
     interm.map(p => p._1(p._2, _globals))
 
     DirectoryReader(_base + _dest)
-    Converters.modifyExtensions(extensions)
     Layouts(_base + _layD, _base + _parD)
 
     _globals

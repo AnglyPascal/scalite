@@ -7,12 +7,11 @@ import laika.format
 import laika.markdown.github
 import laika.parse.code
 
-object Markdown extends Converter:
-  val fileType = "markdown"
-
-  setExt("md,markdown,mkd")
-
-  def outputExt = ".html"
+class Markdown(
+    val fileType: String,
+    val extensions: String,
+    val outputExt: String
+) extends Converter:
 
   private val logger = Logger("Markdown converter")
 
@@ -32,9 +31,7 @@ object Markdown extends Converter:
         str
       case Right(s) => s
 
-// @main
-def markDownTest =
-  val s = "[link]({{mustache}})"
-  val t = Markdown.convert(s)
-  println(t)
-  println(new Mustache(t).render(Map("mustache" -> "haha")))
+object Markdown extends ConverterConstructor:
+  val constructorName: String = "markdown"
+  def apply(fileType: String, extensions: String, outputExt: String) =
+    new Markdown(fileType, extensions, outputExt)

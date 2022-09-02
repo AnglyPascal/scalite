@@ -2,6 +2,7 @@ package com.anglypascal.scalite
 
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Arr
+import com.anglypascal.scalite.data.mutable.DArr
 
 object Defaults:
 
@@ -116,3 +117,11 @@ object Defaults:
     val separator = List(",")
     val style = "category"
 
+
+  object Markdown:
+    val extensions = "markdown,md,mkd,mkdn"
+    val outputExt = ".html"
+
+  object Identity:
+    val extensions = "html"
+    val outputExt = ".html"

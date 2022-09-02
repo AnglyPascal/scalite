@@ -5,18 +5,16 @@ import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.collections.compareBy
+import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.DArr
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.immutable.DStr
-import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.cmpOpt
-import com.rallyhealth.weejson.v1.Arr
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.ArrayBuffer
@@ -55,21 +53,19 @@ class PostsGroup(
 
   lazy val identifier = permalink
 
+  private def getVal(key: String)(default: String): String =
+    extractChain(scopedDefaults, configs)(key)(default)
+
   protected lazy val outputExt: String =
-    scopedDefaults.extractOrElse("outputExt")(
-      configs.extractOrElse("outputExt")(Defaults.PostsGroup.outputExt)
-    )
+    getVal("outputExt")(Defaults.PostsGroup.outputExt)
 
   protected lazy val sortBy: String =
-    scopedDefaults.extractOrElse("sortBy")(
-      configs.extractOrElse("sortBy")(Defaults.PostsGroup.sortBy)
-    )
+    getVal("sortBy")(Defaults.PostsGroup.sortBy)
 
   lazy val permalink: String =
     val permalinkTemplate: String =
-      scopedDefaults.extractOrElse("permalink")(
-        configs.extractOrElse("permalink")(Defaults.PostsGroup.permalink)
-      )
+      getVal("permalink")(Defaults.PostsGroup.permalink)
+
     val urlObj = MObj(
       "name" -> name,
       "gType" -> gType
@@ -87,11 +83,7 @@ class PostsGroup(
     * If not specified in the global settings, this defaults back to "gType"
     */
   protected val layoutName =
-    scopedDefaults.extractOrElse("layout")(
-      configs.extractOrElse("layout")(
-        globals.getOrElse(gType + "Layout")(gType)
-      )
-    )
+    getVal("layout")(globals.getOrElse(gType + "Layout")(gType))
 
   /** Convert the given post to a weeJson obj that will be used to render this
     * post's representative in the page of this PostsGroup. Is intended for

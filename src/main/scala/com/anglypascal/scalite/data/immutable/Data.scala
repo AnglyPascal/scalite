@@ -96,9 +96,6 @@ final class DObj(val obj: Map[String, Data])
   def getOrElse(key: String)(default: List[Data]): List[Data] =
     get(key).flatMap(_.getArr).getOrElse(default)
 
-  def getOrElse(key: String)(default: Map[String, Data]): Map[String, Data] =
-    get(key).flatMap(_.getObj).getOrElse(default)
-
   def getOrElse(key: String)(default: DObj): DObj =
     get(key).flatMap(_.getObj).map(DObj(_)).getOrElse(default)
 

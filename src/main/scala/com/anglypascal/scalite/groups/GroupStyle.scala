@@ -4,7 +4,6 @@ import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.plugins.Plugin
-import com.rallyhealth.weejson.v1.Obj
 
 /** Defines how PostsGroup objects are created from PostLike objects */
 trait GroupStyle:

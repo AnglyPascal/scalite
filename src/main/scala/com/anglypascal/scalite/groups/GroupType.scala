@@ -2,7 +2,6 @@ package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
 
 import scala.collection.mutable.LinkedHashMap

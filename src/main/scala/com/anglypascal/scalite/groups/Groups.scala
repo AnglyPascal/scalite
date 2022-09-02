@@ -5,7 +5,6 @@ import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.DataExtensions.*
-import com.rallyhealth.weejson.v1.Obj
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer

@@ -10,6 +10,7 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
 import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.data.DataExtensions.extractChain
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -91,15 +92,11 @@ object Collections extends Configurable:
       configs: MObj,
       globals: IObj
   ): Unit =
-    import com.anglypascal.scalite.data.DataExtensions.getOrElse
-    import com.anglypascal.scalite.data.DataExtensions.extractOrElse
-
     collectionsConfig.update(configs)
 
-    // override the collectionsDir if it's in collectionData
-    val colsDir = globals.getOrElse("collectionsDir")(
-        Defaults.Directories.collectionsDir
-      )
+    val colsDir =
+      globals.getOrElse("base")(Defaults.Directories.base) +
+        globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
     for key <- collectionsConfig.keys do
@@ -125,9 +122,8 @@ object Collections extends Configurable:
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
             val toc = cobj.extractOrElse("sortBy")(Defaults.Collection.toc)
-            val permalinkTemplate = cobj.extractOrElse("permalink")(
-              globals.getOrElse("permalink")(Defaults.permalink)
-            ) // FIXME the same permalink issues
+            val permalinkTemplate =
+              extractChain(cobj, globals)("permalink")(Defaults.permalink)
 
             logger.debug(
               s"collection $key: ${GREEN(

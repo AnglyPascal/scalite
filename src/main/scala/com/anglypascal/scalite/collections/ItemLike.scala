@@ -1,14 +1,13 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 class ItemLike(val rType: String)(

@@ -2,30 +2,58 @@ package com.anglypascal.scalite.converters
 
 import com.typesafe.scalalogging.Logger
 
-import scala.collection.mutable.Map
+import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.Defaults
 
 /** Companion object giving api to add new members to the set of converters
   * available to Post to render it's content
   */
-object Converters:
+object Converters extends Configurable:
+
+  val sectionName: String = "converters"
 
   /** Set of all the avaiable converters. When an object implements the
     * Converter trait, it gets added to this set. Each converter is mapped to
     * the filetype it converts.
     */
-  private val _converters = Map[String, Converter]()
+  private val converters = LinkedHashMap[String, Converter]()
+
+  private val converterConstructors =
+    LinkedHashMap[String, ConverterConstructor](
+      "markdown" -> Markdown,
+      "markdownGithub" -> MarkdownGithub,
+      "identity" -> Identity
+    )
 
   private val logger = Logger("Converter")
 
-  /** Find a converter by the given filetype */
-  private def findByFileType(ft: String): Option[Converter] =
-    _converters.get(ft)
+  private val convsConfig = MObj(
+    "markdown" -> MObj(
+      "converter" -> "markdown",
+      "extensions" -> Defaults.Markdown.extensions,
+      "outputExt" -> Defaults.Markdown.outputExt
+    ),
+    "html" -> MObj(
+      "converter" -> "identity",
+      "extensions" -> Defaults.Identity.extensions,
+      "outputExt" -> Defaults.Identity.outputExt
+    )
+  )
 
-  def modifyExtensions(exts: Map[String, String]): Unit =
-    for (ft, ext) <- exts do
-      findByFileType(ft) match
-        case Some(conv) => conv.setExt(ext)
-        case None       => ()
+  def apply(configs: MObj, globals: IObj): Unit =
+    convsConfig.update(configs)
+    for (name, conv) <- convsConfig do
+      conv match
+        case conv: MObj => 
+          val cn = conv.getOrElse("converter")("identity")
+          val ex = conv.getOrElse("extensions")("")
+          val oe = conv.getOrElse("outputExt")(".html")
+          val C = converterConstructors.get(cn).getOrElse(Identity)
+          converters += name -> C(name, ex, oe)
+        case _ => ()
 
   /** Private method that finds the correct converter for a given file
     *
@@ -36,7 +64,7 @@ object Converters:
     *   available
     */
   def findByExt(ext: String): Option[Converter] =
-    _converters.filter(_._2.matches(ext)).headOption.map(_._2)
+    converters.filter(_._2.matches(ext)).headOption.map(_._2)
 
   /** Checks if there is a converter avaiable for thei given filepath
     * @param ext
@@ -88,5 +116,5 @@ object Converters:
   /** The given converter to the converters set, mapped to its filetype. This
     * overrides previously defined converter for this filetype.
     */
-  def addConverter(conv: Converter): Unit =
-    _converters += ((conv.fileType, conv))
+  def addConverterConstructor(conv: ConverterConstructor): Unit =
+    converterConstructors += conv.constructorName -> conv
