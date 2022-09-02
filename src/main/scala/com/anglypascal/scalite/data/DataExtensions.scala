@@ -1,5 +1,7 @@
 package com.anglypascal.scalite.data
 
+import com.anglypascal.scalite.data.immutable.DObj
+
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Num

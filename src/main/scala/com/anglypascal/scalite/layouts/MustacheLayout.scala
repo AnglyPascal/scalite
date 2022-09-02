@@ -1,8 +1,8 @@
 package com.anglypascal.scalite.layouts
 
 import com.anglypascal.mustache.Mustache
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.Data
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.Data
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths

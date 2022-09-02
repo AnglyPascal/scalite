@@ -3,9 +3,9 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DArr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths

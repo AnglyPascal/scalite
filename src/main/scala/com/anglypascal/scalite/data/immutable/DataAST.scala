@@ -1,4 +1,4 @@
-package com.anglypascal.scalite.data
+package com.anglypascal.scalite.data.immutable
 
 import com.anglypascal.mustache.AST
 import com.anglypascal.mustache.ASTConverter

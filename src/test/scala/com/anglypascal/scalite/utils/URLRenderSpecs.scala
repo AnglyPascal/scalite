@@ -1,11 +1,11 @@
 package com.anglypascal.scalite.utils
 
 import com.anglypascal.scalite.URL
-import com.anglypascal.scalite.data.DataAST
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DataAST
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
-import org.scalatest.flatspec.AnyFlatSpec
-import com.anglypascal.scalite.data.DObj
 import com.rallyhealth.weejson.v1.Obj
+import org.scalatest.flatspec.AnyFlatSpec
 
 def init() =
   val ins = DataAST

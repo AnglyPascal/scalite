@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.layouts
 
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
 

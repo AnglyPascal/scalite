@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.plugins.Plugin
 
 /** Trait to define a new style of elements. Some predefined examples are

@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.utils.cmpOpt

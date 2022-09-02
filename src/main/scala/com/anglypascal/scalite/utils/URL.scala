@@ -1,7 +1,7 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.mustache.Mustache
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 
 object URL:
 

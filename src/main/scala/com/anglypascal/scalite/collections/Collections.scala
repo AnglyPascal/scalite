@@ -1,10 +1,10 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DBool
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DArr
+import com.anglypascal.scalite.data.immutable.DBool
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.utils.Colors.*
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Obj

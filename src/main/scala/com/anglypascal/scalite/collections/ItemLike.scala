@@ -1,8 +1,8 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*

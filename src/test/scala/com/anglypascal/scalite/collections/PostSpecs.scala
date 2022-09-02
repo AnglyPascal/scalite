@@ -1,8 +1,8 @@
 package com.anglypascal.scalite.collections
 
 import org.scalatest.flatspec.AnyFlatSpec
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.converters.Converters

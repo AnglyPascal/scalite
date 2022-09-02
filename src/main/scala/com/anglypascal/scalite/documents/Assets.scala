@@ -1,7 +1,7 @@
 package com.anglypascal.scalite.documents
 
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName

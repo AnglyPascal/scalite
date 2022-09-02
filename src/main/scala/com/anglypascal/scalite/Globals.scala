@@ -4,9 +4,9 @@ import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DataAST
+import com.anglypascal.scalite.data.immutable.DArr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DataAST
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.documents.Assets

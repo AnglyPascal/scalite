@@ -1,16 +1,18 @@
-package com.anglypascal.scalite.data
+package com.anglypascal.scalite.data.mutable
 
 import org.scalatest.flatspec.AnyFlatSpec
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Str
 
-class DataSpecs extends AnyFlatSpec:
+import scala.collection.mutable.Map
+
+class MutableDataSpecs extends AnyFlatSpec:
 
   it should "handle basic object creation" in {
     val s1 = DStr("hello")
     val n1 = DNum(1)
     val b1 = DBool(true)
-    val a1 = DArr(List(s1, n1, b1))
+    val a1 = DArr(s1, n1, b1)
 
     assert(
       s1.str === "hello" &&
@@ -39,13 +41,10 @@ class DataSpecs extends AnyFlatSpec:
     val b1 = DBool(true)
     val o1 = Arr("hello", 1, true)
 
-    val a1 = DArr(List(s1, n1, b1))
-    val a2 = DArr(s1, n1, b1)
-    val a3 = DArr(o1)
+    val a1 = DArr(s1, n1, b1)
+    val a2 = DArr(o1)
 
-    assert(
-      a1(0) === a2(0) && a2(0) === a3(0)
-    )
+    assert(a1(0) === a2(0))
   }
 
   it should "handle DObj properly" in {
@@ -83,8 +82,7 @@ class DataSpecs extends AnyFlatSpec:
 
     assert(
       o1.getOrElse("d")(DArr())(0) === DStr("a") &&
-      o1.getOrElse("d")(DArr())(1) === DStr("b")
+        o1.getOrElse("d")(DArr())(1) === DStr("b")
     )
-
 
   }

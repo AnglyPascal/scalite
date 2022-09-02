@@ -5,9 +5,9 @@ import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.collections.compareBy
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DArr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.layouts.Layout

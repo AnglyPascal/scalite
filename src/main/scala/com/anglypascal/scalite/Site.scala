@@ -1,7 +1,7 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.*
-import com.anglypascal.scalite.data.DataAST
+import com.anglypascal.scalite.data.immutable.DataAST
 import com.anglypascal.scalite.documents.*
 
 /** the main thing, anchor of this project
