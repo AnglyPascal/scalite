@@ -7,29 +7,28 @@ import com.anglypascal.mustache.Mustache
 import scala.language.implicitConversions
 
 /** AST Support for the Data implementation to be used in Mustache */
-private[scalite] final class DataAST(v: Data) extends AST:
+final class DataAST(v: Data) extends AST:
 
-  import DataAST.given_Conversion_Data_AST
+  import DataAST.dataToAST
 
   def findKey(key: String): Option[Any] =
     v match
-      case obj: DObj => obj.get(key).map(given_Conversion_Data_AST)
+      case obj: DObj => obj.get(key).map(dataToAST)
       case null      => None
-      case other     => Some(value)
+      case other     => Some(dataToAST(v))
 
   def value: Any =
     v match
-      case obj: DObj =>
-        obj.obj.toMap.map(p => (p._1, given_Conversion_Data_AST(p._2)))
-      case arr: DArr  => arr.arr.toSeq.map(given_Conversion_Data_AST)
+      case obj: DObj  => obj.obj.toMap.map(p => (p._1, dataToAST(p._2)))
+      case arr: DArr  => arr.arr.toSeq.map(dataToAST)
       case str: DStr  => str.str
       case num: DNum  => num.num
       case boo: DBool => boo.bool
       case _          => None
 
-private[scalite] object DataAST extends ASTConverter:
+object DataAST extends ASTConverter:
 
-  given Conversion[Data, AST] = new DataAST(_)
+  given dataToAST: Conversion[Data, AST] = new DataAST(_)
 
   def toAST(context: Any): Either[Any, AST] =
     context match

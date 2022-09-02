@@ -74,7 +74,11 @@ final class DObj(val obj: Map[String, Data])
   def removed(key: String): DObj = DObj(obj.removed(key))
 
   def updated[V >: Data](k: String, v: V): DObj =
-    DObj(obj.updated(k, v.asInstanceOf[Data]))
+    try DObj(obj.updated(k, v.asInstanceOf[Data]))
+    catch
+      case e: java.lang.ClassCastException =>
+        throw java.lang.ClassCastException("DObj can only accept Data values")
+      case e => throw e
 
   def iterator = obj.iterator
 
@@ -95,6 +99,9 @@ final class DObj(val obj: Map[String, Data])
 
   def getOrElse(key: String)(default: DObj): DObj =
     get(key).flatMap(_.getObj).map(DObj(_)).getOrElse(default)
+
+  def getOrElse(key: String)(default: DArr): DArr =
+    get(key).flatMap(_.getArr).map(DArr(_)).getOrElse(default)
 
   def compare(that: Data): Int = 0
 
@@ -119,9 +126,7 @@ object DObj:
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))).toMap)
 
 /** Immutable wrapper around Arr */
-final class DArr(val arr: List[Data])
-    extends Data
-    with Iterable[Data]:
+final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
 
   /** Return the index entry of the List[Data], inefficient TODO */
   def apply(ind: Int): Data = arr(ind)
@@ -137,9 +142,11 @@ final class DArr(val arr: List[Data])
     Console.GREEN + "[ " + Console.RESET + arr.mkString(", ") +
       Console.GREEN + " ]" + Console.RESET
 
+
 /** Companion object to DArr to provide factory constructors */
 object DArr:
   def apply(_arr: List[Data]) = new DArr(_arr)
+  def apply(_arr: Data*) = new DArr(_arr.toList)
   def apply(_arr: Iterable[Data]) = new DArr(_arr.toList)
   def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
 
@@ -162,6 +169,11 @@ final class DStr(val str: String) extends Data:
       case that: DStr => str.compare(that.str)
       case _          => 0
 
+  override def equals(that: Any): Boolean = 
+    that match
+      case that: DStr => str == that.str
+      case _ => false
+
 /** Factory methods for constructing a DStr */
 object DStr:
   def apply(_str: String) = new DStr(_str)
@@ -180,6 +192,11 @@ final class DNum(val num: BigDecimal) extends Data:
       case that: DNum => num.compare(that.num)
       case _          => 0
 
+  override def equals(that: Any): Boolean = 
+    that match
+      case that: DNum => num == that.num
+      case _ => false
+
 /** Factory methods for constructing a DNum */
 object DNum:
   def apply(_num: BigDecimal) = new DNum(_num)
@@ -197,6 +214,11 @@ final class DBool(val bool: Boolean) extends Data:
       case that: DArr  => -1
       case that: DBool => bool.compare(that.bool)
       case _           => 0
+
+  override def equals(that: Any): Boolean = 
+    that match
+      case that: DBool => bool == that.bool
+      case _ => false
 
 /** Factory methods for constructing a DBool */
 object DBool:
@@ -233,6 +255,7 @@ object DataImplicits:
       case v: Bool => DBool(v)
       case Null    => DNull
 
-/** FEATURE: Add wrappers for lambda functions. Text lambda AST with mustache.Then
- *  define the predefined filter functions in terms of these lambda
- */
+/** FEATURE: Add wrappers for lambda functions. Text lambda AST with
+  * mustache.Then define the predefined filter functions in terms of these
+  * lambda
+  */

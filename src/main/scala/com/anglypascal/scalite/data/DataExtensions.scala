@@ -129,3 +129,7 @@ object DataExtensions:
             obj.extractOrElse(key)(getChain(tail: _*)(key)(default))
           case obj: DObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
+
+
+  // def update(that: Obj): Obj = 
+  //   obj
