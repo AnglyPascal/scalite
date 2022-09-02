@@ -129,6 +129,9 @@ final class DObj(val obj: Map[String, Data])
   def getOrElse(key: String)(default: DArr): DArr =
     get(key).flatMap(_.getArr).map(DArr(_)).getOrElse(default)
 
+  def getOrElse(key: String)(default: Data): Data =
+    get(key).getOrElse(default)
+
   def extractOrElse(key: String)(default: String): String =
     remove(key).flatMap(_.extractStr).getOrElse(default)
 
@@ -154,6 +157,65 @@ final class DObj(val obj: Map[String, Data])
   def extractOrElse(key: String)(default: DArr): DArr =
     remove(key).flatMap(_.extractArr).map(DArr(_)).getOrElse(default)
 
+  def extractOrElse(key: String)(default: Data): Data =
+    remove(key).getOrElse(default)
+
+  def update(that: Obj): this.type =
+    for key <- that.obj.keys do
+      if !contains(key) then this(key) = DataImplicits.fromValue(that(key))
+      else
+        this(key) match
+          case s: DStr =>
+            that(key) match
+              case st: Str => this(key) = DStr(st)
+              case _        => ()
+          case n: DNum =>
+            that(key) match
+              case nm: Num => this(key) = DNum(nm)
+              case _        => ()
+          case b: DBool =>
+            that(key) match
+              case bl: Bool => this(key) = DBool(bl)
+              case _         => ()
+          case a: DArr =>
+            that(key) match
+              case ar: Arr => this(key) = DArr(ar)
+              case _        => ()
+          case o: DObj =>
+            that(key) match
+              case ob: Obj => o.update(ob)
+              case _        => ()
+          case _ => ()
+    this
+
+  def update(that: DObj): this.type =
+    for key <- that.keys do
+      if !contains(key) then this(key) = that(key)
+      else
+        this(key) match
+          case s: DStr =>
+            that(key) match
+              case st: DStr => this(key) = st
+              case _        => ()
+          case n: DNum =>
+            that(key) match
+              case nm: DNum => this(key) = nm
+              case _        => ()
+          case b: DBool =>
+            that(key) match
+              case bl: DBool => this(key) = bl
+              case _         => ()
+          case a: DArr =>
+            that(key) match
+              case ar: DArr => this(key) = ar
+              case _        => ()
+          case o: DObj =>
+            that(key) match
+              case ob: DObj => o.update(ob)
+              case _        => ()
+          case _ => ()
+    this
+
   def compare(that: Data): Int = 0
 
   override def toString(): String = toString(0)
@@ -171,8 +233,12 @@ final class DObj(val obj: Map[String, Data])
 
 /** Companion object to provide factory constructors. */
 object DObj:
+
   def apply(_obj: Map[String, Data]) = new DObj(_obj)
-  def apply(pairs: Tuple2[String, Data]*) = new DObj(Map(pairs: _*))
+
+  def apply(pairs: (String, Any)*) =
+    new DObj(Map(pairs.map(p => (p._1, DataImplicits.fromAny(p._2))): _*))
+
   def apply(_obj: Obj) =
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))))
 
@@ -224,8 +290,12 @@ final class DArr(val arr: ArrayBuffer[Data]) extends Data with Buffer[Data]:
 
 /** Companion object to DArr to provide factory constructors */
 object DArr:
+
   def apply(_arr: ArrayBuffer[Data]) = new DArr(_arr)
-  def apply(_arr: Data*) = new DArr(ArrayBuffer(_arr: _*))
+
+  def apply(_arr: Any*) =
+    new DArr(ArrayBuffer(_arr.map(DataImplicits.fromAny): _*))
+
   def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue))
 
 /** Wrapper for Str */
@@ -235,12 +305,12 @@ final class DStr(private var _str: String) extends Data:
   def str_=(s: String) = _str = s
 
   /** Add a string to this DStr */
-  def +(nstr: String) = 
+  def +(nstr: String) =
     _str += nstr
     this
 
   /** Add the string of another DStr to this DStr */
-  def +(dstr: DStr) = 
+  def +(dstr: DStr) =
     _str += dstr.str
     this
 
@@ -336,6 +406,13 @@ object DataImplicits:
   given fromString: Conversion[String, DStr] = DStr(_)
   given fronBigDecima: Conversion[BigDecimal, DNum] = DNum(_)
   given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
+  given fromAny: Conversion[Any, Data] = any =>
+    any match
+      case any: String     => DStr(any)
+      case any: BigDecimal => DNum(any)
+      case any: Boolean    => DBool(any)
+      case any: Data       => any
+      case _               => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match

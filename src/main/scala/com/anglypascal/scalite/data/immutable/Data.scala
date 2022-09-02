@@ -122,10 +122,18 @@ final class DObj(val obj: Map[String, Data])
 
 /** Companion object to provide factory constructors. */
 object DObj:
+
   def apply(_obj: Map[String, Data]) = new DObj(_obj)
-  def apply(pairs: Tuple2[String, Data]*) = new DObj(Map(pairs: _*))
+
+  def apply(pairs: (String, Any)*) =
+    new DObj(Map(pairs.map(p => (p._1, DataImplicits.fromAny(p._2))): _*))
+
   def apply(_obj: Obj) =
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))).toMap)
+
+  def apply(dobj: mutable.DObj) = new DObj(
+    dobj.obj.map(p => (p._1, DataImplicits.fromMutData(p._2))).toMap
+  )
 
 /** Immutable wrapper around Arr */
 final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
@@ -146,10 +154,16 @@ final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
 
 /** Companion object to DArr to provide factory constructors */
 object DArr:
+
   def apply(_arr: List[Data]) = new DArr(_arr)
-  def apply(_arr: Data*) = new DArr(_arr.toList)
-  def apply(_arr: Iterable[Data]) = new DArr(_arr.toList)
+
+  def apply(_arr: Any*) =
+    new DArr(List(_arr.map(DataImplicits.fromAny): _*))
+
   def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
+
+  def apply(dobj: mutable.DArr) =
+    new DArr(dobj.arr.toList.map(DataImplicits.fromMutData))
 
 /** Wrapper for Str */
 final class DStr(val str: String) extends Data:
@@ -246,6 +260,13 @@ object DataImplicits:
   given fromString: Conversion[String, DStr] = DStr(_)
   given fronBigDecima: Conversion[BigDecimal, DNum] = DNum(_)
   given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
+  given fromAny: Conversion[Any, Data] = any =>
+    any match
+      case any: String     => DStr(any)
+      case any: BigDecimal => DNum(any)
+      case any: Boolean    => DBool(any)
+      case any: Data       => any
+      case _               => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match

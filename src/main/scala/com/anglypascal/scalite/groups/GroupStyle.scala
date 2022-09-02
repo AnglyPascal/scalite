@@ -1,7 +1,8 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
-import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.plugins.Plugin
 import com.rallyhealth.weejson.v1.Obj
 
@@ -40,4 +41,4 @@ trait GroupConstructor extends Plugin:
     * @returns
     *   New GroupStyle conforming to these configurations
     */
-  def apply(gType: String, configs: Obj, globals: DObj): GroupStyle
+  def apply(gType: String, configs: MObj, globals: IObj): GroupStyle

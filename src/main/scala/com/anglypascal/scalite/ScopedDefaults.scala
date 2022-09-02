@@ -1,11 +1,12 @@
 package com.anglypascal.scalite
 
+import com.anglypascal.scalite.data.mutable.DObj
 import com.rallyhealth.weejson.v1.Obj
 import scala.collection.mutable.ArrayBuffer
 import com.rallyhealth.weejson.v1.Arr
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 
-final case class Scope(path: String, rType: String = null, conf: Obj = Obj()):
+final case class Scope(path: String, rType: String = null, conf: DObj = DObj()):
   /** check if path is inside this scope */
   def contains(file: String, rT: String) =
     file.startsWith(path) && rT == rType
@@ -18,15 +19,15 @@ object ScopedDefaults:
       v match
         case v: Obj =>
           val o = v("values") match
-            case x: Obj => x
-            case _      => Obj()
+            case x: Obj => DObj(x)
+            case _      => DObj()
           val p = v("scope").obj.getOrElse("path")("")
           val r = v("scope").obj.getOrElse("type")("")
           scopes += Scope(p, r, o)
         case _ => ()
 
   def getDefaults(file: String, rT: String) =
-    val obj = Obj()
-    for scope <- scopes if scope.contains(file, rT) do
-      obj.obj ++= scope.conf.obj
+    val obj = DObj()
+    for scope <- scopes if scope.contains(file, rT) do 
+      obj update scope.conf
     obj

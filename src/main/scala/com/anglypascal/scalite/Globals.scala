@@ -4,27 +4,31 @@ import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown
-import com.anglypascal.scalite.data.immutable.DArr
-import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.data.immutable.DataAST
 import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
+import com.anglypascal.scalite.data.immutable.{DArr => IArr}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.immutable.{DataAST => IAST}
+import com.anglypascal.scalite.data.mutable.{DArr => MArr}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.mutable.{DataAST => MAST}
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
+import com.anglypascal.scalite.documents.Pages
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.utils.yamlFileParser
 import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
-import com.rallyhealth.weejson.v1.Bool
-import com.anglypascal.scalite.documents.Pages
+import com.anglypascal.scalite.groups.Groups
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -75,74 +79,13 @@ object Globals:
     "permalink" -> Defaults.permalink
   )
 
-  /** Defaults of the `collection` section. */
-  private lazy val collections =
-    import Defaults.Posts
-    import Defaults.Drafts
-    import Defaults.Statics
-    Obj(
-      "posts" -> Obj(
-        "output" -> Posts.output,
-        "folder" -> Posts.folder,
-        "name" -> Posts.name,
-        "directory" -> Posts.directory,
-        "sortBy" -> Posts.sortBy,
-        "toc" -> Posts.toc,
-        "permalink" -> Posts.permalink,
-        "layout" -> Posts.layout,
-        "style" -> Posts.style
-      ),
-      "drafts" -> Obj(
-        "output" -> Drafts.output,
-        "folder" -> Drafts.folder,
-        "name" -> Drafts.name,
-        "directory" -> Drafts.directory,
-        "sortBy" -> Drafts.sortBy,
-        "toc" -> Drafts.toc,
-        "permalink" -> Drafts.permalink,
-        "layout" -> Drafts.layout,
-        "style" -> Drafts.style
-      ),
-      "statics" -> Obj(
-        "output" -> Statics.output,
-        "folder" -> Statics.folder,
-        "name" -> Statics.name,
-        "directory" -> Statics.directory,
-        "sortBy" -> Statics.sortBy,
-        "toc" -> Statics.toc,
-        "permalink" -> Statics.permalink,
-        "layout" -> Statics.layout,
-        "style" -> Statics.style
-      )
-    )
-
-  private lazy val groups: MMap[String, Obj] =
-    import Defaults.Group
-    import Defaults.Tags
-    import Defaults.Categories
-    MMap(
-      "tags" -> Obj(
-        "title" -> Tags.title,
-        "gType" -> Tags.gType,
-        "sortBy" -> Tags.sortBy,
-        "permalink" -> Tags.permalink,
-        "separator" -> Tags.separator,
-        "style" -> Tags.style
-      ),
-      "categories" -> Obj(
-        "title" -> Categories.title,
-        "gType" -> Categories.gType,
-        "sortBy" -> Categories.sortBy,
-        "permalink" -> Categories.permalink,
-        "separator" -> Categories.separator,
-        "style" -> Categories.style
-      )
-    )
 
   /** FIXME what do with this? */
   private lazy val build = Obj(
     "logLevel" -> 1
   )
+
+  private val configurables = List[Configurable](Collections, Groups)
 
   private def _base =
     dirs.getOrElse("base")(Defaults.Directories.base)
@@ -193,40 +136,13 @@ object Globals:
       case v: Arr => ScopedDefaults(_base, v)
       case _      => ()
 
-  /** Process the collections from the updated config */
-  private def processCollections() =
-    logger.trace("setting up configs for collections")
-    val colMap = configs.extractOrElse("collections")(MMap[String, Value]())
-    colMap.remove("collectionsDir") match
-      case Some(s) => dirs("collectionsDir") = s
-      case None    => ()
-    for (key, value) <- colMap do
-      if collections.obj.contains(key) then
-        value match
-          case value: Obj  => for (k, v) <- value.obj do collections(key)(k) = v
-          case value: Bool => collections(key)("output") = value
-          case _           => ()
-      else
-        value match
-          case value: Obj  => collections(key) = value
-          case value: Bool => collections(key) = Obj("output" -> value)
-          case _           => ()
+  private def getConfiguration(conf: Configurable): MObj =
+    MObj(configs.extractOrElse(conf.sectionName)(Obj()))
 
   /** Process the defaults fro the updated config */
   private def processDefaults() =
     logger.trace("setting the default configurations")
     val defMap = configs.extractOrElse("defaults")(MMap[String, Value]())
-
-  /** Process the groups fro the updated config */
-  private def processGroups() =
-    logger.trace("setting up configs for groups")
-    val grpMap = configs.extractOrElse("groups")(MMap[String, Value]())
-    for (k, v) <- grpMap do
-      v match
-        case v: Obj =>
-          if !groups.obj.contains(k) then groups(k) = v
-          else for (kk, vv) <- v.obj do groups(k)(kk) = vv
-        case _ => ()
 
   /** Process the assets */
   private def processAssets: Obj =
@@ -238,7 +154,7 @@ object Globals:
   private def loadPlugins(): Unit =
     logger.trace("loading the plugins and instantiating standalone objects")
     // default plugins
-    val dataAST = DataAST
+    val dataAST = IAST
     Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
     // custom plugins
@@ -254,13 +170,13 @@ object Globals:
     for key <- dirs.obj.keys if configs.obj.contains(key) do
       dirs(key) = configs(key)
 
+    val interm = configurables.map(c => (c, getConfiguration(c)))
+
     loadPlugins()
     Pages.setup(_base)
     URL.setup(configs.extractOrElse("timeZone")(Defaults.timeZone))
 
     processDefaults()
-    processCollections()
-    processGroups()
 
     glbsObj ++= dirs.obj
     glbsObj ++= reading.obj
@@ -271,11 +187,12 @@ object Globals:
 
     for (key, value) <- configs.obj do glbsObj(key) = value
 
-    val _globals = DObj(glbsObj)
+    val _globals = IObj(glbsObj)
+
+    interm.map(p => p._1(p._2, _globals))
 
     DirectoryReader(_base + _dest)
     Converters.modifyExtensions(extensions)
-    Collections(_base + _colD, collections, _globals)
     Layouts(_base + _layD, _base + _parD)
 
     _globals

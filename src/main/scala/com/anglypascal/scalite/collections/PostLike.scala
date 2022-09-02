@@ -4,7 +4,11 @@ import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.mutable.{DStr => MStr}
+import com.anglypascal.scalite.data.mutable.Data
+import com.anglypascal.scalite.data.mutable.DNull
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
@@ -127,14 +131,14 @@ class PostLike(val rType: String)(
     )(Converters.findExt(filepath))
 
   lazy val locals =
-    frontMatter.obj ++= List(
+    frontMatter update MObj(
       "title" -> title,
       "date" -> date,
       "url" -> permalink,
       "filename" -> filename
     )
     if frontMatter.extractOrElse("showExcerpt")(false) then
-      frontMatter("excerpt") = excerpt
+      frontMatter("excerpt") = MStr(excerpt)
 
     DObj(frontMatter).add("collection" -> collection)
 
@@ -149,11 +153,11 @@ class PostLike(val rType: String)(
     *   These links then can be used as mustache or other tags like {{post1}}
     */
   lazy val postUrls: Map[String, String] =
-    def f(p: (String, Value)): Option[(String, String)] =
+    def f(p: (String, Data)): Option[(String, String)] =
       p._2 match
-        case str: Str => Pages.findPage(str.str).map(p._1 -> _.permalink)
-        case _        => None
-    frontMatter.extractOrElse("postUrls")(Obj()).obj.flatMap(f).toMap
+        case str: MStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
+        case _         => None
+    frontMatter.extractOrElse("postUrls")(MObj()).obj.flatMap(f).toMap
 
   /** Convert the contents of the post to HTML */
   protected lazy val render: String =
@@ -189,8 +193,8 @@ class PostLike(val rType: String)(
   private val groups = LinkedHashMap[String, ListBuffer[PostsGroup]]()
 
   /** Return the global settings for the collection-type grpType */
-  def getGroupsList(grpType: String): Value =
-    frontMatter.obj.remove(grpType).getOrElse(null)
+  def getGroupsList(grpType: String): Data =
+    frontMatter.extractOrElse(grpType)(DNull)
 
   /** Adds the collection in the set of this collection-type */
   def addGroup[A <: PostsGroup](grpType: String)(a: A): Unit =

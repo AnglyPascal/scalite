@@ -13,6 +13,6 @@ class ReaderSpecs extends AnyFlatSpec:
 
   it should "read front matter and main matter properly" in {
     val o = R.frontMatter
-    assert(o("a").str === "hello" && o("b").str === "bye")
+    assert(o("a").getStr === Some("hello") && o("b").getStr === Some("bye"))
     assert(R.mainMatter === "\nSome text to go along.")
   }

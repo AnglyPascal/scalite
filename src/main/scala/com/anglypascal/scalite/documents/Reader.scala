@@ -38,7 +38,7 @@ trait Reader:
     val src = readFile(filepath)
     src match
       case yaml_regex(a, b) =>
-        scope.obj ++= frontMatterParser(a).obj
+        scope update frontMatterParser(a).obj
         (scope, b)
       case _ => (scope, src)
 

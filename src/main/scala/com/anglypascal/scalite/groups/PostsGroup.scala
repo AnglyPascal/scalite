@@ -6,7 +6,8 @@ import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.collections.compareBy
 import com.anglypascal.scalite.data.immutable.DArr
-import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
@@ -36,8 +37,8 @@ import scala.collection.mutable.ArrayBuffer
   */
 class PostsGroup(
     val gType: String,
-    private val configs: Obj,
-    private val globals: DObj
+    private val configs: MObj,
+    private val globals: IObj
 )(val name: String)
     extends Page:
 
@@ -69,12 +70,12 @@ class PostsGroup(
       scopedDefaults.extractOrElse("permalink")(
         configs.extractOrElse("permalink")(Defaults.PostsGroup.permalink)
       )
-    val urlObj = Obj(
+    val urlObj = MObj(
       "name" -> name,
       "gType" -> gType
     )
-    for (k, v) <- configs.obj do urlObj(k) = v
-    purifyUrl(URL(permalinkTemplate)(DObj(urlObj)))
+    urlObj.update(configs)
+    purifyUrl(URL(permalinkTemplate)(IObj(urlObj)))
 
   /** Add a new post to this collection */
   def addPost(post: PostLike) =
@@ -101,19 +102,19 @@ class PostsGroup(
     * @return
     *   weeJson obj, with the required mappings for the rendering
     */
-  protected def postToItem(post: PostLike): DObj =
+  protected def postToItem(post: PostLike): IObj =
     post.locals match
-      case a: DObj => a
-      case null    => DObj()
+      case a: IObj => a
+      case null    => IObj()
 
   /** The local varibales that will be used to render the PostsGroup page. */
-  lazy val locals: DObj =
-    val obj = Obj(
+  lazy val locals: IObj =
+    val obj = MObj(
       "title" -> name,
       "url" -> permalink
     )
-    for (k, v) <- configs.obj do obj(k) = v
-    DObj(obj)
+    obj.update(configs)
+    IObj(obj)
 
   /** Should the tag be rendered in a separate page? */
   val visible =
@@ -123,7 +124,7 @@ class PostsGroup(
 
   /** Return the rendered html string of this page */
   protected lazy val render: String =
-    val context = DObj(
+    val context = IObj(
       "site" -> globals,
       "page" -> locals,
       "items" -> DArr(posts.map(postToItem).toList)

@@ -5,6 +5,7 @@ import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.Map
+import com.rallyhealth.weejson.v1.Obj
 
 class MutableDataSpecs extends AnyFlatSpec:
 
@@ -85,4 +86,49 @@ class MutableDataSpecs extends AnyFlatSpec:
         o1.getOrElse("d")(DArr())(1) === DStr("b")
     )
 
+  }
+
+  it should "handle updates to DObj properly" in {
+    val o1 = DObj(
+      "a" -> DStr("1"),
+      "b" -> DNum(2),
+      "c" -> DBool(true)
+    )
+    o1("a") = DBool(false)
+    o1("b") = DStr("1")
+    o1("c") = DNum(1)
+
+    assert(
+      !o1("a").getBool.get &&
+        o1("b") === DStr("1") &&
+        o1("c") === DNum(1)
+    )
+  }
+
+  it should "handle DObj.update properly" in {
+    val o1 = DObj(
+      "a" -> DStr("1"),
+      "b" -> DNum(2),
+      "c" -> DBool(true)
+    )
+    val o2 = Obj(
+      "a" -> "2",
+      "b" -> 1,
+      "c" -> false
+    )
+    o1.update(o2)
+
+    assert(
+      !o1("c").getBool.get &&
+        o1("a") === DStr("2") &&
+        o1("b") === DNum(1)
+    )
+  }
+
+  it should "handle large DObj creation" in {
+    val dobj = DObj()
+    val N = 1000000
+    for i <- 0 until N do 
+      dobj.addOne(i.toString -> DNum(i))
+    assert(dobj.toList.length === N)
   }

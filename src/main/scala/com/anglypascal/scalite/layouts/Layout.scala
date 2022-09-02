@@ -8,6 +8,7 @@ import scala.collection.mutable.Set
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.utils.DirectoryReader.{getListOfFilepaths}
+import com.anglypascal.scalite.data.mutable.DStr
 
 /** Defines an abstract Layout.
   *
@@ -49,7 +50,7 @@ abstract class Layout(
     _parent =
       if frontMatter.obj.contains("layout") then
         frontMatter("layout") match
-          case s: Str =>
+          case s: DStr =>
             logger.trace(s"layout $name has a parent layout named $s")
             val pn = s.str
             layouts.get(pn) match
