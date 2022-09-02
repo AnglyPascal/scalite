@@ -216,7 +216,6 @@ object DNull extends Data:
   */
 object DataImplicits:
 
-  // implicit def dobjToObj(dobj: DObj): mutable.Map[String, Data] = dobj.obj
   given fromDStr: Conversion[DStr, String] = _.str
   given fromDNum: Conversion[DNum, BigDecimal] = _.num
   given fromDBool: Conversion[DBool, Boolean] = _.bool
@@ -233,3 +232,7 @@ object DataImplicits:
       case v: Num  => DNum(v)
       case v: Bool => DBool(v)
       case Null    => DNull
+
+/** FEATURE: Add wrappers for lambda functions. Text lambda AST with mustache.Then
+ *  define the predefined filter functions in terms of these lambda
+ */

@@ -1,16 +1,11 @@
 package com.anglypascal.scalite.plugins
 
-import com.anglypascal.scalite.data.DObj
+import com.rallyhealth.weejson.v1.Obj
 
-/** Simple trait to allow for plugin creation and loading. Exists solely to tag
-  * an object as Plugin
+/** Trait to allow for plugin creation. Plugins to be loaded at runtime should
+  * extend this trait.
   */
 trait Plugin:
 
-  /** Meant to be overriden by custom plugins to provide configurability through
-    * the global configs file
-    *
-    * TODO: What kind of configs are we talking about here?
-    *
-    */
-  def addConfigs(data: DObj): Plugin = this
+  /** May be overriden to accept configuration through \_config.yml */
+  protected[plugins] def addConfigs(data: Obj): Plugin = this

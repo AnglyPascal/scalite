@@ -243,7 +243,7 @@ object Globals:
     Layouts.addEngine(MustacheLayouts)
     // custom plugins
     val plugMap = configs.extractOrElse("plugins")(MMap[String, Value]())
-    PluginManager(_base + _plugD, DObj(plugMap))
+    PluginManager(_base + _plugD, plugMap)
 
   /** Read the config, do all the initial stuff, return the global variables */
   def apply(base: String) =

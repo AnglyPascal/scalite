@@ -1,25 +1,26 @@
 package com.anglypascal.scalite.plugins
 
-import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.collections.ElemConstructor
 import com.anglypascal.scalite.converters.Converter
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DArr
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.groups.GroupConstructor
 import com.anglypascal.scalite.groups.Groups
 import com.anglypascal.scalite.layouts.LayoutObject
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.rallyhealth.weejson.v1.Arr
+import com.rallyhealth.weejson.v1.Obj
+import com.rallyhealth.weejson.v1.Str
+import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
+import scala.collection.mutable.{Map => MMap}
 import scala.reflect.ClassTag
-import com.anglypascal.scalite.data.Data
 
 /** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager:
@@ -40,7 +41,7 @@ object PluginManager:
         logger.error("SecurityException was thrown" + e.getMessage)
         None
       case e =>
-        logger.error(s"Loading $jarPath threw " + e.toString)
+        logger.error(s"Loading $jarPath threw " + e)
         None
 
   /** Returns the object objName from the classLoader if it exists */
@@ -61,62 +62,46 @@ object PluginManager:
         None
 
   /** Search for the given object in all the loaded jars */
-  private def findObject[T <: Plugin](objName: (String | Map[String, Data]))(
-      using
+  private def findObject[T <: Plugin](objName: (String, Obj))(using
       ClassTag[T],
       ClassTag[Plugin]
   ): Option[Plugin] =
-    val key = objName match
-      case str: String => str
-      case obj: Map[String, Data] =>
-        obj.keys.headOption match
-          case None =>
-            logger.error("Plugin customization had wrong syntax.")
-            return None
-          case some => some.get
+    val key = objName._1
 
     def getObj = getObject[T](key)
     for loader <- classLoaders do
       getObj(loader) match
-        /** FIXME: this type check will be erased, fix this */
-        case some: Some[_] =>
-          objName match
-            case k: DStr =>
-              logger.debug(s"Found plugin $key")
-              return some
-            case obj: DObj =>
-              logger.debug(
-                s"Found plugin $key " +
-                  "and initiated with the customization options"
-              )
-              return some.map(_.addConfigs(obj.getOrElse(key)(DObj())))
+        case some: Some[?] =>
+          logger.debug(
+            s"Found plugin $key " +
+              "and initiated with the customization options"
+          )
+          return some.map(_.addConfigs(objName._2))
         case _ => ()
-    logger.error(
-      s"Plugin $objName not found inside module com.anglypascal.scalite.plugins"
-    )
+    logger.error(s"$objName not found in com.anglypascal.scalite.plugins")
     None
 
   /** Find the objects of type T in the jars */
-  private def findObjects[T <: Plugin](names: List[DStr | DObj])(using
+  private def findObjects[T <: Plugin](names: Map[String, Obj])(using
       ClassTag[T]
   ) = names.map(findObject[T]).filter(_ == None).map(_.get)
 
-  private def loadConverters(names: List[DStr | DObj]) =
+  private def loadConverters(names: Map[String, Obj]) =
     findObjects[Converter](names).map(C =>
       Converters.addConverter(C.asInstanceOf[Converter])
     )
 
-  private def loadElemConstructors(names: List[DStr | DObj]) =
+  private def loadElemConstructors(names: Map[String, Obj]) =
     findObjects[ElemConstructor](names).map(E =>
       Collections.addStyle(E.asInstanceOf[ElemConstructor])
     )
 
-  private def loadGroupConstructors(names: List[DStr | DObj]) =
+  private def loadGroupConstructors(names: Map[String, Obj]) =
     findObjects[GroupConstructor](names).map(C =>
       Groups.addNewGroupStyle(C.asInstanceOf[GroupConstructor])
     )
 
-  private def loadLayouts(names: List[DStr | DObj]) =
+  private def loadLayouts(names: Map[String, Obj]) =
     findObjects[LayoutObject](names).map(L =>
       Layouts.addEngine(L.asInstanceOf[LayoutObject])
     )
@@ -132,21 +117,30 @@ object PluginManager:
       .map(_.get)
       .toList
 
-  /** FIXME make sure that the plugins data is a DObj with name -> Configs map
-    */
-  def apply(pluginsDir: String, pluginsData: DObj): Unit =
+  def apply(pluginsDir: String, pluginsData: MMap[String, Value]): Unit =
     getClassLoaders(pluginsDir)
 
-    def getArrStr(key: String): List[DStr | DObj] =
-      if pluginsData.contains(key) then
-        pluginsData(key) match
-          case d: DArr =>
-            d.filter(_.isInstanceOf[DStr]).map(_.asInstanceOf[DStr]) ++
-              d.filter(_.isInstanceOf[DObj]).map(_.asInstanceOf[DObj])
-          case _ => List()
-      else List()
+    def getArr(key: String): Map[String, Obj] =
+      def f(v: Value): Option[(String, Obj)] =
+        v match
+          case v: Str => Some(v.str -> Obj())
+          case v: Obj =>
+            if v.obj.keys.toList.length == 1 then
+              val k = v.obj.keys.head
+              v(k) match
+                case w: Obj => Some(k -> w)
+                case _      => None
+            else None
+          case _ => None
 
-    loadConverters(getArrStr("converters"))
-    loadElemConstructors(getArrStr("elementConstructors"))
-    loadGroupConstructors(getArrStr("groupConstructors"))
-    loadLayouts(getArrStr("layouts"))
+      pluginsData.remove(key) match
+        case Some(value) =>
+          value match
+            case value: Arr => value.arr.flatMap(f).toMap
+            case _          => Map[String, Obj]()
+        case None => Map[String, Obj]()
+
+    loadConverters(getArr("converters"))
+    loadElemConstructors(getArr("elementConstructors"))
+    loadGroupConstructors(getArr("groupConstructors"))
+    loadLayouts(getArr("layouts"))
