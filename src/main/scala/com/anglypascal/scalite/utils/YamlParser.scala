@@ -5,31 +5,37 @@ import com.rallyhealth.weejson.v1.Value
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.utils.StringProcessors.quote
+import com.anglypascal.scalite.data.mutable.Data
+import com.anglypascal.scalite.data.mutable.DObj
+import com.anglypascal.scalite.data.mutable.DNull
+import com.anglypascal.scalite.data.mutable.DataImplicits
 
-def yamlFileParser(path: String): Value =
+def yamlFileParser(path: String): Data =
   val logger = Logger("YAML File Parser")
   val str = DirectoryReader.readFile(path)
-  try FromYaml(str).transform(Value)
+  try 
+    val value = FromYaml(str).transform(Value)
+    DataImplicits.fromValue(value)
   catch
     case e =>
       logger.error(s"${e.toString} occurred while parsing yaml file $path")
-      null
+      DNull
 
-def frontMatterParser(yaml: String): Obj =
+def frontMatterParser(yaml: String): DObj =
   val logger = Logger("Front Matter Parser")
   try
     FromYaml(yaml).transform(Value) match
-      case v: Obj => v
+      case v: Obj => DObj(v)
       case some =>
         logger.warn("yaml string could not be parsed into an weejson Obj")
         logger.trace(
           s"yaml string could not be parsed into an weejson Obj: $yaml"
         )
-        Obj()
+        DObj()
   catch
     case e: com.rallyhealth.weepickle.v1.core.TransformException =>
       logger.error("failed to parse yaml string: " + quote(yaml))
-      Obj()
+      DObj()
     case e =>
       logger.error(e.getMessage())
-      Obj()
+      DObj()

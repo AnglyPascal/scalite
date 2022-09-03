@@ -3,7 +3,7 @@ package com.anglypascal.scalite.utils
 import org.scalatest.flatspec.AnyFlatSpec
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Arr
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.DObj
 
 class CleanerSpecs extends AnyFlatSpec:
   val ob1 = Obj(

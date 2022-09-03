@@ -2,30 +2,38 @@ package com.anglypascal.scalite.plugins
 
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.collections.ElemConstructor
-import com.anglypascal.scalite.converters.Converter
+// import com.anglypascal.scalite.converters.Converter
+import com.anglypascal.scalite.converters.ConverterConstructor
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.converters.Identity
+import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.groups.GroupConstructor
 import com.anglypascal.scalite.groups.Groups
-import com.anglypascal.scalite.layouts.LayoutObject
+import com.anglypascal.scalite.layouts.LayoutGroupConstructor
 import com.anglypascal.scalite.layouts.Layouts
+import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-import com.rallyhealth.weejson.v1.Arr
-import com.rallyhealth.weejson.v1.Obj
-import com.rallyhealth.weejson.v1.Str
-import com.rallyhealth.weejson.v1.Value
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.mutable.Data
+import com.anglypascal.scalite.data.mutable.DArr
+import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
-import scala.collection.mutable.{Map => MMap}
 import scala.reflect.ClassTag
+import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.Defaults
 
 /** Load Plugin objects form the jar files in the plugins directory */
-object PluginManager:
+object PluginManager extends Configurable:
 
   private val logger = Logger("Plugin Manager")
+
+  val sectionName: String = "plugins"
 
   /** Rerturns the URLClassLoader from jarPath */
   private def loadJar(jarPath: String): Option[URLClassLoader] =
@@ -62,7 +70,7 @@ object PluginManager:
         None
 
   /** Search for the given object in all the loaded jars */
-  private def findObject[T <: Plugin](objName: (String, Obj))(using
+  private def findObject[T <: Plugin](objName: (String, MObj))(using
       ClassTag[T],
       ClassTag[Plugin]
   ): Option[Plugin] =
@@ -82,28 +90,28 @@ object PluginManager:
     None
 
   /** Find the objects of type T in the jars */
-  private def findObjects[T <: Plugin](names: Map[String, Obj])(using
+  private def findObjects[T <: Plugin](names: Map[String, MObj])(using
       ClassTag[T]
   ) = names.map(findObject[T]).filter(_ == None).map(_.get)
 
-  private def loadConverters(names: Map[String, Obj]) =
-    findObjects[Converter](names).map(C =>
-      Converters.addConverter(C.asInstanceOf[Converter])
+  private def loadConverterConstructors(names: Map[String, MObj]) =
+    findObjects[ConverterConstructor](names).map(C =>
+      Converters.addConverterConstructor(C.asInstanceOf[ConverterConstructor])
     )
 
-  private def loadElemConstructors(names: Map[String, Obj]) =
+  private def loadElemConstructors(names: Map[String, MObj]) =
     findObjects[ElemConstructor](names).map(E =>
       Collections.addStyle(E.asInstanceOf[ElemConstructor])
     )
 
-  private def loadGroupConstructors(names: Map[String, Obj]) =
+  private def loadGroupConstructors(names: Map[String, MObj]) =
     findObjects[GroupConstructor](names).map(C =>
       Groups.addNewGroupStyle(C.asInstanceOf[GroupConstructor])
     )
 
-  private def loadLayouts(names: Map[String, Obj]) =
-    findObjects[LayoutObject](names).map(L =>
-      Layouts.addEngine(L.asInstanceOf[LayoutObject])
+  private def loadLayouts(names: Map[String, MObj]) =
+    findObjects[LayoutGroupConstructor](names).map(L =>
+      Layouts.addEngine(L.asInstanceOf[LayoutGroupConstructor])
     )
 
   private var classLoaders = List[URLClassLoader]()
@@ -117,30 +125,36 @@ object PluginManager:
       .map(_.get)
       .toList
 
-  def apply(pluginsDir: String, pluginsData: MMap[String, Value]): Unit =
+  def apply(pluginsData: MObj, globals: IObj): Unit =
+    // Layouts.addEngine(MustacheLayouts)
+
+    val pluginsDir: String =
+      globals.getOrElse("base")(Defaults.Directories.base) +
+        globals.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
+
     getClassLoaders(pluginsDir)
 
-    def getArr(key: String): Map[String, Obj] =
-      def f(v: Value): Option[(String, Obj)] =
+    def getArr(key: String): Map[String, MObj] =
+      def f(v: Data): Option[(String, MObj)] =
         v match
-          case v: Str => Some(v.str -> Obj())
-          case v: Obj =>
+          case v: DStr => Some(v.str -> MObj())
+          case v: MObj =>
             if v.obj.keys.toList.length == 1 then
               val k = v.obj.keys.head
               v(k) match
-                case w: Obj => Some(k -> w)
-                case _      => None
+                case w: MObj => Some(k -> w)
+                case _       => None
             else None
           case _ => None
 
       pluginsData.remove(key) match
         case Some(value) =>
           value match
-            case value: Arr => value.arr.flatMap(f).toMap
-            case _          => Map[String, Obj]()
-        case None => Map[String, Obj]()
+            case v: DArr => v.arr.flatMap(f).toMap
+            case _       => Map[String, MObj]()
+        case None => Map[String, MObj]()
 
-    loadConverters(getArr("converters"))
+    loadConverterConstructors(getArr("converters"))
     loadElemConstructors(getArr("elementConstructors"))
     loadGroupConstructors(getArr("groupConstructors"))
     loadLayouts(getArr("layouts"))

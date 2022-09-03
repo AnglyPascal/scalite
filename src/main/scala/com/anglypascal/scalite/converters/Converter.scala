@@ -12,17 +12,12 @@ trait Converter extends Plugin:
   val fileType: String
 
   /** The extensions of the files this converter is able to convert */
-  private var _ext: Regex = _
-  def ext: Regex = _ext
+  val extensions: String
 
-  /** Set the extensions of this converter from the given string of extensions
-    *
-    * @param exts
-    *   comma separated list of extensions, like "markdown,md, mkd"
-    */
-  def setExt(exts: String): Unit =
-    val s = exts.split(",").map(_.trim).mkString("|")
-    _ext = (".*\\.(" + s + ")").r
+  def ext: Regex =
+    ("(" + extensions
+      .split(",").map(s => raw".*\." + s)
+      .mkString("|") + ")").r
 
   /** Does this converter accepts the file? */
   def matches(filepath: String): Boolean =
@@ -41,3 +36,7 @@ trait Converter extends Plugin:
     */
   def convert(str: String, filepath: String): String
   def convert(str: String): String = convert(str, "string input")
+
+trait ConverterConstructor extends Plugin:
+  val constructorName: String
+  def apply(fileType: String, extensions: String, outputExt: String): Converter

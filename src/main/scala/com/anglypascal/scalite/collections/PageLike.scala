@@ -3,8 +3,8 @@ package com.anglypascal.scalite.collections
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.Colors.*
@@ -12,7 +12,6 @@ import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.StringProcessors.slugify
-import com.rallyhealth.weejson.v1.Obj
 import com.anglypascal.scalite.ScopedDefaults
 import com.typesafe.scalalogging.Logger
 
@@ -64,7 +63,7 @@ class PageLike(val rType: String)(
   lazy val locals: DObj =
     val dateFormat =
       extractChain(frontMatter, globals)("dateFormat")(Defaults.dateFormat)
-    val obj = Obj(
+    DObj(
       "title" -> title,
       "outputExt" -> outputExt,
       "modifiedTime" -> lastModifiedTime(filepath, dateFormat),
@@ -72,7 +71,6 @@ class PageLike(val rType: String)(
       "collection" -> collection.getOrElse("name")("statics"),
       "slugTitle" -> slugify(title)
     )
-    DObj(obj)
 
   /** Relative permanent link to this page in the website */
   lazy val permalink =

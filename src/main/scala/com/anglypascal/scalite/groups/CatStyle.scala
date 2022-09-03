@@ -1,15 +1,15 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.DArr
+import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.StringProcessors.*
-import com.rallyhealth.weejson.v1.Arr
-import com.rallyhealth.weejson.v1.Obj
-import com.rallyhealth.weejson.v1.Str
 
 import scala.collection.mutable.LinkedHashMap
 
-class CatStyle(gType: String, configs: Obj, globals: DObj) extends GroupStyle:
+class CatStyle(gType: String, configs: MObj, globals: IObj) extends GroupStyle:
 
   /** */
   def groupConstructor(name: String): PostsGroup =
@@ -20,9 +20,9 @@ class CatStyle(gType: String, configs: Obj, globals: DObj) extends GroupStyle:
     val arr = post.relativePath.split("/").init.filter(_ != "")
     // check the entry in the front matter
     val unslugged = post.getGroupsList(gType) match
-      case s: Str => arr ++ s.str.split(",").map(_.trim) // more options?
-      case a: Arr => arr ++ a.arr.map(s => s.str) // error-prone
-      case _      => arr
+      case s: DStr => arr ++ s.str.trim.split(",").map(_.trim)
+      case a: DArr => arr ++ a.arr.flatMap(_.getStr)
+      case _       => arr
     // slugify the category names
     unslugged
 
@@ -30,5 +30,5 @@ object CatStyle extends GroupConstructor:
 
   val styleName = "category"
 
-  def apply(gType: String, configs: Obj, globals: DObj): GroupStyle =
+  def apply(gType: String, configs: MObj, globals: IObj): GroupStyle =
     new CatStyle(gType, configs, globals)

@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.plugins
 
-import com.rallyhealth.weejson.v1.Obj
+import com.anglypascal.scalite.data.mutable.DObj
 
 /** Trait to allow for plugin creation. Plugins to be loaded at runtime should
   * extend this trait.
@@ -8,4 +8,4 @@ import com.rallyhealth.weejson.v1.Obj
 trait Plugin:
 
   /** May be overriden to accept configuration through \_config.yml */
-  protected[plugins] def addConfigs(data: Obj): Plugin = this
+  protected[plugins] def addConfigs(data: DObj): Plugin = this

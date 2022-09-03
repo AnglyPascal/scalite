@@ -1,19 +1,18 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Page
 
 import scala.collection.mutable.LinkedHashMap
 
-/** Creates a new type of Group. 
+/** Creates a new type of Group.
   *
   * @param style
   *   A GroupStyle object defining how the PostsGroup objects are created from
   *   PostLike objects
   * @param globals
-  *   DObj containing the global setting for this site
+  *   Immutable DObj containing the global setting for this site
   */
 final class GroupType(style: GroupStyle, globals: DObj):
 
@@ -28,7 +27,7 @@ final class GroupType(style: GroupStyle, globals: DObj):
     * @param post
     *   A post object to be added to the groups of this type
     */
-  def addToGroups(post: PostLike): Unit =
+  def addPostToGroups(post: PostLike): Unit =
     // names of categories this post belongs to
     val catNames = style.getGroupNames(post)
     // for each category, add this post to it and add this category back to the post

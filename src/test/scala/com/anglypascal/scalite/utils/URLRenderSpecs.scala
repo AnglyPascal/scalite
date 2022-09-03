@@ -1,18 +1,12 @@
 package com.anglypascal.scalite.utils
 
 import com.anglypascal.scalite.URL
-import com.anglypascal.scalite.data.DataAST
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
-import org.scalatest.flatspec.AnyFlatSpec
-import com.anglypascal.scalite.data.DObj
 import com.rallyhealth.weejson.v1.Obj
-
-def init() =
-  val ins = DataAST
+import org.scalatest.flatspec.AnyFlatSpec
 
 class URLRenderSpecs extends AnyFlatSpec:
-  init()
-
   val time = "2022-08-28 18:15:30"
   val date = dateParseObj(time, "yyyy-MM-dd HH-mm-ss z")
   date("title") = "test_title"

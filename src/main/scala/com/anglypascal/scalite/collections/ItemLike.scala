@@ -1,20 +1,20 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 class ItemLike(val rType: String)(
     val parentDir: String,
     val relativePath: String,
-    globals: DObj,
-    collection: DObj
+    globals: IObj,
+    collection: IObj
 ) extends Element:
 
   private val logger = Logger(s"ItemLike $rType")
@@ -33,13 +33,13 @@ class ItemLike(val rType: String)(
   // TODO: check with jekyll if it needs more default variables
   lazy val locals =
     val used = List("title")
-    val obj = Obj()
+    val obj = MObj()
     for
       (s, v) <- frontMatter.obj
       if !used.contains(s)
     do obj(s) = v
-    obj.obj ++= List("title" -> title)
-    DObj(obj)
+    obj update MObj("title" -> title)
+    IObj(obj)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(false)
 
@@ -58,7 +58,7 @@ object ItemConstructor extends ElemConstructor:
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,
-      globals: DObj,
-      collection: DObj
+      globals: IObj,
+      collection: IObj
   ): Element =
     ItemLike(rType)(parentDir, relativePath, globals, collection)

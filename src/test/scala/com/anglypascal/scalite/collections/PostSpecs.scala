@@ -1,8 +1,8 @@
 package com.anglypascal.scalite.collections
 
 import org.scalatest.flatspec.AnyFlatSpec
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.DStr
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.converters.Converters
@@ -51,12 +51,10 @@ class PostSpecs extends AnyFlatSpec:
   }
 
   ignore should "handle rendering and file creation properly" in {
-    Converters.addConverter(Markdown)
-    Layouts.addEngine(MustacheLayouts)
     DirectoryReader("src/test/resources/site_template/_site")
     Layouts(
-      "src/test/resources/site_template/_layouts",
-      "src/test/resources/site_template/_partials"
+      com.anglypascal.scalite.data.mutable.DObj(),
+      DObj()
     )
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
     pst.write(false)

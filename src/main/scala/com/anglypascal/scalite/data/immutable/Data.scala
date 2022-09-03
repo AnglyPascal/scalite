@@ -1,4 +1,6 @@
-package com.anglypascal.scalite.data
+package com.anglypascal.scalite.data.immutable
+
+import com.anglypascal.scalite.data.mutable
 
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
@@ -94,9 +96,6 @@ final class DObj(val obj: Map[String, Data])
   def getOrElse(key: String)(default: List[Data]): List[Data] =
     get(key).flatMap(_.getArr).getOrElse(default)
 
-  def getOrElse(key: String)(default: Map[String, Data]): Map[String, Data] =
-    get(key).flatMap(_.getObj).getOrElse(default)
-
   def getOrElse(key: String)(default: DObj): DObj =
     get(key).flatMap(_.getObj).map(DObj(_)).getOrElse(default)
 
@@ -112,7 +111,7 @@ final class DObj(val obj: Map[String, Data])
       obj
         .map((k, v) =>
           "  " * (depth + 1) + Console.RED + k + Console.YELLOW
-            + " -> " + Console.RESET + v.toString(depth + 1)
+            + ": " + Console.RESET + v.toString(depth + 1)
         )
         .mkString(
           "\n"
@@ -120,10 +119,18 @@ final class DObj(val obj: Map[String, Data])
 
 /** Companion object to provide factory constructors. */
 object DObj:
+
   def apply(_obj: Map[String, Data]) = new DObj(_obj)
-  def apply(pairs: Tuple2[String, Data]*) = new DObj(Map(pairs: _*))
+
+  def apply(pairs: (String, Any)*) =
+    new DObj(Map(pairs.map(p => (p._1, DataImplicits.fromAny(p._2))): _*))
+
   def apply(_obj: Obj) =
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))).toMap)
+
+  def apply(dobj: mutable.DObj) = new DObj(
+    dobj.obj.map(p => (p._1, DataImplicits.fromMutData(p._2))).toMap
+  )
 
 /** Immutable wrapper around Arr */
 final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
@@ -142,13 +149,18 @@ final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
     Console.GREEN + "[ " + Console.RESET + arr.mkString(", ") +
       Console.GREEN + " ]" + Console.RESET
 
-
 /** Companion object to DArr to provide factory constructors */
 object DArr:
+
   def apply(_arr: List[Data]) = new DArr(_arr)
-  def apply(_arr: Data*) = new DArr(_arr.toList)
-  def apply(_arr: Iterable[Data]) = new DArr(_arr.toList)
+
+  def apply(_arr: Any*) =
+    new DArr(List(_arr.map(DataImplicits.fromAny): _*))
+
   def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
+
+  def apply(dobj: mutable.DArr) =
+    new DArr(dobj.arr.toList.map(DataImplicits.fromMutData))
 
 /** Wrapper for Str */
 final class DStr(val str: String) extends Data:
@@ -169,10 +181,10 @@ final class DStr(val str: String) extends Data:
       case that: DStr => str.compare(that.str)
       case _          => 0
 
-  override def equals(that: Any): Boolean = 
+  override def equals(that: Any): Boolean =
     that match
       case that: DStr => str == that.str
-      case _ => false
+      case _          => false
 
 /** Factory methods for constructing a DStr */
 object DStr:
@@ -192,10 +204,10 @@ final class DNum(val num: BigDecimal) extends Data:
       case that: DNum => num.compare(that.num)
       case _          => 0
 
-  override def equals(that: Any): Boolean = 
+  override def equals(that: Any): Boolean =
     that match
       case that: DNum => num == that.num
-      case _ => false
+      case _          => false
 
 /** Factory methods for constructing a DNum */
 object DNum:
@@ -215,10 +227,10 @@ final class DBool(val bool: Boolean) extends Data:
       case that: DBool => bool.compare(that.bool)
       case _           => 0
 
-  override def equals(that: Any): Boolean = 
+  override def equals(that: Any): Boolean =
     that match
       case that: DBool => bool == that.bool
-      case _ => false
+      case _           => false
 
 /** Factory methods for constructing a DBool */
 object DBool:
@@ -245,6 +257,13 @@ object DataImplicits:
   given fromString: Conversion[String, DStr] = DStr(_)
   given fronBigDecima: Conversion[BigDecimal, DNum] = DNum(_)
   given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
+  given fromAny: Conversion[Any, Data] = any =>
+    any match
+      case any: String     => DStr(any)
+      case any: BigDecimal => DNum(any)
+      case any: Boolean    => DBool(any)
+      case any: Data       => any
+      case _               => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match
@@ -254,6 +273,16 @@ object DataImplicits:
       case v: Num  => DNum(v)
       case v: Bool => DBool(v)
       case Null    => DNull
+
+  given fromMutData: Conversion[mutable.Data, Data] =
+    _ match
+      case v: mutable.DObj =>
+        DObj(v.obj.toMap.map((k, vv) => (k, fromMutData(vv))))
+      case v: mutable.DArr  => DArr(v.toList.map(fromMutData))
+      case v: mutable.DStr  => DStr(v.str)
+      case v: mutable.DNum  => DNum(v.num)
+      case v: mutable.DBool => DBool(v.bool)
+      case mutable.DNull    => DNull
 
 /** FEATURE: Add wrappers for lambda functions. Text lambda AST with
   * mustache.Then define the predefined filter functions in terms of these

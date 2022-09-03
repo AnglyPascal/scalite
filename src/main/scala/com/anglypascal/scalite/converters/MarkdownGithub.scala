@@ -5,18 +5,16 @@ import com.typesafe.scalalogging.Logger
 import sttp.client3.HttpClientSyncBackend
 import sttp.client3.UriContext
 import sttp.client3.basicRequest
-import com.anglypascal.scalite.data.Data
-import com.anglypascal.scalite.data.DObj
+import com.anglypascal.scalite.data.immutable.Data
+import com.anglypascal.scalite.data.immutable.DObj
 import java.net.URLEncoder
 
 /** Basic Markdown to HTML converter using the Github API */
-object MarkdownGithub extends Converter:
-
-  val fileType: String = "markdown"
-
-  setExt("md,markdown,mkd")
-
-  def outputExt = ".html"
+class MarkdownGithub(
+    val fileType: String,
+    val extensions: String,
+    val outputExt: String
+) extends Converter:
 
   private val logger = Logger("Markdown converter")
 
@@ -46,3 +44,8 @@ object MarkdownGithub extends Converter:
       case Right(convertedText) =>
         logger.debug(s"Successfully converted $filepath")
         decode(convertedText, "{{", "}}")
+
+object MarkdownGithub extends ConverterConstructor:
+  val constructorName: String = "markdownGithub"
+  def apply(fileType: String, extensions: String, outputExt: String) =
+    new MarkdownGithub(fileType, extensions, outputExt)

@@ -26,7 +26,6 @@ def pluginTest =
   val classToLoad =
     classLoader.loadClass("com.anglypascal.scalite.plugins.PPConverter$")
   val a = classToLoad.getField("MODULE$").get(null).asInstanceOf[Converter]
-  Converters.addConverter(a)
   Converters.hasConverter("haha.pp")
 
   // Plugins.listOfPlubins.map(_.getClass.getSimpleName).map(println(_))

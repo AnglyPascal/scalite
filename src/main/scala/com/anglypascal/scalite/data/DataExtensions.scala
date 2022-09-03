@@ -1,5 +1,8 @@
 package com.anglypascal.scalite.data
 
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Num
@@ -90,44 +93,44 @@ object DataExtensions:
         logger.trace(s"didn't find key in $data")
         default
 
-  def getChain(objs: (Obj | DObj)*)(key: String)(default: Boolean): Boolean =
-    objs match
+  def getChain(objs: (MObj | IObj)*)(key: String)(default: Boolean): Boolean =
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
-          case obj: Obj =>
+          case obj: MObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
-          case obj: DObj =>
+          case obj: IObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
-  def getChain(objs: (Obj | DObj)*)(key: String)(default: String): String =
-    objs match
+  def getChain(objs: (MObj | IObj)*)(key: String)(default: String): String =
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
-          case obj: Obj =>
+          case obj: MObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
-          case obj: DObj =>
+          case obj: IObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
-  def extractChain(objs: (Obj | DObj)*)(key: String)(default: Boolean): Boolean =
-    objs match
+  def extractChain(objs: (MObj | IObj)*)(key: String)(default: Boolean): Boolean =
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
-          case obj: Obj =>
+          case obj: MObj =>
             obj.extractOrElse(key)(getChain(tail: _*)(key)(default))
-          case obj: DObj =>
+          case obj: IObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
-  def extractChain(objs: (Obj | DObj)*)(key: String)(default: String): String =
-    objs match
+  def extractChain(objs: (MObj | IObj)*)(key: String)(default: String): String =
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
-          case obj: Obj =>
+          case obj: MObj =>
             obj.extractOrElse(key)(getChain(tail: _*)(key)(default))
-          case obj: DObj =>
+          case obj: IObj =>
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
 

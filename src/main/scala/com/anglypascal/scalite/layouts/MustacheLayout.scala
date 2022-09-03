@@ -1,35 +1,35 @@
 package com.anglypascal.scalite.layouts
 
 import com.anglypascal.mustache.Mustache
-import com.anglypascal.scalite.data.DObj
-import com.anglypascal.scalite.data.Data
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.utils.Colors.*
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
   * layout as a parent, and the local and global variables, and renders the
   * template.
   *
-  * TODO: Layouts might have locally specified theme
-  *
   * @param name
   *   name of the layout, which will be refered by other documents
   * @param layoutPath
   *   path to the layout file inside "/\_layouts"
   */
-class MustacheLayout(name: String, parentDir: String, relativePath: String)
-    extends Layout(
-      "mustache",
-      name,
-      parentDir,
-      relativePath,
-      "mustacheLayouts"
-    ):
+class MustacheLayout(
+    val name: String,
+    val parentDir: String,
+    val relativePath: String,
+    private val partials: Map[String, Mustache]
+) extends Layout:
+
+  /** */
+  val lang = "mustache"
+
+  val rType = "mustache"
 
   private val logger = Logger("Mustache Layout")
 
@@ -51,7 +51,7 @@ class MustacheLayout(name: String, parentDir: String, relativePath: String)
   def render(context: DObj, contentPartial: String = ""): String =
     val str = mustache.render(
       context,
-      MustacheLayouts.partials + ("content" -> new Mustache(contentPartial))
+      partials + ("content" -> new Mustache(contentPartial))
     )
     parent match
       case Some(p) =>
@@ -61,56 +61,32 @@ class MustacheLayout(name: String, parentDir: String, relativePath: String)
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory
   */
-object MustacheLayouts extends LayoutObject with Plugin:
+class MustacheLayouts(
+    val layoutsDir: String,
+    val partialsDir: String,
+    val ext: String
+) extends LayoutGroup:
 
-  /** The default mustache layout will only handle files with the .mustache
-    * extension
-    */
-  def ext = "(.*.mustache|.*.html)".r
-
-  /** prevents the call of layouts before doing the apply */
-  private var _layouts: Map[String, Layout] = _
-  def layouts = _layouts
-
-  private var _partials: Map[String, Mustache] = _
-  def partials = _partials
+  val lang = "mustache"
 
   private val logger = Logger("MustacheLayouts")
 
-  /** Process all the layouts in "/\_layouts" directory. This is done in two
-    * passes. The first pass creates the layouts without specifying the parents.
-    * The second pass assigns to each layout it's parent, if specified in the
-    * front matter.
-    */
-  def createLayouts(
-      layoutsDir: String,
-      partialsDir: String,
-      layoutFiles: Array[String],
-      partialFiles: Array[String]
-  ): Map[String, Layout] =
+  DataAST.init()
+
+  def layouts =
     val ls = layoutFiles
       .filter(matches(_))
       .map(f => {
         val fn = getFileName(f)
-        (fn, new MustacheLayout(fn, layoutsDir, f))
+        (fn, new MustacheLayout(fn, layoutsDir, f, partials))
       })
       .toMap
 
-    _partials = getPartials(partialsDir, partialFiles)
     ls.map((s, l) => l.setParent(ls))
-    _layouts = ls.toMap
-    logger.debug(
-      "Got the layouts: " + ls
-        .map(_._2.toString)
-        .mkString(", ")
-    )
-    layouts
+    logger.debug("Found layouts: " + ls.map(_._2.toString).mkString(", "))
+    ls.toMap
 
-  /** Process all the partials in "/\_partials" directory. */
-  private def getPartials(
-      partialsDir: String,
-      partialFiles: Array[String]
-  ): Map[String, Mustache] =
+  private def partials: Map[String, Mustache] =
     val ls = partialFiles
       .filter(matches(_))
       .map(f => {
@@ -123,9 +99,11 @@ object MustacheLayouts extends LayoutObject with Plugin:
       })
       .toMap
 
-    logger.debug(
-      "Got the partials: " + ls
-        .map(Console.GREEN + _._1 + Console.RESET)
-        .mkString(", ")
-    )
+    logger.debug("Found partials: " + ls.map(s => GREEN(s._1)).mkString(", "))
     ls.toMap
+
+object MustacheGroupConstructor extends LayoutGroupConstructor:
+  val lang = "mustache"
+
+  def apply(layoutsDir: String, partialsDir: String, ext: String): LayoutGroup =
+    new MustacheLayouts(layoutsDir, partialsDir, ext)
