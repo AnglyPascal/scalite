@@ -1,34 +1,32 @@
 package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.Configurable
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-
-import scala.collection.mutable.Set
-import scala.collection.mutable.Map
-
 import com.typesafe.scalalogging.Logger
-import cats.instances.partialOrder
 
-/** Layout Object holding all the defined LayoutObjects. During construction
-  * with apply(), it fetches all the files in layoutPath and uses the
-  * appropriate Layout constructor to create a layout representing that file.
-  */
+import scala.collection.mutable.LinkedHashMap
+
+/** */
 object Layouts extends Configurable:
 
   val sectionName: String = "layouts"
 
-  private val constructors = Map[String, LayoutGroupConstructor]()
+  private val constructors =
+    LinkedHashMap[String, LayoutGroupConstructor](
+      "mustache" -> MustacheGroupConstructor
+    )
 
-  private val layouts = Map[String, Layout]()
+  private val layouts = LinkedHashMap[String, Layout]()
 
   private val logger = Logger("Layout object")
 
   /** TODO: add section in Defaults */
-  private val conf = MObj(
+  val conf = MObj(
     "mustache" -> MObj(
       "layoutsDir" -> Defaults.Directories.layoutsDir,
       "partialsDir" -> Defaults.Directories.partialsDir,
@@ -61,16 +59,13 @@ object Layouts extends Configurable:
   def get(name: String): Option[Layout] =
     layouts.get(name) match
       case None =>
-        logger.debug(s"layout $name not found")
+        logger.trace(s"layout $name not found")
         None
       case some =>
-        logger.debug(s"layout $name found")
+        logger.trace(s"layout $name found")
         some
 
   override def toString(): String =
     layouts
-      .map((k, v) =>
-        v.lang + ": " + Console.RED + k
-          + Console.YELLOW + " -> " + v.toString
-      )
+      .map((k, v) => v.lang + " " + BLUE(k) + YELLOW(": ") + v.toString)
       .mkString("\n")

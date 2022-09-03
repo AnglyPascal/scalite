@@ -2,13 +2,12 @@ package com.anglypascal.scalite.layouts
 
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.data.immutable.Data
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.documents.Reader
-import cats.instances.partialOrder
+import com.anglypascal.scalite.utils.Colors.*
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
@@ -84,11 +83,7 @@ class MustacheLayouts(
       .toMap
 
     ls.map((s, l) => l.setParent(ls))
-    logger.debug(
-      "Got the layouts: " + ls
-        .map(_._2.toString)
-        .mkString(", ")
-    )
+    logger.debug("Found layouts: " + ls.map(_._2.toString).mkString(", "))
     ls.toMap
 
   private def partials: Map[String, Mustache] =
@@ -104,11 +99,7 @@ class MustacheLayouts(
       })
       .toMap
 
-    logger.debug(
-      "Got the partials: " + ls
-        .map(Console.GREEN + _._1 + Console.RESET)
-        .mkString(", ")
-    )
+    logger.debug("Found partials: " + ls.map(s => GREEN(s._1)).mkString(", "))
     ls.toMap
 
 object MustacheGroupConstructor extends LayoutGroupConstructor:

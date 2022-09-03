@@ -44,5 +44,4 @@ trait Layout extends Reader:
         case None => logger.trace(s"parent $pn of layout $name doesn't exist")
 
   override def toString(): String =
-    lang.capitalize + "layout: " + GREEN(name) +
-      parent.map(p => YELLOW(" -> ") + GREEN(p.toString)).getOrElse("")
+    GREEN(name) + parent.map(p => YELLOW(" -> ") + p.toString).getOrElse("")

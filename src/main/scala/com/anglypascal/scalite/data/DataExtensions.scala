@@ -94,7 +94,7 @@ object DataExtensions:
         default
 
   def getChain(objs: (MObj | IObj)*)(key: String)(default: Boolean): Boolean =
-    objs match
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
@@ -104,7 +104,7 @@ object DataExtensions:
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
   def getChain(objs: (MObj | IObj)*)(key: String)(default: String): String =
-    objs match
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
@@ -114,7 +114,7 @@ object DataExtensions:
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
   def extractChain(objs: (MObj | IObj)*)(key: String)(default: Boolean): Boolean =
-    objs match
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match
@@ -124,7 +124,7 @@ object DataExtensions:
             obj.getOrElse(key)(getChain(tail: _*)(key)(default))
 
   def extractChain(objs: (MObj | IObj)*)(key: String)(default: String): String =
-    objs match
+    objs.toList match
       case Nil => default
       case obj :: tail =>
         obj match

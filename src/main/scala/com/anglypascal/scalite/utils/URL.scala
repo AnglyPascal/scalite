@@ -2,8 +2,11 @@ package com.anglypascal.scalite
 
 import com.anglypascal.mustache.Mustache
 import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.layouts.DataAST
 
 object URL:
+
+  DataAST.init()
 
   private var _timeZone: String = ""
   def setup(timeZone: String): Unit = _timeZone = timeZone

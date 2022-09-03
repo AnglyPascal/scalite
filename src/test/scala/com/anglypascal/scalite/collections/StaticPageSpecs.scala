@@ -19,11 +19,10 @@ class StaticPageSpecs extends AnyFlatSpec:
   val clcs = DObj()
 
   ignore should "handle rendering and file creation properly" in {
-    Layouts.addEngine(MustacheLayouts)
     DirectoryReader("src/test/resources/site_template/_site")
     Layouts(
-      "src/test/resources/site_template/_layouts",
-      "src/test/resources/site_template/_partials"
+      com.anglypascal.scalite.data.mutable.DObj(),
+      DObj()
     )
     val pst = new PageLike("statics")(pD, rP, glb1, clcs)
     pst.write()

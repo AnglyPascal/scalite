@@ -165,23 +165,23 @@ final class DObj(val obj: Map[String, Data])
           case s: DStr =>
             that(key) match
               case st: Str => this(key) = DStr(st)
-              case _        => ()
+              case _       => ()
           case n: DNum =>
             that(key) match
               case nm: Num => this(key) = DNum(nm)
-              case _        => ()
+              case _       => ()
           case b: DBool =>
             that(key) match
               case bl: Bool => this(key) = DBool(bl)
-              case _         => ()
+              case _        => ()
           case a: DArr =>
             that(key) match
               case ar: Arr => this(key) = DArr(ar)
-              case _        => ()
+              case _       => ()
           case o: DObj =>
             that(key) match
               case ob: Obj => o.update(ob)
-              case _        => ()
+              case _       => ()
           case _ => ()
     this
 
@@ -208,7 +208,8 @@ final class DObj(val obj: Map[String, Data])
               case _        => ()
           case o: DObj =>
             that(key) match
-              case ob: DObj => o.update(ob)
+              case ob: DObj => 
+                o.update(ob)
               case _        => ()
           case _ => ()
     this
@@ -406,6 +407,7 @@ object DataImplicits:
   given fromAny: Conversion[Any, Data] = any =>
     any match
       case any: String     => DStr(any)
+      case any: Int        => DNum(any)
       case any: BigDecimal => DNum(any)
       case any: Boolean    => DBool(any)
       case any: Data       => any

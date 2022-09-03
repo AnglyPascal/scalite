@@ -125,7 +125,55 @@ class MutableDataSpecs extends AnyFlatSpec:
   it should "handle large DObj creation" in {
     val dobj = DObj()
     val N = 1000000
-    for i <- 0 until N do 
-      dobj.addOne(i.toString -> DNum(i))
+    for i <- 0 until N do dobj.addOne(i.toString -> DNum(i))
     assert(dobj.toList.length === N)
+  }
+
+  it should "handle object creation with sugar syntax" in {
+    val obj = DObj(
+      "hello" -> "world",
+      "number" -> 1,
+      "bool" -> true,
+      "arr" -> DArr(1, "2", 3, DArr("1", "2")),
+      "obj" -> DObj(
+        "1" -> 1,
+        "2" -> "2"
+      )
+    )
+    assert(
+      obj("hello") == DStr("world") &&
+        obj.getOrElse("obj")(DObj()).getOrElse("1")(2) === 1 &&
+        obj.getOrElse("obj")(DObj()).getOrElse("2")(3) === 3 &&
+        obj.getOrElse("arr")(DArr())(2) === DNum(3)
+    )
+  }
+
+  it should "handle updates" in {
+    val obj = DObj(
+      "hello" -> "world",
+      "number" -> 1,
+      "bool" -> true,
+      "arr" -> DArr(1, "2", 3, DArr("1", "2")),
+      "obj" -> DObj(
+        "1" -> 1,
+        "2" -> "2"
+      )
+    )
+
+    val obj2 = DObj(
+      "hello" -> "goodbye",
+      "obj" -> DObj(
+        "1" -> "3",
+        "2" -> "3"
+      ),
+      "new" -> "word"
+    )
+
+    obj update obj2
+    assert(
+      obj.getOrElse("obj")(DObj()).getOrElse("2")("1") === "3" &&
+        obj.getOrElse("obj")(DObj()).getOrElse("1")("3") === "3" &&
+        obj.getOrElse("new")("new") === "word" &&
+        obj.getOrElse("hello")("world") === "goodbye"
+    )
   }
