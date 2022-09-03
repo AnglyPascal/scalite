@@ -9,6 +9,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.data.immutable.DataAST
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
@@ -62,6 +63,8 @@ class MustacheLayout(name: String, parentDir: String, relativePath: String)
 /** Defines methods to process all the layouts from the "/\_layouts" directory
   */
 object MustacheLayouts extends LayoutObject with Plugin:
+
+  val AST = DataAST
 
   /** The default mustache layout will only handle files with the .mustache
     * extension

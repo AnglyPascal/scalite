@@ -4,16 +4,15 @@ import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.data.DataExtensions.*
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
-import scala.collection.mutable.{Map => MMap}
 import com.anglypascal.scalite.Configurable
 
-/** Object that holds all the Groups defined for this website. By default these
-  * are Tag and Category. New groups can be added by creating a object of the
-  * trait Group.
+/** Object in charge of creating and configuring PostGroups
+  *
+  * Is a Configurable, so the configuration can be added under the "groups"
+  * section of \_config.yml
   */
 object Groups extends Configurable:
 
@@ -24,6 +23,10 @@ object Groups extends Configurable:
     "tag" -> TagStyle,
     "category" -> CatStyle
   )
+
+  /** Add a new GroupConstructor for a new GroupStyle to this site */
+  def addNewGroupStyle(style: GroupConstructor) =
+    styles += style.styleName -> style
 
   private lazy val groupsConfig: MObj =
     import Defaults.Group
@@ -48,16 +51,13 @@ object Groups extends Configurable:
       )
     )
 
-  def addNewGroupStyle(style: GroupConstructor) =
-    styles += style.styleName -> style
-
   /** Set of the available Groups for this site */
   private val availableGroups: ListBuffer[GroupType] = ListBuffer()
 
   /** Add a new Group to this site */
   def addNewGroup(group: GroupType) = availableGroups += group
 
-  /** Create the groups indicated by the global settings. */
+  /** Apply the configuration from groups section */
   def apply(configs: MObj, globals: IObj): Unit =
     groupsConfig.update(configs)
     for (key, value) <- groupsConfig do
@@ -72,5 +72,6 @@ object Groups extends Configurable:
   /** Create pages for each PostsGroup that wishes to be rendered */
   def process(): Unit = ???
 
+  /** Called by a PostLike to add itself to all the available groups */
   def addToGroups(post: PostLike): Unit =
-    for groupObj <- availableGroups do groupObj.addToGroups(post)
+    for groupObj <- availableGroups do groupObj.addPostToGroups(post)

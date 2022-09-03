@@ -13,7 +13,6 @@ class PostsSpecs extends AnyFlatSpec:
   val pPth = "/_posts"
   val globals = DObj()
 
-  Converters.addConverter(Markdown)
   Layouts.addEngine(MustacheLayouts)
   DirectoryReader(pDir + "/_site")
   Layouts(pDir + "/_layouts", pDir + "/_partials")

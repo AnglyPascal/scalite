@@ -4,10 +4,8 @@ import com.anglypascal.scalite.data.immutable.DObj
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
 
-import scala.collection.mutable.Set
 import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.documents.Reader
-import com.anglypascal.scalite.utils.DirectoryReader.{getListOfFilepaths}
 import com.anglypascal.scalite.data.mutable.DStr
 
 /** Defines an abstract Layout.
@@ -73,56 +71,6 @@ abstract class Layout(
       parent
         .map(Console.YELLOW + " -> " + Console.GREEN + _.toString)
         .getOrElse("") + Console.RESET
-
-/** Layout Object holding all the defined LayoutObjects. During construction
-  * with apply(), it fetches all the files in layoutPath and uses the
-  * appropriate Layout constructor to create a layout representing that file.
-  */
-object Layouts:
-
-  private val layoutConstructors: Set[LayoutObject] = Set()
-
-  private var _layouts: Map[String, Layout] = _
-  def layouts = _layouts
-
-  private val logger = Logger("Layout object")
-
-  /** Add a new layout constructor to this set */
-  def addEngine(engine: LayoutObject) = layoutConstructors += engine
-
-  /** Fetch all the layouts and partials in the given paths. */
-  def apply(layoutsDir: String, partialsDir: String) =
-    val layoutFiles = getListOfFilepaths(layoutsDir)
-    val partialFiles = getListOfFilepaths(partialsDir)
-    _layouts = Map(
-      layoutConstructors
-        .flatMap(
-          _.createLayouts(
-            layoutsDir,
-            partialsDir,
-            layoutFiles,
-            partialFiles
-          ).toList
-        )
-        .toList: _*
-    )
-
-  def get(name: String): Option[Layout] =
-    layouts.get(name) match
-      case None =>
-        logger.debug(s"layout $name not found")
-        None
-      case some => 
-        logger.debug(s"layout $name found")
-        some
-
-  override def toString(): String =
-    layouts
-      .map((k, v) =>
-        v.lang + ": " + Console.RED + k
-          + Console.YELLOW + " -> " + v.toString
-      )
-      .mkString("\n")
 
 /** A trait for generic layout object. Specifies which files this layout will
   * match, and how it will create layouts from the files in the given

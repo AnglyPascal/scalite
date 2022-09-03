@@ -127,7 +127,6 @@ object PluginManager extends Configurable:
       .toList
 
   def apply(pluginsData: MObj, globals: IObj): Unit =
-    val dataAST = DataAST
     Layouts.addEngine(MustacheLayouts)
 
     val pluginsDir: String =

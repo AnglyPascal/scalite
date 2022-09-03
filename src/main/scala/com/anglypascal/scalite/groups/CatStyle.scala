@@ -1,10 +1,10 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.DArr
+import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.StringProcessors.*
 
 import scala.collection.mutable.LinkedHashMap

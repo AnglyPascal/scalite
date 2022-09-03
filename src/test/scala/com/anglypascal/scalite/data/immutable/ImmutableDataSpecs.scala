@@ -75,10 +75,7 @@ class ImmutableDataSpecs extends AnyFlatSpec:
     assert(
       o1.getOrElse("e")(DObj()).getOrElse("1")(0) === 1 &&
         o1.getOrElse("e")(DObj()).getOrElse("2")(0) === 2 &&
-        o1.getOrElse("e")(DObj()).getOrElse("3")(2) === 2 &&
-        o1.getOrElse("e")(Map[String, Data]())("1") === DNum(1) &&
-        o1.getOrElse("e")(Map[String, Data]())("2") === DNum(2) &&
-        o1.getOrElse("e")(Map[String, Data]()).get("3") === None
+        o1.getOrElse("e")(DObj()).getOrElse("3")(2) === 2
     )
 
     assert(

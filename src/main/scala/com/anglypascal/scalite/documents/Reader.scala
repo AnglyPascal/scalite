@@ -5,7 +5,6 @@ import com.anglypascal.scalite.utils.DirectoryReader.readFile
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.frontMatterParser
 import com.anglypascal.scalite.ScopedDefaults
-import com.rallyhealth.weejson.v1.Obj
 
 import java.nio.file.Files
 import java.nio.file.Paths
@@ -38,7 +37,7 @@ trait Reader:
     val src = readFile(filepath)
     src match
       case yaml_regex(a, b) =>
-        scope update frontMatterParser(a).obj
+        scope update frontMatterParser(a)
         (scope, b)
       case _ => (scope, src)
 

@@ -19,7 +19,6 @@ class StaticPageSpecs extends AnyFlatSpec:
   val clcs = DObj()
 
   ignore should "handle rendering and file creation properly" in {
-    Converters.addConverter(Markdown)
     Layouts.addEngine(MustacheLayouts)
     DirectoryReader("src/test/resources/site_template/_site")
     Layouts(
