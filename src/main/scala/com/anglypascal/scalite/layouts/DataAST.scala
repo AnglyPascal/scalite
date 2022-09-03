@@ -1,4 +1,6 @@
-package com.anglypascal.scalite.data.immutable
+package com.anglypascal.scalite.layouts
+
+import com.anglypascal.scalite.data.immutable.*
 
 import com.anglypascal.mustache.AST
 import com.anglypascal.mustache.ASTConverter
@@ -27,6 +29,8 @@ final class DataAST(v: Data) extends AST:
       case _          => None
 
 object DataAST extends ASTConverter:
+
+  def init(): Unit = ()
 
   given dataToAST: Conversion[Data, AST] = new DataAST(_)
 

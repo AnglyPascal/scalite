@@ -1,32 +1,21 @@
 package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.utils.Colors.*
 import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
 
-import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.data.mutable.DStr
 
-/** Defines an abstract Layout.
-  *
-  * @constructor
-  *   returns a new Layout
-  * @param name
-  *   name of the layout, which will be referred to in the front matters
-  * @param layoutPath
-  *   path to the layout file
-  */
-abstract class Layout(
-    val lang: String,
-    val name: String,
-    val parentDir: String,
-    val relativePath: String,
-    val rType: String
-) extends Reader:
+/** Defines an abstract Layout. */
+trait Layout extends Reader:
 
-  /** */
-  private val logger = Logger("Mustache Layout")
+  val lang: String
+
+  val name: String
+
+  private val logger = Logger(s"${lang.capitalize} layout")
 
   /** Render the layout with the given Data object as context
     *
@@ -45,53 +34,15 @@ abstract class Layout(
 
   /** Take a list of layouts, and find the parent layout */
   def setParent(layouts: Map[String, Layout]): Unit =
-    _parent =
-      if frontMatter.obj.contains("layout") then
-        frontMatter("layout") match
-          case s: DStr =>
-            logger.trace(s"layout $name has a parent layout named $s")
-            val pn = s.str
-            layouts.get(pn) match
-              case Some(v) =>
-                v match
-                  case v: MustacheLayout => Some(v)
-                  case _                 => None
-              case None =>
-                logger.trace(s"parent layout $pn of layout $name doesn't exist")
-                None
-          case _ =>
-            logger.trace("layout field of the front matter must be a string")
-            None
-      else
-        logger.trace(s"layout $name doesn't have a specified parent layout")
-        None
+    if frontMatter.contains("layout") then
+      val pn = frontMatter.getOrElse("layout")("")
+      layouts.get(pn) match
+        case Some(v) =>
+          v match
+            case v: Layout => _parent = Some(v)
+            case null      => ()
+        case None => logger.trace(s"parent $pn of layout $name doesn't exist")
 
   override def toString(): String =
-    Console.GREEN + name + Console.RESET +
-      parent
-        .map(Console.YELLOW + " -> " + Console.GREEN + _.toString)
-        .getOrElse("") + Console.RESET
-
-/** A trait for generic layout object. Specifies which files this layout will
-  * match, and how it will create layouts from the files in the given
-  * directories.
-  */
-trait LayoutObject extends Plugin:
-
-  /** Get the layouts of this type */
-  def layouts: Map[String, Layout]
-
-  /** The extensions of the files this converter is able to convert */
-  def ext: util.matching.Regex
-
-  /** Does this constructor recognize this filepath? */
-  def matches(filepath: String): Boolean =
-    ext.matches(filepath)
-
-  /** Create a layout this constructor matches from the given directories */
-  def createLayouts(
-      layoutsDir: String,
-      partialsDir: String,
-      layoutFiles: Array[String],
-      partialFiles: Array[String]
-  ): Map[String, Layout]
+    lang.capitalize + "layout: " + GREEN(name) +
+      parent.map(p => YELLOW(" -> ") + GREEN(p.toString)).getOrElse("")

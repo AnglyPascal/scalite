@@ -10,13 +10,12 @@ import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.groups.GroupConstructor
 import com.anglypascal.scalite.groups.Groups
-import com.anglypascal.scalite.layouts.LayoutObject
+import com.anglypascal.scalite.layouts.LayoutGroupConstructor
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.mutable.Data
-import com.anglypascal.scalite.data.immutable.DataAST
 import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
@@ -111,8 +110,8 @@ object PluginManager extends Configurable:
     )
 
   private def loadLayouts(names: Map[String, MObj]) =
-    findObjects[LayoutObject](names).map(L =>
-      Layouts.addEngine(L.asInstanceOf[LayoutObject])
+    findObjects[LayoutGroupConstructor](names).map(L =>
+      Layouts.addEngine(L.asInstanceOf[LayoutGroupConstructor])
     )
 
   private var classLoaders = List[URLClassLoader]()
@@ -127,7 +126,7 @@ object PluginManager extends Configurable:
       .toList
 
   def apply(pluginsData: MObj, globals: IObj): Unit =
-    Layouts.addEngine(MustacheLayouts)
+    // Layouts.addEngine(MustacheLayouts)
 
     val pluginsDir: String =
       globals.getOrElse("base")(Defaults.Directories.base) +

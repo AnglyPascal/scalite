@@ -6,7 +6,6 @@ import com.anglypascal.scalite.data.DataExtensions.extractOrElse
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.data.immutable.{DArr => IArr}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.data.immutable.{DataAST => IAST}
 import com.anglypascal.scalite.data.mutable.{DArr => MArr}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Assets
@@ -28,7 +27,6 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
 import com.anglypascal.scalite.data.mutable.DStr
-
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -87,7 +85,13 @@ object Globals:
     )
 
   private val configurables =
-    List[Configurable](PluginManager, Converters, Layouts, Groups, Collections)
+    List[Configurable](
+      PluginManager,
+      Converters,
+      Layouts,
+      Groups,
+      Collections
+    )
 
   import Defaults.Directories
   private def _base = dirs.getOrElse("base")(Directories.base)
