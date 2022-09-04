@@ -1,16 +1,21 @@
 package com.anglypascal.scalite.converters
 
+import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.Configurable
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
-import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.utils.Colors.*
 
-/** Companion object giving api to add new members to the set of converters
-  * available to Post to render it's content
+/** Holds all implementations of Converter and ConverterConstructor.
+  *
+  * It's a Configurable, it looks out for "converters" section in \_config.yml
+  * for configurations to add to itself.
+  *
+  * Based on these configurations, creates a hash table holding filetype ->
+  * converter maps.
   */
 object Converters extends Configurable:
 
@@ -29,6 +34,12 @@ object Converters extends Configurable:
       "identity" -> Identity
     )
 
+  /** The given converter to the converters set, mapped to its filetype. This
+    * overrides previously defined converter for this filetype.
+    */
+  def addConverterConstructor(conv: ConverterConstructor): Unit =
+    converterConstructors += conv.constructorName -> conv
+
   private val logger = Logger("Converter")
 
   private val convsConfig = MObj(
@@ -45,16 +56,25 @@ object Converters extends Configurable:
   )
 
   def apply(configs: MObj, globals: IObj): Unit =
-    convsConfig.update(configs)
+    convsConfig update configs
+
     for (name, conv) <- convsConfig do
       conv match
-        case conv: MObj => 
+        case conv: MObj =>
           val cn = conv.getOrElse("converter")("identity")
           val ex = conv.getOrElse("extensions")("")
           val oe = conv.getOrElse("outputExt")(".html")
           val C = converterConstructors.get(cn).getOrElse(Identity)
+
+          logger.debug(
+            s"new converter: filetype: ${GREEN(name)}, " +
+              s"extensions: ${GREEN(ex.split(",").map(_.trim).mkString(", "))}, " +
+              s"outputExt: ${GREEN(oe)}, " +
+              s"converter constructor: ${BLUE(cn)}"
+          )
           converters += name -> C(name, ex, oe)
-        case _ => ()
+        case _ =>
+          logger.debug(s"please provide configs for convert $name as a table")
 
   /** Private method that finds the correct converter for a given file
     *
@@ -64,8 +84,11 @@ object Converters extends Configurable:
     *   Some(c) if c accepts filetypes matching ext None if no such converter is
     *   available
     */
-  def findByExt(ext: String): Option[Converter] =
+  private def findByExt(ext: String): Option[Converter] =
     converters.filter(_._2.matches(ext)).headOption.map(_._2)
+
+  def findOutputExt(ext: String): String =
+    findByExt(ext).map(_.outputExt).getOrElse(".html")
 
   /** Checks if there is a converter avaiable for thei given filepath
     * @param ext
@@ -76,14 +99,12 @@ object Converters extends Configurable:
   def hasConverter(ext: String): Boolean =
     findByExt(ext) match
       case None =>
-        logger.warn(
-          s"Converter could not be found for file ${Console.RED + ext + Console.RESET}"
-        )
+        logger.debug(s"Converter not found for ${RED(ext)}")
         false
       case Some(conv) =>
         logger.debug(
-          s"${GREEN(conv.getClass.getSimpleName.stripSuffix("$"))} found for " +
-            s"${GREEN(ext)}"
+          s"${GREEN(conv.getClass.getSimpleName.stripSuffix("$"))} " +
+            s"found for ${GREEN(ext)}"
         )
         true
 
@@ -95,29 +116,14 @@ object Converters extends Configurable:
     *   the path to the file containing the extension. Used to find appropriate
     *   converter
     */
-  def convert(
-      str: String,
-      filepath: String
-  ): String =
+  def convert(str: String, filepath: String): String =
     findByExt(filepath) match
-      case Some(converter) =>
-        converter.convert(str, filepath)
+      case Some(converter) => converter.convert(str, filepath)
       case None =>
         logger.warn(
-          "Converter could not be found, " +
-            "so no conversion was made for file " +
-            Console.RED + filepath + Console.RESET
+          "convertion failed: no converter was found for " + RED(filepath)
         )
         str
 
-  def findExt(filepath: String) =
-    findByExt(filepath).map(_.outputExt).getOrElse(".html")
-
-  /** The given converter to the converters set, mapped to its filetype. This
-    * overrides previously defined converter for this filetype.
-    */
-  def addConverterConstructor(conv: ConverterConstructor): Unit =
-    converterConstructors += conv.constructorName -> conv
-
-  override def toString(): String = 
+  override def toString(): String =
     converters.map("  " + _._2.toString).mkString("\n")

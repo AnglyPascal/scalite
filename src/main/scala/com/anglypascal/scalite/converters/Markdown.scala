@@ -7,6 +7,10 @@ import laika.format
 import laika.markdown.github
 import laika.parse.code
 
+/** Markdown converter using Laika
+  *
+  * TODO: documentation about the sytanx highlighting
+  */
 class Markdown(
     val fileType: String,
     val extensions: String,
@@ -15,10 +19,6 @@ class Markdown(
 
   private val logger = Logger("Markdown converter")
 
-  /** Markdown converter using Laika
-    *
-    * TODO: need to give documentation about the sytanx highlighting
-    */
   def convert(str: String, filepath: String): String =
     val transformer = api.Transformer
       .from(format.Markdown)

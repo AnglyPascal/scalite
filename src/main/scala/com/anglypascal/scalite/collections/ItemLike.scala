@@ -1,5 +1,6 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.data.immutable.DStr
@@ -8,8 +9,24 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
+import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.Defaults
 
+/** Elements that don't have a separate Page, but may be rendered as part of a
+  * different Page.
+  *
+  * @param rType
+  *   The named type of these Pages. For example, "static"
+  * @param parentDir
+  *   The directory of this Element's Collection.
+  * @param relativePath
+  *   The relative path to the file of this Element from the `parentDir`
+  * @param globals
+  *   The global variables
+  * @param collection
+  *   The configuration variables for this Element's Collection
+  */
 class ItemLike(val rType: String)(
     val parentDir: String,
     val relativePath: String,
@@ -18,37 +35,59 @@ class ItemLike(val rType: String)(
 ) extends Element:
 
   private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
-  logger.debug("creating from " + GREEN(filepath))
+  logger.debug("source: " + GREEN(filepath))
 
-  protected val layoutName = ""
+  // by default ItemLike objects don't have layouts
+  protected val layoutName =
+    extractChain(frontMatter, collection)("layout")("")
 
   /** Title of this item */
-  val title: String =
+  lazy val title: String =
     frontMatter.extractOrElse("title")(
       frontMatter.extractOrElse("name")(
-        titleParser(filepath).getOrElse("untitled" + this.toString)
+        titleParser(filepath).getOrElse("item " + filename)
       )
-    ) // so that titles are always different for different items
+    )
 
-  // TODO: check with jekyll if it needs more default variables
   lazy val locals =
-    val obj = MObj()
-    for (s, v) <- frontMatter do obj(s) = v
-    obj update MObj("title" -> title)
+    val dateString = frontMatter.extractOrElse("date")(filename)
+    val dateFormat =
+      extractChain(frontMatter, collection, globals)(
+        "dateFormat"
+      )(Defaults.dateFormat)
+    val obj = dateParseObj(dateString, dateFormat)
+
+    obj update frontMatter
+    obj += "title" -> title
+    obj += "lastModifiedTime" -> lastModifiedTime(filepath, dateFormat)
+    obj += "filename" -> filename
+
     IObj(obj)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(false)
 
-  /** If there's some front\_matter, then the main\_matter will be conerted with
-    * appropriate converter. Otherwise, the identity will be returned
+  private val shouldConvert = !frontMatter.isEmpty
+
+  /** If there's some frontMatter, then the mainMatter will be conerted with
+    * appropriate converter. Then the converted string will be processed with
+    * the layout if it exists. Otherwise the unprocessed string will be returned
     */
   protected lazy val render: String =
-    // TODO what if frontmatter is deleted by the process
-    if frontMatter.obj.isEmpty then mainMatter
-    else Converters.convert(mainMatter, filepath)
+    val str =
+      if shouldConvert then Converters.convert(mainMatter, filepath)
+      else mainMatter
+    layout match
+      case Some(l) =>
+        val context = IObj(
+          "site" -> globals,
+          "item" -> locals
+        )
+        l.render(context, str)
+      case None => str
 
   override def toString(): String = CYAN(title)
 
+/** Constructor for ItemLike objects */
 object ItemConstructor extends ElemConstructor:
 
   val styleName = "item"

@@ -82,22 +82,26 @@ class PostLike(val rType: String)(
     */
   private lazy val urlObj: DObj =
     val dateString = frontMatter.extractOrElse("date")(filename)
-    val dateFormat =
-      extractChain(frontMatter, collection, globals)(
-        "dateFormat"
-      )(Defaults.dateFormat)
+    val dateFormat = extractChain(frontMatter, collection, globals)(
+      "dateFormat"
+    )(Defaults.dateFormat)
     val obj = dateParseObj(dateString, dateFormat)
 
-    obj("title") = title
-    obj("lastModifiedTime") = lastModifiedTime(filepath, dateFormat)
-    obj("outputExt") = outputExt
-    obj("filename") = filename
-    obj("collection") = collection.getOrElse("name")("posts")
-    for (k, s) <- groups do obj(k) = s.map(_.name).mkString("/")
+    val newObj = MObj(
+      "title" -> title,
+      "lastModifiedTime" -> lastModifiedTime(filepath, dateFormat),
+      "outputExt" -> outputExt,
+      "filename" -> filename,
+      "collection" -> collection.getOrElse("name")("posts"),
+      "slugTitle" -> slugify(title),
+      "slugTitlePretty" -> slugify(title, "pretty"),
+      "slugTitleCased" -> slugify(title, "default", true)
+    )
+    val grpObj = MObj()
+    for (k, s) <- groups do grpObj(k) = MStr(s.map(_.name).mkString("/"))
 
-    obj("slugTitle") = slugify(title)
-    obj("slugTitlePretty") = slugify(title, "pretty")
-    obj("slugTitleCased") = slugify(title, "default", true)
+    obj update newObj
+    obj update grpObj
 
     DObj(obj)
 
@@ -125,7 +129,7 @@ class PostLike(val rType: String)(
   protected lazy val outputExt =
     extractChain(frontMatter, collection)(
       "outputExt"
-    )(Converters.findExt(filepath))
+    )(Converters.findOutputExt(filepath))
 
   lazy val locals =
     frontMatter update MObj(

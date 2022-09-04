@@ -11,24 +11,24 @@ class DateParserSpecs extends AnyFlatSpec:
 
     val date = dateParseObj(dateStr, dateFmt)
     assert(
-      date("dateString").str === "28 Aug, 2022 12:00:45" &&
-        date("year").str === "2022" &&
-        date("shortYear").str === "22" &&
-        date("month").str === "08" &&
-        date("iMonth").str === "8" &&
-        date("shortMonth").str === "Aug" &&
-        date("longMonth").str === "August" &&
-        date("day").str === "28" &&
-        date("iDay").str === "28" &&
-        date("yDay").str === "240" &&
-        date("wDay").str === "7" &&
-        date("shortDay").str === "Sun" &&
-        date("longDay").str === "Sunday" &&
-        date("week").str === "34" &&
-        date("wYear").str === "34" &&
-        date("hour").str === "12" &&
-        date("minute").str === "00" &&
-        date("second").str === "45"
+      date("dateString").getStr.get === "28 Aug, 2022 12:00:45" &&
+        date("year").getStr.get === "2022" &&
+        date("shortYear").getStr.get === "22" &&
+        date("month").getStr.get === "08" &&
+        date("iMonth").getStr.get === "8" &&
+        date("shortMonth").getStr.get === "Aug" &&
+        date("longMonth").getStr.get === "August" &&
+        date("day").getStr.get === "28" &&
+        date("iDay").getStr.get === "28" &&
+        date("yDay").getStr.get === "240" &&
+        date("wDay").getStr.get === "7" &&
+        date("shortDay").getStr.get === "Sun" &&
+        date("longDay").getStr.get === "Sunday" &&
+        date("week").getStr.get === "34" &&
+        date("wYear").getStr.get === "34" &&
+        date("hour").getStr.get === "12" &&
+        date("minute").getStr.get === "00" &&
+        date("second").getStr.get === "45"
     )
   }
 
@@ -38,24 +38,24 @@ class DateParserSpecs extends AnyFlatSpec:
 
     val date = dateParseObj(dateStr, dateFmt)
     assert(
-      date("dateString").str === "28 Aug, 2022 12:00:45" &&
-        date("year").str === "2022" &&
-        date("shortYear").str === "22" &&
-        date("month").str === "08" &&
-        date("iMonth").str === "8" &&
-        date("shortMonth").str === "Aug" &&
-        date("longMonth").str === "August" &&
-        date("day").str === "28" &&
-        date("iDay").str === "28" &&
-        date("yDay").str === "240" &&
-        date("wDay").str === "7" &&
-        date("shortDay").str === "Sun" &&
-        date("longDay").str === "Sunday" &&
-        date("week").str === "34" &&
-        date("wYear").str === "34" &&
-        date("hour").str === "12" &&
-        date("minute").str === "00" &&
-        date("second").str === "45"
+      date("dateString").getStr.get === "28 Aug, 2022 12:00:45" &&
+        date("year").getStr.get === "2022" &&
+        date("shortYear").getStr.get === "22" &&
+        date("month").getStr.get === "08" &&
+        date("iMonth").getStr.get === "8" &&
+        date("shortMonth").getStr.get === "Aug" &&
+        date("longMonth").getStr.get === "August" &&
+        date("day").getStr.get === "28" &&
+        date("iDay").getStr.get === "28" &&
+        date("yDay").getStr.get === "240" &&
+        date("wDay").getStr.get === "7" &&
+        date("shortDay").getStr.get === "Sun" &&
+        date("longDay").getStr.get === "Sunday" &&
+        date("week").getStr.get === "34" &&
+        date("wYear").getStr.get === "34" &&
+        date("hour").getStr.get === "12" &&
+        date("minute").getStr.get === "00" &&
+        date("second").getStr.get === "45"
     )
   }
 
@@ -65,24 +65,24 @@ class DateParserSpecs extends AnyFlatSpec:
 
     val date = dateParseObj(dateStr, dateFmt)
     assert(
-      date("dateString").str === "28 Aug, 2022 00:00:00" &&
-        date("year").str === "2022" &&
-        date("shortYear").str === "22" &&
-        date("month").str === "08" &&
-        date("iMonth").str === "8" &&
-        date("shortMonth").str === "Aug" &&
-        date("longMonth").str === "August" &&
-        date("day").str === "28" &&
-        date("iDay").str === "28" &&
-        date("yDay").str === "240" &&
-        date("wDay").str === "7" &&
-        date("shortDay").str === "Sun" &&
-        date("longDay").str === "Sunday" &&
-        date("week").str === "34" &&
-        date("wYear").str === "34" &&
-        date("hour").str === "00" &&
-        date("minute").str === "00" &&
-        date("second").str === "00"
+      date("dateString").getStr.get === "28 Aug, 2022 00:00:00" &&
+        date("year").getStr.get === "2022" &&
+        date("shortYear").getStr.get === "22" &&
+        date("month").getStr.get === "08" &&
+        date("iMonth").getStr.get === "8" &&
+        date("shortMonth").getStr.get === "Aug" &&
+        date("longMonth").getStr.get === "August" &&
+        date("day").getStr.get === "28" &&
+        date("iDay").getStr.get === "28" &&
+        date("yDay").getStr.get === "240" &&
+        date("wDay").getStr.get === "7" &&
+        date("shortDay").getStr.get === "Sun" &&
+        date("longDay").getStr.get === "Sunday" &&
+        date("week").getStr.get === "34" &&
+        date("wYear").getStr.get === "34" &&
+        date("hour").getStr.get === "00" &&
+        date("minute").getStr.get === "00" &&
+        date("second").getStr.get === "00"
     )
   }
 

@@ -1,12 +1,13 @@
 package com.anglypascal.scalite.converters
 
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.Data
 import com.anglypascal.scalite.plugins.Plugin
 import com.typesafe.scalalogging.Logger
 import sttp.client3.HttpClientSyncBackend
 import sttp.client3.UriContext
 import sttp.client3.basicRequest
-import com.anglypascal.scalite.data.immutable.Data
-import com.anglypascal.scalite.data.immutable.DObj
+
 import java.net.URLEncoder
 
 /** Basic Markdown to HTML converter using the Github API */

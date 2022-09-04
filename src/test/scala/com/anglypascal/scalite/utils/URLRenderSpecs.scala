@@ -9,9 +9,9 @@ import org.scalatest.flatspec.AnyFlatSpec
 class URLRenderSpecs extends AnyFlatSpec:
   val time = "2022-08-28 18:15:30"
   val date = dateParseObj(time, "yyyy-MM-dd HH-mm-ss z")
-  date("title") = "test_title"
-  date("slugTitle") = "test-title"
-  date("categories") = "cat1/cat2"
+  date += "title" -> "test_title"
+  date += "slugTitle" -> "test-title"
+  date += "categories" -> "cat1/cat2"
   val dobj = DObj(date)
 
   it should "render urls properly" in {

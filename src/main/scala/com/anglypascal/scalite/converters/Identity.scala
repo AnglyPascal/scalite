@@ -18,3 +18,4 @@ object Identity extends ConverterConstructor:
   val constructorName: String = "identity"
   def apply(fileType: String, extensions: String, outputExt: String) =
     new Identity(fileType, extensions, outputExt)
+    new Identity(fileType, extensions, outputExt)

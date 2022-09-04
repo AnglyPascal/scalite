@@ -1,8 +1,8 @@
 package com.anglypascal.scalite.utils
 
 import com.github.nscala_time.time.Imports.*
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.data.mutable.DObj
 
 /** Provides methods for parsing date from string and modified date from file
   *
@@ -14,7 +14,7 @@ object DateParser:
 
   private val logger = Logger("Date parser")
 
-  def dateParseObj(dateString: String, dateFormat: String): Obj =
+  def dateParseObj(dateString: String, dateFormat: String): DObj =
     val reg1 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}\.\d{3}).*".r
     val reg2 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}).*".r
     val reg3 = raw"(\d{4}-\d{2}-\d{2}).*".r
@@ -46,15 +46,15 @@ object DateParser:
       dt match
         case Some(d) =>
           dateToObj(d, dateFormat)
-        case None => Obj()
+        case None => DObj()
     catch
       case e =>
         logger.error(s"${e.toString} thrown while parsing date")
-        Obj()
+        DObj()
 
-  private def dateToObj(date: DateTime, dateFormat: String): Obj =
+  private def dateToObj(date: DateTime, dateFormat: String): DObj =
     val month = date.month
-    Obj(
+    DObj(
       "dateString" -> dateToString(date, dateFormat),
       // year
       "year" -> date.year.get.toString,

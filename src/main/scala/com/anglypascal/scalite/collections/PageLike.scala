@@ -62,7 +62,9 @@ class PageLike(val rType: String)(
   /** Local variables publicly visible, used to render the parent template */
   lazy val locals: DObj =
     val dateFormat =
-      extractChain(frontMatter, globals)("dateFormat")(Defaults.dateFormat)
+      extractChain(frontMatter, collection, globals)("dateFormat")(
+        Defaults.dateFormat
+      )
     DObj(
       "title" -> title,
       "outputExt" -> outputExt,
@@ -82,9 +84,7 @@ class PageLike(val rType: String)(
 
   /** The output extension of this page */
   protected lazy val outputExt =
-    frontMatter.getOrElse("outputExt")(
-      Converters.findByExt(filepath).map(_.outputExt).getOrElse(".html")
-    )
+    frontMatter.getOrElse("outputExt")(Converters.findOutputExt(filepath))
 
   /** Render the contents of this page to a HTML string
     *

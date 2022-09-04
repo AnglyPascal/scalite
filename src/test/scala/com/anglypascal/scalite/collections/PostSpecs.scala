@@ -23,7 +23,6 @@ class PostSpecs extends AnyFlatSpec:
 
   it should "read valid file properly" in {
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
-    println("haha")
     assert(
       pst.title === "Super Short Article" &&
         pst.date === "2016-05-19" &&

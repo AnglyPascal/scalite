@@ -7,9 +7,9 @@ import com.anglypascal.scalite.data.immutable.DArr
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 

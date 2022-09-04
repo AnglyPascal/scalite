@@ -39,3 +39,4 @@ class LoggingLayout extends LayoutBase[ILoggingEvent]:
       case "TRACE" => BLUE(l)
       case "FATAL" => ERROR(l)
       case _       => l
+

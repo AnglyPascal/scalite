@@ -99,6 +99,10 @@ final class DObj(val obj: Map[String, Data])
     obj.addOne(pairs)
     this
 
+  override def +=(pairs: (String, Any)): this.type =
+    obj.addOne(pairs._1 -> DataImplicits.fromAny(pairs._2))
+    this
+
   /** Get an iterable for the list of keys in the map */
   override def keys = obj.keys
 

@@ -1,29 +1,32 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.Configurable
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.DBool
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
-import com.anglypascal.scalite.Configurable
-import com.anglypascal.scalite.data.DataExtensions.extractChain
-import com.anglypascal.scalite.data.mutable.DBool
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
   * a table of contents like page for the collction.
+  *
+  * It's a Configurable, so it looks out for the "collections" section in
+  * \_config.yml to configure itself.
   */
 object Collections extends Configurable:
 
+  private val logger = Logger(BLUE("Collections"))
+
   val sectionName: String = "collections"
 
-  /** Map of predefined collections that will later be populated by
-    * "\_config.yml"
-    */
+  /** Avaiable Element styles */
   private val styles = LinkedHashMap[String, ElemConstructor](
     "post" -> PostConstructor,
     "page" -> PageConstructor,
@@ -74,21 +77,14 @@ object Collections extends Configurable:
   private def defaultConf(bool: Boolean): MObj =
     MObj("output" -> bool)
 
+  /** Add a new ElemConstructor */
   def addStyle(elemCons: ElemConstructor): Unit =
     styles += elemCons.styleName -> elemCons
 
   private val collections = ListBuffer[Collection]()
 
-  private val logger = Logger(BLUE("Collections"))
-
-  /** Processes all the collections that are set to output, with posts by
-    * default.bakira kichu
-    * @param collectionsDir
-    *   the root collection directory. All collections must be in this directory
-    * @param collectionData
-    *   collection section from "\_config.yml"
-    * @param globals
-    *   global parameters
+  /** Gets the configuration set in the "collections" section of \_configs.yml
+    * and creates necessary Collection objects
     */
   def apply(
       configs: MObj,
@@ -117,8 +113,7 @@ object Collections extends Configurable:
               cobj.extractOrElse("output")(true)
             else cobj.extractOrElse("output")(false)
 
-          if !output then
-            logger.debug(s"output of collection ${RED(key)} is set to false")
+          if !output then logger.debug(s"won't output ${RED(key)}")
           else
             val lout = cobj.extractOrElse("layout")(key)
 
@@ -126,6 +121,7 @@ object Collections extends Configurable:
             val fld = cobj.extractOrElse("folder")(s"/_$key")
             val dir =
               base + prn + (if fld.startsWith("/") then fld else "/" + fld)
+
             logger.debug(s"${CYAN(key)} source: ${GREEN(dir)}")
 
             val sortBy =
@@ -153,7 +149,7 @@ object Collections extends Configurable:
 
         // wasn't mentioned in the configuration
         case _ =>
-          logger.debug(
+          logger.error(
             s"${RED(key)}: provide collection metadata in a table or a boolean"
           )
 
