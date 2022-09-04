@@ -59,9 +59,7 @@ class Collection(
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items =
     val files = getListOfFilepaths(directory)
-    logger.debug(
-      s"collecting $name from ${GREEN(directory)}: found ${files.length} files"
-    )
+    logger.debug(s"$name source ${GREEN(directory)}: ${files.length} files")
     def f(fn: String) =
       (getFileName(fn), constructor(directory, fn, globals, locals))
     files.filter(Converters.hasConverter).map(f).toMap
@@ -90,10 +88,10 @@ class Collection(
     layout match
       case None => ""
       case Some(p) =>
-        val itemsData = DArr(sortedItems.map(_.locals))
         val context = DObj(
           "site" -> globals,
-          "page" -> locals.add("title" -> DStr(name), "items" -> itemsData)
+          "page" -> locals.add("title" -> DStr(name)),
+          "items" -> DArr(sortedItems.map(_.locals))
         )
         p.render(context)
 

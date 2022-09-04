@@ -141,3 +141,9 @@ object StringProcessors:
     case _    => if (ch.isControl) "\\0" + Integer.toOctalString(ch.toInt) 
                  else              String.valueOf(ch)
   }
+
+  def pad(str: Any, num: Int): String = 
+    val s = str.toString
+    val l = s.length 
+    if l < num then s + (" " * (num - l))
+    else s
