@@ -15,10 +15,22 @@ import scala.collection.mutable.LinkedHashMap
   * @param globals
   *   Immutable DObj containing the global setting for this site
   */
-final class GroupType(style: GroupStyle, globals: DObj):
+final class GroupType(style: GroupStyle, globals: DObj) extends Page:
 
   /** PostsGroup objects of this style */
   protected val groups = LinkedHashMap[String, PostsGroup]()
+
+  lazy val identifier: String = ???
+
+  lazy val permalink: String = ???
+
+  protected lazy val outputExt: String = ???
+
+  protected lazy val render: String = ???
+
+  val visible: Boolean = ???
+
+  protected val layoutName: String = ???
 
   /** Defines how posts add themselves to this group type. Usually it's by a
     * combination of specifying group names in the front matter as a string or
@@ -39,6 +51,10 @@ final class GroupType(style: GroupStyle, globals: DObj):
         case None =>
           groups(cat) = style.groupConstructor(cat)
           groups(cat).addPost(post)
+
+  def process(dryRun: Boolean = false): Unit =
+    for (_, grp) <- groups do grp.write(dryRun)
+    write(dryRun)
 
   override def toString(): String =
     BLUE(style.getClass.getSimpleName) + ": " + groups

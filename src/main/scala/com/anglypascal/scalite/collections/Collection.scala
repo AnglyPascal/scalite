@@ -1,11 +1,13 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.DArr
-import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
@@ -47,14 +49,16 @@ class Collection(
     protected val layoutName: String
 )(
     private val directory: String,
-    private val globals: DObj,
+    private val globals: IObj,
     private val sortBy: String,
     val visible: Boolean,
     private val permalinkTemplate: String,
-    val locals: DObj
+    private val _locals: MObj
 ) extends Page:
 
   private val logger = Logger(s"${BLUE(name.capitalize)}")
+
+  private val scopedDefaults = ScopedDefaults.getDefaults(name, "collection")
 
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items =
@@ -63,6 +67,12 @@ class Collection(
     def f(fn: String) =
       (getFileName(fn), constructor(directory, fn, globals, locals))
     files.filter(Converters.hasConverter).map(f).toMap
+
+  lazy val locals =
+    _locals update scopedDefaults
+    _locals += "title" -> name
+
+    IObj(_locals)
 
   private var constructor = elemCons(name)
 
@@ -88,9 +98,9 @@ class Collection(
     layout match
       case None => ""
       case Some(p) =>
-        val context = DObj(
+        val context = IObj(
           "site" -> globals,
-          "page" -> locals.add("title" -> DStr(name)),
+          "page" -> locals,
           "items" -> DArr(sortedItems.map(_.locals))
         )
         p.render(context)

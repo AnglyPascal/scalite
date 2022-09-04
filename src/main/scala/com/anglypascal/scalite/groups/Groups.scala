@@ -51,11 +51,11 @@ object Groups extends Configurable:
     )
 
   /** Set of the available Groups for this site */
-  private val availableGroups: LinkedHashMap[String, GroupType] = LinkedHashMap()
+  private val groupTypes: LinkedHashMap[String, GroupType] = LinkedHashMap()
 
   /** Add a new Group to this site */
   private def addNewGroup(gType: String, group: GroupType) = 
-    availableGroups += gType -> group
+    groupTypes += gType -> group
 
   /** Apply the configuration from groups section */
   def apply(configs: MObj, globals: IObj): Unit =
@@ -70,12 +70,14 @@ object Groups extends Configurable:
         case _ => ()
 
   /** Create pages for each PostsGroup that wishes to be rendered */
-  def process(): Unit = ???
+  def process(dryRun: Boolean = false): Unit = 
+    for (_, grp) <- groupTypes do 
+      grp.process(dryRun)
 
   /** Called by a PostLike to add itself to all the available groups */
   def addToGroups(post: PostLike): Unit =
-    for (_, groupObj) <- availableGroups do groupObj.addPostToGroups(post)
+    for (_, groupObj) <- groupTypes do groupObj.addPostToGroups(post)
 
   override def toString(): String = 
-    availableGroups.map(_._2.toString).mkString("\n")
+    groupTypes.map(_._2.toString).mkString("\n")
 

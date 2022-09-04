@@ -103,26 +103,26 @@ object Collections extends Configurable:
       globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
-    for key <- collectionsConfig.keys do
-      collectionsConfig(key) match
+    for colName <- collectionsConfig.keys do
+      collectionsConfig(colName) match
         /** the collectionObj that comes in will be an Obj type */
         case cobj: MObj =>
           val style = cobj.extractOrElse("style")("item")
           val output =
-            if key == "posts" || key == "statics" then
+            if colName == "posts" || colName == "statics" then
               cobj.extractOrElse("output")(true)
             else cobj.extractOrElse("output")(false)
 
-          if !output then logger.debug(s"won't output ${RED(key)}")
+          if !output then logger.debug(s"won't output ${RED(colName)}")
           else
-            val lout = cobj.extractOrElse("layout")(key)
+            val layout = cobj.extractOrElse("layout")(colName)
 
             val prn = cobj.extractOrElse("directory")(colsDir)
-            val fld = cobj.extractOrElse("folder")(s"/_$key")
+            val fld = cobj.extractOrElse("folder")(s"/_$colName")
             val dir =
               base + prn + (if fld.startsWith("/") then fld else "/" + fld)
 
-            logger.debug(s"${CYAN(key)} source: ${GREEN(dir)}")
+            logger.debug(s"${CYAN(colName)} source: ${GREEN(dir)}")
 
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
@@ -131,18 +131,18 @@ object Collections extends Configurable:
               extractChain(cobj, globals)("permalink")(Defaults.permalink)
 
             logger.debug(
-              s"${CYAN(key)}: " +
+              s"${CYAN(colName)}: " +
                 s"sortBy: ${GREEN(sortBy)}, toc: ${GREEN(toc.toString)}, " +
                 s"permalink: ${GREEN(permalinkTemplate)}"
             )
 
-            val Col = Collection(styles(style), key, lout)(
+            val Col = Collection(styles(style), colName, layout)(
               dir,
               globals,
               sortBy,
               toc,
               permalinkTemplate,
-              IObj(cobj)
+              cobj
             )
             // add this collection to the collections map
             collections += Col
@@ -150,7 +150,7 @@ object Collections extends Configurable:
         // wasn't mentioned in the configuration
         case _ =>
           logger.error(
-            s"${RED(key)}: provide collection metadata in a table or a boolean"
+            s"${RED(colName)}: provide collection metadata in a table or a boolean"
           )
 
   /** Process all the collections */

@@ -27,7 +27,7 @@ class PostsSpecs extends AsyncFlatSpec:
     "",
     false,
     "",
-    IObj()
+    MObj()
   )
 
   it should "read all posts properly" in {
