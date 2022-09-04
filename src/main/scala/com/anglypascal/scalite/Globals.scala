@@ -2,8 +2,6 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.DataExtensions.extractOrElse
-import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import com.anglypascal.scalite.data.immutable.{DArr => IArr}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DArr => MArr}
@@ -16,12 +14,6 @@ import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.utils.yamlFileParser
-
-import com.rallyhealth.weejson.v1.Arr
-import com.rallyhealth.weejson.v1.Bool
-import com.rallyhealth.weejson.v1.Obj
-import com.rallyhealth.weejson.v1.Str
-import com.rallyhealth.weejson.v1.Value
 
 import com.typesafe.scalalogging.Logger
 

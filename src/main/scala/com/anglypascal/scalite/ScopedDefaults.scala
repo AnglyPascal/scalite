@@ -4,7 +4,6 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 import scala.collection.mutable.ArrayBuffer
-import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import scala.collection.mutable.LinkedHashMap
 import com.typesafe.scalalogging.Logger
 

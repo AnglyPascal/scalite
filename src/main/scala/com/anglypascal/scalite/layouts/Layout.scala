@@ -2,7 +2,6 @@ package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.utils.Colors.*
-import com.rallyhealth.weejson.v1.Str
 import com.typesafe.scalalogging.Logger
 
 import com.anglypascal.scalite.documents.Reader

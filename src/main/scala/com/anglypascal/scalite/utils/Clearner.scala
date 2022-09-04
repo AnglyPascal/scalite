@@ -3,8 +3,6 @@ package com.anglypascal.scalite.utils
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.immutable.Data
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
-import com.rallyhealth.weejson.v1.Arr
-import com.rallyhealth.weejson.v1.Obj
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
@@ -46,7 +44,6 @@ object Cleaner:
 
   /** Clean the destination site according to the global configuration */
   def apply(globals: DObj): Unit =
-    import com.anglypascal.scalite.data.DataExtensions.getOrElse
 
     var cleanSite = // FIXME default would not be the absolute path though
       globals.getOrElse("base")(".") +

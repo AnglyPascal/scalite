@@ -1,7 +1,6 @@
 package com.anglypascal.scalite
 
-import com.rallyhealth.weejson.v1.Obj
-import com.rallyhealth.weejson.v1.Arr
+import com.anglypascal.scalite.data.mutable.DObj
 import com.anglypascal.scalite.data.mutable.DArr
 
 object Defaults:
@@ -14,7 +13,7 @@ object Defaults:
   val showExceprts = true
   val lang = "en"
   val paginate = false
-  val author = Obj()
+  val author = DObj()
   val timeZone = "Europe/London"
   val separator = "<--->"
 
@@ -30,9 +29,9 @@ object Defaults:
     val assetsDir = "/_assets"
 
   object Reading:
-    val include = Arr(".htaccess")
-    val exclude = Arr("build.sbt")
-    val keepFiles = Arr(".git", ".svn") // give regex list
+    val include = DArr(".htaccess")
+    val exclude = DArr("build.sbt")
+    val keepFiles = DArr(".git", ".svn") // give regex list
     val markdownExt = "markdown,mkdown,mkdn,mkd,md"
     val textileExt = "textile"
     val encoding = "utf-8"

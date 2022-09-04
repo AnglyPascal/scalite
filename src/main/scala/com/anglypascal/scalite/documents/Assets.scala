@@ -8,7 +8,6 @@ import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.StringProcessors.slugify
-import com.rallyhealth.weejson.v1.Obj
 
 import java.io.File
 import java.nio.file.Files

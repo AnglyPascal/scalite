@@ -3,7 +3,6 @@ package com.anglypascal.scalite.utils
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
-import com.rallyhealth.weejson.v1.Obj
 import org.scalatest.flatspec.AnyFlatSpec
 
 class URLRenderSpecs extends AnyFlatSpec:
