@@ -118,3 +118,6 @@ object Converters extends Configurable:
     */
   def addConverterConstructor(conv: ConverterConstructor): Unit =
     converterConstructors += conv.constructorName -> conv
+
+  override def toString(): String = 
+    converters.map("  " + _._2.toString).mkString("\n")

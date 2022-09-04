@@ -2,6 +2,7 @@ package com.anglypascal.scalite.converters
 
 import scala.util.matching.Regex
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.utils.Colors.*
 
 /** Converter provides the support to convert files matching the extension regex
   * to html files. Can be extended to provide support for arbitrary language.
@@ -36,6 +37,9 @@ trait Converter extends Plugin:
     */
   def convert(str: String, filepath: String): String
   def convert(str: String): String = convert(str, "string input")
+
+  override def toString(): String = 
+    BLUE(fileType) + ": " + extensions.split(",").map(_.trim).mkString(", ")
 
 trait ConverterConstructor extends Plugin:
   val constructorName: String

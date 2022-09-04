@@ -66,6 +66,10 @@ object Layouts extends Configurable:
         some
 
   override def toString(): String =
-    layouts
-      .map((k, v) => v.lang + " " + BLUE(k) + YELLOW(": ") + v.toString)
+    layouts.toList
+      .groupBy(_._2.lang)
+      .map((k, m) =>
+        RED(k) + "\n" +
+          m.map((k, v) => "  " + v.toString).mkString("\n")
+      )
       .mkString("\n")

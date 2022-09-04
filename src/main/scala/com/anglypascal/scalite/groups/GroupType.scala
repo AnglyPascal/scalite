@@ -3,6 +3,7 @@ package com.anglypascal.scalite.groups
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.utils.Colors.*
 
 import scala.collection.mutable.LinkedHashMap
 
@@ -38,3 +39,8 @@ final class GroupType(style: GroupStyle, globals: DObj):
         case None =>
           groups(cat) = style.groupConstructor(cat)
           groups(cat).addPost(post)
+
+  override def toString(): String =
+    BLUE(style.getClass.getSimpleName) + ": " + groups
+      .map(_._2.toString)
+      .mkString(", ")

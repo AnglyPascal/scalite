@@ -1,0 +1,17 @@
+object: 
+  array: 
+    - "1"
+    - 2
+    - item
+    - [1, 2]
+    - subObj:
+        a: 1
+        b: 2
+  string: "hello, world!"
+  number: 1
+  boolean: true
+
+another:
+  nums: [1, 2, 3]
+  strs: ["1", "2"]
+  arr: ["1", 2, false]
