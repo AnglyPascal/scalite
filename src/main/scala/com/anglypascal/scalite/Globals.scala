@@ -19,6 +19,7 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
 import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.utils.DateParser
 
 /** Defines the global variables and default configurations. Everything can be
   * overwritten in "/\_config.yml" file
@@ -67,7 +68,8 @@ object Globals:
       "paginate" -> Defaults.paginate,
       "showExcerpts" -> Defaults.showExceprts,
       "dateFormat" -> Defaults.dateFormat,
-      "permalink" -> Defaults.permalink
+      "permalink" -> Defaults.permalink,
+      "timeZone" -> Defaults.timeZone
     )
 
   /** FIXME what do with this? */
@@ -108,7 +110,6 @@ object Globals:
         )
         MObj()
 
-
   private def getConfiguration(conf: Configurable): MObj =
     configs.extractOrElse(conf.sectionName)(MObj())
 
@@ -134,13 +135,12 @@ object Globals:
     val glbsObj = MObj()
     dirs("base") = DStr(base)
 
-    for key <- dirs.obj.keys if configs.obj.contains(key) do
-      dirs(key) = configs(key)
+    for key <- dirs.keys if configs.contains(key) do dirs(key) = configs(key)
 
     val interm = configurables.map(c => (c, getConfiguration(c)))
 
     Pages.setup(_base)
-    URL.setup(configs.extractOrElse("timeZone")(Defaults.timeZone))
+    DateParser.setTimeZone(configs.extractOrElse("timeZone")(Defaults.timeZone))
 
     processDefaults()
 
@@ -151,7 +151,7 @@ object Globals:
     glbsObj("assets") = processAssets
     // glbsObj("data") = DataFiles(_base + _dataD)
 
-    for (key, value) <- configs.obj do glbsObj(key) = value
+    for (key, value) <- configs do glbsObj(key) = value
 
     val _globals = IObj(glbsObj)
 

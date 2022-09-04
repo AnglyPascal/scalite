@@ -17,6 +17,6 @@ class CleanerSpecs extends AnyFlatSpec:
     "keepFiles" -> DArr(".*\\.jpg")
   )
 
-  it should "clean target diectory properly" in {
+  ignore should "clean target diectory properly" in {
     Cleaner(IObj(ob1))
   }

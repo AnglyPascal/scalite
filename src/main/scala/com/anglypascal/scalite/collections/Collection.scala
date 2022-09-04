@@ -54,7 +54,7 @@ class Collection(
     val locals: DObj
 ) extends Page:
 
-  private val logger = Logger(s"${RED(name.capitalize)}")
+  private val logger = Logger(s"${BLUE(name.capitalize)}")
 
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items =

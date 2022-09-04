@@ -12,6 +12,10 @@ import com.anglypascal.scalite.data.mutable.DObj
 object DateParser:
   import com.anglypascal.scalite.data.DataExtensions.*
 
+  private var timeZone = "Europe/London"
+  def setTimeZone(tz: String) = timeZone = tz
+  lazy val dateTimeZone = DateTimeZone.forID(timeZone)
+
   private val logger = Logger("Date parser")
 
   def dateParseObj(dateString: String, dateFormat: String): DObj =
@@ -27,15 +31,30 @@ object DateParser:
         dateString match
           case reg1(d) =>
             logger.trace("The date and time was parsed successfully.")
-            Some(DateTimeFormat.forPattern(fmt1).parseDateTime(d))
+            Some(
+              DateTimeFormat
+                .forPattern(fmt1)
+                .withZone(dateTimeZone)
+                .parseDateTime(d)
+            )
           case reg2(d) =>
             logger.trace(
               "The date was parsed successfully wthout the millisecond."
             )
-            Some(DateTimeFormat.forPattern(fmt2).parseDateTime(d))
+            Some(
+              DateTimeFormat
+                .forPattern(fmt2)
+                .withZone(dateTimeZone)
+                .parseDateTime(d)
+            )
           case reg3(d) =>
             logger.trace("The date was parsed successfully wthout the time.")
-            Some(DateTimeFormat.forPattern(fmt3).parseDateTime(d))
+            Some(
+              DateTimeFormat
+                .forPattern(fmt3)
+                .withZone(dateTimeZone)
+                .parseDateTime(d)
+            )
           case _ =>
             logger.warn(
               "Parsing failed because " +
@@ -98,7 +117,7 @@ object DateParser:
     try
       val path = Paths.get(filepath)
       val modTime = Files.getLastModifiedTime(path).toInstant.toEpochMilli()
-      val date = new DateTime(modTime)
+      val date = new DateTime(modTime).withZone(dateTimeZone)
 
       dateToString(date, dateFormat)
     catch

@@ -4,13 +4,18 @@ import com.anglypascal.scalite.utils.StringProcessors.pad
 import com.anglypascal.scalite.utils.Colors.*
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.LayoutBase
+import com.github.nscala_time.time.Imports.*
+import java.time.Instant
 
 class LoggingLayout extends LayoutBase[ILoggingEvent]:
   def doLayout(event: ILoggingEvent): String =
     val sbuf = new StringBuffer(128)
-    sbuf.append(
-      pad(event.getTimeStamp - event.getLoggerContextVO.getBirthTime, 4)
-    )
+
+    val s = DateTimeZone.forID("Asia/Dhaka")
+    val date = new DateTime(s).withZone(s)
+    val dateFormat = "HH:mm:ss.SSS"
+
+    sbuf.append(date.toString(dateFormat).take(12))
     sbuf.append(" ")
     sbuf.append(level(event))
     sbuf.append(" [")
@@ -39,4 +44,3 @@ class LoggingLayout extends LayoutBase[ILoggingEvent]:
       case "TRACE" => BLUE(l)
       case "FATAL" => ERROR(l)
       case _       => l
-

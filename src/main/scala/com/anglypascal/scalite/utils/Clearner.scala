@@ -11,6 +11,8 @@ import scala.util.matching.Regex
 /** Cleans the build directory before write files to it */
 object Cleaner:
 
+  private val logger = Logger("Cleaner")
+
   /** Clears the folder with absolute path cleanSite, keeping the files matching
     * the patterns in excludes
     *
@@ -39,8 +41,6 @@ object Cleaner:
     // delete the files and empty directories
     files.map(fn(_))
     dirs.map(fn(_, true))
-
-  private val logger = Logger("Cleaner")
 
   /** Clean the destination site according to the global configuration */
   def apply(globals: DObj): Unit =

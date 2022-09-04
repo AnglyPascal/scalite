@@ -15,7 +15,10 @@ class PostSpecs extends AnyFlatSpec:
 
   val pDir = "src/test/resources/site_template/_posts"
   val rPth = "/2016-05-19-super-short-article.md"
-  val glb1 = DObj()
+  val glb1 = DObj(
+    "title" -> "Test1",
+    "rootUrl" -> "hello.world.com"
+    )
   val glb2 = DObj(
     "dateFormat" -> DStr("dd MMM, yyyy")
   )
@@ -65,3 +68,4 @@ class PostSpecs extends AnyFlatSpec:
     Files.delete(p)
     assert(!Files.exists(p))
   }
+
