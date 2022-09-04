@@ -86,7 +86,7 @@ class MustacheLayouts(
     logger.debug("Found layouts: " + ls.map(_._2.toString).mkString(", "))
     ls.toMap
 
-  private def partials: Map[String, Mustache] =
+  private lazy val partials: Map[String, Mustache] =
     val ls = partialFiles
       .filter(matches(_))
       .map(f => {

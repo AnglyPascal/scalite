@@ -5,7 +5,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import com.anglypascal.scalite.layouts.Layouts
 import org.scalatest.DoNotDiscover
 
-@DoNotDiscover
+// @DoNotDiscover
 class GlobalsSpec extends AnyFlatSpec:
   val root = "src/test/resources/site_template"
   val globals = Globals(root)

@@ -21,14 +21,13 @@ trait Element extends Reader with Renderable:
   /** An Element also has some internal variables that are publicly visible */
   lazy val locals: DObj
 
-/** Compare two given Elements by the given key */
-def compareBy(
-    fst: Element,
-    snd: Element,
-    key: String
-): Int =
-  val s = cmpOpt(fst.locals.get(key), fst.locals.get(key))
-  if s != 0 then return s
-  val n = cmpOpt(fst.locals.get("title"), fst.locals.get("title"))
-  if n != 0 then return n
-  0
+/** Compare two given Elements by the given key
+  *
+  * TODO: Instead I think we can give a list of keys by which the elements
+  * should be sorted? Also I think we can add this as an Orderable to Element
+  * itself.
+  */
+def compareBy(fst: Element, snd: Element, key: String): Int =
+  val s = cmpOpt(fst.locals.get(key), snd.locals.get(key))
+  if s != 0 then s
+  else cmpOpt(fst.locals.get("title"), snd.locals.get("title"))

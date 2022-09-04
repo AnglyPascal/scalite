@@ -1,28 +1,35 @@
 package com.anglypascal.scalite
 
-import com.anglypascal.scalite.data.mutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 import scala.collection.mutable.ArrayBuffer
 import com.anglypascal.scalite.data.DataExtensions.getOrElse
 import scala.collection.mutable.LinkedHashMap
+import com.typesafe.scalalogging.Logger
 
-object ScopedDefaults:
-  private val scopes = LinkedHashMap[(String, String), DObj]()
+object ScopedDefaults extends Configurable:
 
-  def apply(base: String, defs: DArr): Unit =
-    for v <- defs do
+  private val scopes = LinkedHashMap[(String, String), MObj]()
+
+  val sectionName: String = "defaults"
+
+  def apply(conf: MObj, globals: IObj): Unit =
+    val base = globals.getOrElse("base")(Defaults.Directories.base)
+    for (k, v) <- conf do
       v match
-        case v: DObj if v.contains("values") && v.contains("scope") =>
-          val o = v.getOrElse("values")(DObj())
+        case v: MObj if v.contains("values") && v.contains("scope") =>
+          val o = v.getOrElse("values")(MObj())
 
-          val s = v.getOrElse("scope")(DObj())
+          val s = v.getOrElse("scope")(MObj())
           val p = s.getOrElse("path")("")
           val r = s.getOrElse("type")("")
 
-          scopes += (p, r) -> o
+          scopes += (base + p, r) -> o
         case _ => ()
 
   def getDefaults(file: String, rT: String) =
-    val obj = DObj()
-    if scopes.contains(file, rT) then obj update scopes(file, rT)
+    val obj = MObj()
+    for (k, v) <- scopes do
+      if file.contains(k._1) && (rT == k._2 || rT == "") then obj update v
     obj

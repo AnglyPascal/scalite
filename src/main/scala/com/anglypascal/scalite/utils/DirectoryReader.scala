@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.utils
 
 import com.typesafe.scalalogging.Logger
+import Colors.*
 
 import java.io.File
 import scala.io.Source
@@ -19,13 +20,10 @@ object DirectoryReader:
     * should be read?
     */
   def readFile(filepath: String): String =
-    val logger = Logger("File reader")
     try Source.fromFile(filepath).getLines.mkString("\n")
     catch
       case fnf: java.io.FileNotFoundException =>
-        logger.error(
-          s"File at ${Console.RED + filepath + Console.RESET} not found"
-        )
+        logger.error(s"${RED("\"" + filepath + "\"")} not found")
         ""
       case e =>
         logger.error(e.toString)
@@ -34,16 +32,12 @@ object DirectoryReader:
   /** Recover just the filename without the exteions from a file path */
   def getFileName(filepath: String): String =
     if filepath == "" || filepath.endsWith("/") || filepath.endsWith(".") then
-      logger.warn(
-        s"filename invalid for ${Console.RED + filepath + Console.RESET}"
-      )
+      logger.warn(s"invalid filename: ${RED("\"" + filepath + "\"")}")
       return ""
     filepath.split('/').last.split('.').headOption match
       case Some(s) => s
       case None =>
-        logger.warn(
-          s"filename invalid for ${Console.RED + filepath + Console.RESET}"
-        )
+        logger.warn(s"invalid filename: ${RED("\"" + filepath + "\"")}")
         ""
 
   /** Get the relative paths to the files inside this directory */
@@ -55,17 +49,13 @@ object DirectoryReader:
     */
   def getListOfFiles(dir: File, exr: Regex): Array[File] =
     if !dir.isDirectory then
-      logger.error(
-        s"Path ${Console.RED + dir.getAbsolutePath + Console.RESET}" +
-          " is not a directory"
-      )
+      logger.error(s"invalid directory: ${RED(s"\"${dir.getAbsolutePath}\"")}")
       return Array()
 
     val these = dir.listFiles()
     if these == null then
       logger.error(
-        "IO error while accessing " +
-          Console.RED + dir.getAbsolutePath + Console.RESET
+        "IO error while accessing " + RED(s"\"${dir.getAbsolutePath}\"")
       )
       return Array()
 
@@ -79,16 +69,11 @@ object DirectoryReader:
     (path, render) =>
       val dir = Paths.get(base + path)
       if !Files.exists(dir) then
-        logger.debug(
-          Console.GREEN + base + path + Console.RESET + " doesn't exist, creating it"
-        )
+        logger.debug(GREEN(base + path) + " doesn't exist, creating it")
         Files.createDirectories(dir.getParent)
         Files.createFile(dir)
         Files.write(dir, render.getBytes(StandardCharsets.UTF_8))
-      else
-        logger.debug(
-          Console.YELLOW + base + path + Console.RESET + " exists, ignoring"
-        )
+      else logger.debug(YELLOW(base + path) + " exists, ignoring")
 
   var writeTo: (String, String) => Unit = _
 

@@ -63,8 +63,8 @@ object Groups extends Configurable:
     for (key, value) <- groupsConfig do
       value match
         case value: MObj =>
-          val style = value.extractOrElse("style")("tags")
-          val gType = value.extractOrElse("gType")("tags")
+          val style = value.extractOrElse("style")("tag")
+          val gType = value.extractOrElse("gType")("tag")
           val grpStyle = styles(style)(gType, value, globals)
           addNewGroup(new GroupType(grpStyle, globals))
         case _ => ()

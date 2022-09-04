@@ -41,8 +41,8 @@ class PageLike(val rType: String)(
 ) extends Element
     with Page:
 
-  private val logger = Logger(s"PageLike $rType")
-  logger.debug("creating from " + GREEN(filepath))
+  private val logger = Logger(s"PageLike \"${CYAN(rType)}\"")
+  logger.debug("source: " + GREEN(filepath))
 
   /** Name of the parent layout. Can be set in either the frontMatter, in the
     * scoped defaults, in collection configurations, or the "page" layout, in

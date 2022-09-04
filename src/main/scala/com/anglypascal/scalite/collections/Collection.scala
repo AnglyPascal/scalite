@@ -9,6 +9,7 @@ import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
+import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
@@ -53,14 +54,13 @@ class Collection(
     val locals: DObj
 ) extends Page:
 
-  private val logger = Logger(s"${name.capitalize} collection")
+  private val logger = Logger(s"${RED(name.capitalize)}")
 
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items =
     val files = getListOfFilepaths(directory)
     logger.debug(
-      s"collecting $name from $directory" +
-        s"found ${files.length} files in $directory"
+      s"collecting $name from ${GREEN(directory)}: found ${files.length} files"
     )
     def f(fn: String) =
       (getFileName(fn), constructor(directory, fn, globals, locals))
@@ -71,6 +71,11 @@ class Collection(
   lazy val identifier = s"/collections/$name"
 
   lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
+
+  /** TODO why is there an @uncheckedVariance annotation? */
+  private def sortedItems =
+    val v = items.map(_._2).filter(_.visible).toArray.sortWith(compare)
+    v
 
   /** The toc will have default output extension html */
   protected lazy val outputExt = locals.getOrElse("outputExt")(".html")
@@ -85,8 +90,6 @@ class Collection(
     layout match
       case None => ""
       case Some(p) =>
-        val sortedItems =
-          items.map(_._2).filter(_.visible).toList.sortWith(compare)
         val itemsData = DArr(sortedItems.map(_.locals))
         val context = DObj(
           "site" -> globals,
@@ -106,4 +109,4 @@ class Collection(
   protected[collections] def cache(): Unit = ???
 
   override def toString(): String =
-    "\n" + items.map((_, v) => "  " + v.toString).mkString("\n")
+    "\n" + sortedItems.map("  " + _.toString).mkString("\n")

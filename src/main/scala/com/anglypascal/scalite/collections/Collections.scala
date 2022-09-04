@@ -11,6 +11,7 @@ import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
 import com.anglypascal.scalite.Configurable
 import com.anglypascal.scalite.data.DataExtensions.extractChain
+import com.anglypascal.scalite.data.mutable.DBool
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -70,12 +71,13 @@ object Collections extends Configurable:
       )
     )
 
+  private def defaultConf(bool: Boolean): MObj =
+    MObj("output" -> bool)
+
   def addStyle(elemCons: ElemConstructor): Unit =
     styles += elemCons.styleName -> elemCons
 
   private val collections = ListBuffer[Collection]()
-
-  def addCollection(col: Collection): Unit = collections += col
 
   private val logger = Logger(BLUE("Collections"))
 
@@ -92,11 +94,17 @@ object Collections extends Configurable:
       configs: MObj,
       globals: IObj
   ): Unit =
-    collectionsConfig.update(configs)
+    for (key, value) <- configs do
+      value match
+        case v: DBool =>
+          configs(key) = defaultConf(v.bool)
+        case _ => ()
 
+    collectionsConfig update configs
+
+    val base = globals.getOrElse("base")(Defaults.Directories.base)
     val colsDir =
-      globals.getOrElse("base")(Defaults.Directories.base) +
-        globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
+      globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
     for key <- collectionsConfig.keys do
@@ -116,8 +124,9 @@ object Collections extends Configurable:
 
             val prn = cobj.extractOrElse("directory")(colsDir)
             val fld = cobj.extractOrElse("folder")(s"/_$key")
-            val dir = prn + (if fld.startsWith("/") then fld else "/" + fld)
-            logger.debug(s"fetching files from $dir for collection $key")
+            val dir =
+              base + prn + (if fld.startsWith("/") then fld else "/" + fld)
+            logger.debug(s"${CYAN(key)} source: ${GREEN(dir)}")
 
             val sortBy =
               cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
@@ -126,9 +135,9 @@ object Collections extends Configurable:
               extractChain(cobj, globals)("permalink")(Defaults.permalink)
 
             logger.debug(
-              s"collection $key: ${GREEN(
-                  s"sortBy: $sortBy, toc: $toc, permalink: $permalinkTemplate"
-                )}"
+              s"${CYAN(key)}: " +
+                s"sortBy: ${GREEN(sortBy)}, toc: ${GREEN(toc.toString)}, " +
+                s"permalink: ${GREEN(permalinkTemplate)}"
             )
 
             val Col = Collection(styles(style), key, lout)(
@@ -140,11 +149,13 @@ object Collections extends Configurable:
               IObj(cobj)
             )
             // add this collection to the collections map
-            addCollection(Col)
+            collections += Col
 
         // wasn't mentioned in the configuration
         case _ =>
-          logger.debug(s"provide the metadata in a table or boolean for $key")
+          logger.debug(
+            s"${RED(key)}: provide collection metadata in a table or a boolean"
+          )
 
   /** Process all the collections */
   def process(): Unit =
@@ -152,5 +163,5 @@ object Collections extends Configurable:
 
   override def toString(): String =
     collections
-      .map(v => RED(v.name) + YELLOW(" -> ") + v.toString)
+      .map(v => MAGENTA(v.name) + YELLOW(": ") + v.toString)
       .mkString("\n")

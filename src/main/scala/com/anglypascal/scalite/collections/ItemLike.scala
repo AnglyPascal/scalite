@@ -17,7 +17,7 @@ class ItemLike(val rType: String)(
     collection: IObj
 ) extends Element:
 
-  private val logger = Logger(s"ItemLike $rType")
+  private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
   logger.debug("creating from " + GREEN(filepath))
 
   protected val layoutName = ""
@@ -32,12 +32,8 @@ class ItemLike(val rType: String)(
 
   // TODO: check with jekyll if it needs more default variables
   lazy val locals =
-    val used = List("title")
     val obj = MObj()
-    for
-      (s, v) <- frontMatter.obj
-      if !used.contains(s)
-    do obj(s) = v
+    for (s, v) <- frontMatter do obj(s) = v
     obj update MObj("title" -> title)
     IObj(obj)
 
@@ -50,6 +46,8 @@ class ItemLike(val rType: String)(
     // TODO what if frontmatter is deleted by the process
     if frontMatter.obj.isEmpty then mainMatter
     else Converters.convert(mainMatter, filepath)
+
+  override def toString(): String = CYAN(title)
 
 object ItemConstructor extends ElemConstructor:
 

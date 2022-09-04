@@ -48,8 +48,8 @@ class PostLike(val rType: String)(
 ) extends Element
     with Page:
 
-  private val logger = Logger(s"PostLike $rType")
-  logger.debug("creating from " + GREEN(filepath))
+  private val logger = Logger(s"PostLike \"${CYAN(rType)}\"")
+  logger.debug("source: " + GREEN(filepath))
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -168,10 +168,10 @@ class PostLike(val rType: String)(
     )
     layout match
       case Some(l) =>
-        logger.debug(s"$this has parent layout ${l.name}")
+        logger.debug(s"$this has layout ${l.name}")
         l.render(context, str)
       case None =>
-        logger.debug(s"$this has no parent layout")
+        logger.debug(s"$this has no specified layout")
         str
 
   /** For now, just gets the first part of the main matter, separated by the
@@ -204,7 +204,7 @@ class PostLike(val rType: String)(
   Groups.addToGroups(this)
 
   override def toString(): String =
-    CYAN(title) + "(" + GREEN(date) + ")" + "[" + BLUE(permalink) + "]"
+    CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"
 
 /** Constructor for PostLike objects */
 object PostConstructor extends ElemConstructor:

@@ -87,6 +87,7 @@ object Globals:
   private val configurables =
     List[Configurable](
       PluginManager,
+      ScopedDefaults,
       Converters,
       Layouts,
       Groups,
@@ -115,11 +116,6 @@ object Globals:
         )
         MObj()
 
-  private def processScopedDefaults() =
-    logger.trace("setting up scoped defaults")
-    configs.obj.remove("defaults").getOrElse(null) match
-      case v: MArr => ScopedDefaults(_base, v)
-      case _       => ()
 
   private def getConfiguration(conf: Configurable): MObj =
     configs.extractOrElse(conf.sectionName)(MObj())

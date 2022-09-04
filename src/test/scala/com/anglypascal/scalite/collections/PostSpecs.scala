@@ -21,7 +21,7 @@ class PostSpecs extends AnyFlatSpec:
   )
   val clcs = DObj()
 
-  ignore should "read valid file properly" in {
+  it should "read valid file properly" in {
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
     println("haha")
     assert(
@@ -39,7 +39,7 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  ignore should "read files with groups properly" in {
+  it should "read files with groups properly" in {
     val rPth1 = "/2022-08-29-categories-test.md"
     val pst = new PostLike("posts")(pDir, rPth1, glb1, clcs)
     assert(
@@ -50,16 +50,16 @@ class PostSpecs extends AnyFlatSpec:
     )
   }
 
-  ignore should "handle rendering and file creation properly" in {
+  it should "handle rendering and file creation properly" in {
     DirectoryReader("src/test/resources/site_template/_site")
     Layouts(
       com.anglypascal.scalite.data.mutable.DObj(),
-      DObj()
+      DObj("base" -> "src/test/resources/site_template")
     )
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
     pst.write(false)
     val p = Paths.get(
-      "src/test/resources/site_template/_site" + 
+      "src/test/resources/site_template/_site" +
         "/posts/2016/05/19/super-short-article.html"
     )
     assert(Files.exists(p))

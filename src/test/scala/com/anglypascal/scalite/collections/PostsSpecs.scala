@@ -4,9 +4,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.layouts.Layouts
-import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.groups.Groups
 

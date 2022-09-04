@@ -7,6 +7,7 @@ import com.anglypascal.scalite.Configurable
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.utils.Colors.*
 
 /** Companion object giving api to add new members to the set of converters
   * available to Post to render it's content
@@ -81,9 +82,8 @@ object Converters extends Configurable:
         false
       case Some(conv) =>
         logger.debug(
-          s"Converter ${Console.GREEN + conv.getClass.getName
-              .stripSuffix("$") + Console.RESET} found for " +
-            s"${Console.GREEN + ext + Console.RESET}"
+          s"${GREEN(conv.getClass.getSimpleName.stripSuffix("$"))} found for " +
+            s"${GREEN(ext)}"
         )
         true
 

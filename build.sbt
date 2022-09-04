@@ -18,14 +18,14 @@ lazy val root = project
       "org.planet42" %% "laika-core" % "0.18.2", 
       "com.github.nscala-time" %% "nscala-time" % "2.30.0",
       "io.lemonlabs" %% "scala-uri" % "4.0.2",
-      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4"
+      "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
+      "de.larsgrefer.sass" % "sass-embedded-host" % "1.6.1"
     ),
     libraryDependencies ++= Seq(
-      "ch.qos.logback" % "logback-classic" % "1.2.10",
+      "ch.qos.logback" % "logback-classic" % "1.4.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
     ),
     libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.1.2.1",
-    libraryDependencies += "de.larsgrefer.sass" % "sass-embedded-host" % "1.6.1"
   )
 
 scalacOptions ++= Seq(
