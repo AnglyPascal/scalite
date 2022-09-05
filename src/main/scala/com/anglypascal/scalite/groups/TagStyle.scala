@@ -8,25 +8,31 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.StringProcessors.*
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.documents.Page
 
-class TagStyle(val gType: String, configs: MObj, globals: IObj)
-    extends GroupStyle:
+class TagStyle(groupType: String, configs: MObj, globals: IObj)
+    extends PostSuperGroup(groupType, configs, globals):
 
-  def groupConstructor(name: String): PostsGroup =
-    new PostsGroup(gType, configs, globals)(name)
+  /** */
+  lazy val locals: IObj =
+    IObj(
+      "type" -> groupType,
+      "url" -> permalink
+    )
+
+  def createGroup(name: String): Group[PostLike] =
+    new PostGroup(groupType, name)(configs, globals)
 
   def getGroupNames(post: PostLike): Iterable[String] =
-    // check the entry in the front matter
-    val unslugged = post.getGroupsList(gType) match
+    val unslugged = post.getGroupsList(groupType) match
       case s: DStr => s.str.trim.split(",").flatMap(_.trim.split(" "))
       case a: DArr => a.arr.flatMap(_.getStr).flatMap(_.trim.split(" ")).toArray
       case _       => Array[String]()
-    // slugify the category names
     unslugged
 
-object TagStyle extends GroupConstructor:
+object TagStyle extends GroupConstructor[PostLike]:
 
   val styleName = "tag"
 
-  def apply(gType: String, configs: MObj, globals: IObj): GroupStyle =
-    new TagStyle(gType, configs, globals)
+  def apply(groupType: String, configs: MObj, globals: IObj) =
+    new TagStyle(groupType, configs, globals)

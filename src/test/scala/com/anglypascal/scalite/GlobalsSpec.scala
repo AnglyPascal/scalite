@@ -5,9 +5,9 @@ import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.Colors.*
 import org.scalatest.DoNotDiscover
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.groups.Groups
 import org.scalatest.flatspec.AsyncFlatSpec
 import scala.concurrent.Future
+import com.anglypascal.scalite.groups.PostGroups
 
 // @DoNotDiscover
 class GlobalsSpec extends AsyncFlatSpec:
@@ -41,7 +41,7 @@ class GlobalsSpec extends AsyncFlatSpec:
   "Groups" should "process the groups properly" in {
     val future = Future {
       println(ERROR("\nGROUPS"))
-      println(Groups)
+      println(PostGroups)
     }
 
     future.map(unit => assert(true))

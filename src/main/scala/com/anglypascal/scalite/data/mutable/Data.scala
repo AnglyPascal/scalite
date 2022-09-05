@@ -228,6 +228,7 @@ final class DObj(val obj: Map[String, Data])
         case v: DArr  => nObj += k -> v.copy
         case v: DObj  => nObj += k -> v.copy
         case _        => nObj += k -> DNull
+    nObj
 
   def compare(that: Data): Int = 0
 
@@ -301,12 +302,13 @@ final class DArr(val arr: ArrayBuffer[Data]) extends Data with Buffer[Data]:
     val nArr = DArr()
     for v <- this do
       v match
-        case v: DStr  => nObj += DStr(v.str)
-        case v: DNum  => nObj += DNum(v.num)
-        case v: DBool => nObj += DBool(v.bool)
-        case v: DArr  => nObj += v.copy
-        case v: DObj  => nObj += v.copy
-        case _        => nObj += k -> DNull
+        case v: DStr  => nArr += DStr(v.str)
+        case v: DNum  => nArr += DNum(v.num)
+        case v: DBool => nArr += DBool(v.bool)
+        case v: DArr  => nArr += v.copy
+        case v: DObj  => nArr += v.copy
+        case _        => nArr += DNull
+    nArr
 
   override def toString(): String =
     Console.GREEN + "[ " + Console.RESET + arr.mkString(", ") +

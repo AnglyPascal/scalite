@@ -9,7 +9,7 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.DataFiles
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.Groups
+import com.anglypascal.scalite.groups.PostGroups
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.utils.DirectoryReader
@@ -84,7 +84,7 @@ object Globals:
       ScopedDefaults,
       Converters,
       Layouts,
-      Groups,
+      PostGroups,
       Collections
     )
 

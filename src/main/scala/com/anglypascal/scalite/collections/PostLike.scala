@@ -12,8 +12,8 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.mutable.{DStr => MStr}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.Groups
-import com.anglypascal.scalite.groups.PostsGroup
+import com.anglypascal.scalite.groups.PostGroups
+import com.anglypascal.scalite.groups.PostGroup
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
@@ -98,7 +98,7 @@ class PostLike(val rType: String)(
       "slugTitleCased" -> slugify(title, "default", true)
     )
     val grpObj = MObj()
-    for (k, s) <- groups do grpObj(k) = MStr(s.map(_.name).mkString("/"))
+    for (k, s) <- groups do grpObj(k) = MStr(s.map(_.groupName).mkString("/"))
 
     obj update newObj
     obj update grpObj
@@ -191,21 +191,21 @@ class PostLike(val rType: String)(
     Converters.convert(head, filepath)
 
   /** The map holding sets of collection-types */
-  private val groups = LinkedHashMap[String, ListBuffer[PostsGroup]]()
+  private val groups = LinkedHashMap[String, ListBuffer[PostGroup]]()
 
   /** Return the global settings for the collection-type grpType */
   def getGroupsList(grpType: String): Data =
     frontMatter.extractOrElse(grpType)(DNull)
 
   /** Adds the collection in the set of this collection-type */
-  def addGroup[A <: PostsGroup](grpType: String)(a: A): Unit =
+  def addGroup[A <: PostGroup](grpType: String)(a: A): Unit =
     if groups.contains(grpType) then groups(grpType) += a
     else groups += grpType -> ListBuffer(a)
 
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
-  Groups.addToGroups(this)
+  PostGroups.addToGroups(this)
 
   override def toString(): String =
     CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"

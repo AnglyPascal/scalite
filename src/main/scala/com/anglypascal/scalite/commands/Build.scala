@@ -3,7 +3,7 @@ package com.anglypascal.scalite.commands
 import com.anglypascal.scalite.Globals
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.utils.Cleaner
-import com.anglypascal.scalite.groups.Groups
+import com.anglypascal.scalite.groups.PostGroups
 
 object Build extends Command:
 
@@ -16,7 +16,7 @@ object Build extends Command:
     // Clean the build site
     Cleaner(globals)
     Collections.process()
-    Groups.process()
+    PostGroups.process()
 
     /** Where should posts go?
       *

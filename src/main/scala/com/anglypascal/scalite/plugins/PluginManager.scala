@@ -1,15 +1,15 @@
 package com.anglypascal.scalite.plugins
 
 import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.collections.ElemConstructor
-// import com.anglypascal.scalite.converters.Converter
 import com.anglypascal.scalite.converters.ConverterConstructor
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.groups.GroupConstructor
-import com.anglypascal.scalite.groups.Groups
+import com.anglypascal.scalite.groups.PostGroups
 import com.anglypascal.scalite.layouts.LayoutGroupConstructor
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
@@ -105,8 +105,8 @@ object PluginManager extends Configurable:
     )
 
   private def loadGroupConstructors(names: Map[String, MObj]) =
-    findObjects[GroupConstructor](names).map(C =>
-      Groups.addNewGroupStyle(C.asInstanceOf[GroupConstructor])
+    findObjects[GroupConstructor[PostLike]](names).map(C =>
+      PostGroups.addNewGroupStyle(C.asInstanceOf[GroupConstructor[PostLike]])
     )
 
   private def loadLayouts(names: Map[String, MObj]) =

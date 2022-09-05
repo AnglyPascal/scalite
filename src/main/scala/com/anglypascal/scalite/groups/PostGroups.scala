@@ -13,21 +13,14 @@ import com.anglypascal.scalite.Configurable
   * Is a Configurable, so the configuration can be added under the "groups"
   * section of \_config.yml
   */
-object Groups extends Configurable:
+object PostGroups extends Groups[PostLike]:
 
   val sectionName: String = "groups"
 
-  /** The available style defintiions */
-  private val styles = LinkedHashMap[String, GroupConstructor](
-    "tag" -> TagStyle,
-    "category" -> CatStyle
-  )
+  addNewGroupStyle(TagStyle)
+  addNewGroupStyle(CatStyle)
 
-  /** Add a new GroupConstructor for a new GroupStyle to this site */
-  def addNewGroupStyle(style: GroupConstructor) =
-    styles += style.styleName -> style
-
-  private lazy val groupsConfig: MObj =
+  protected lazy val groupsConfig: MObj =
     import Defaults.Group
     import Defaults.Tags
     import Defaults.Categories
@@ -52,32 +45,9 @@ object Groups extends Configurable:
       )
     )
 
-  /** Set of the available Groups for this site */
-  private val groupTypes: LinkedHashMap[String, SuperGroup] = LinkedHashMap()
-
-  /** Add a new Group to this site */
-  private def addNewGroup(gType: String, group: SuperGroup) =
-    groupTypes += gType -> group
-
-  /** Apply the configuration from groups section */
-  def apply(configs: MObj, globals: IObj): Unit =
-    groupsConfig.update(configs)
-    for (key, value) <- groupsConfig do
-      value match
-        case value: MObj =>
-          val style = value.extractOrElse("style")(Defaults.Group.defaultStyle)
-          val gType = value.extractOrElse("gType")(Defaults.Group.defaultGType)
-          val cons = styles(style)
-          addNewGroup(gType, SuperGroup(cons)(gType, value, globals))
-        case _ => ()
-
-  /** Create pages for each PostsGroup that wishes to be rendered */
-  def process(dryRun: Boolean = false): Unit =
-    for (_, grp) <- groupTypes do grp.process(dryRun)
-
   /** Called by a PostLike to add itself to all the available groups */
   def addToGroups(post: PostLike): Unit =
-    for (_, groupObj) <- groupTypes do groupObj.addPostToGroups(post)
+    for (_, groupObj) <- groupTypes do groupObj.add(post)
 
   override def toString(): String =
     groupTypes.map(_._2.toString).mkString("\n")

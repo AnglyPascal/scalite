@@ -17,39 +17,18 @@ import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.cmpOpt
 import com.typesafe.scalalogging.Logger
 
-import scala.collection.mutable.ArrayBuffer
-
-/** Each PostsGroup object represents a generic group containing posts. Each
-  * PostsGroup has a gType and a name, for example, a tag group might have gType
-  * "tags" and a name "coding". A PostsGroup is customizable through the configs
-  * Obj passed at the construction.
-  *
-  * @param gType
-  *   the type of this PostsGroup, like "tags" or "categories"
-  * @param configs
-  *   a weejson obj containing the configuration options for this PostsGroup
-  * @param name
-  *   the name of this PostsGroup
-  * @param globals
-  *   a weejson obj containing the global options for this site
-  */
-class PostsGroup(
-    val gType: String,
+class PostGroup(val groupType: String, val groupName: String)(
     private val configs: MObj,
     private val globals: IObj
-)(val name: String)
-    extends Page:
+) extends Group[PostLike]
+    with Page:
 
-  private val logger = Logger(toString)
+  private val logger = Logger("PostGroup")
 
   /** Each individual group object can be finetuned by adding a section in the
     * Defaults with scope = group name and type = group type.
     */
-  private val scopedDefaults = ScopedDefaults.getDefaults(name, gType)
-
-  /** Set of posts that belong to this collection. */
-  protected val _posts: ArrayBuffer[PostLike] = ArrayBuffer()
-  def posts = _posts.sortWith(compare)
+  private val scopedDefaults = ScopedDefaults.getDefaults(groupName, groupType)
 
   lazy val identifier = permalink
 
@@ -68,23 +47,23 @@ class PostsGroup(
         getVal("relativeLink")(Defaults.PostsGroup.relativeLink)
 
     val urlObj = MObj(
-      "name" -> name,
-      "gType" -> gType
+      "name" -> groupName,
+      "type" -> groupType
     )
     urlObj.update(configs)
     purifyUrl(URL(permalinkTemplate)(IObj(urlObj)))
 
   /** Add a new post to this collection */
   def addPost(post: PostLike) =
-    _posts += post
-    post.addGroup(gType)(this)
+    add(post)
+    post.addGroup(groupType)(this)
     logger.trace(s"adding $post")
 
   /** Name of the layout to be used for rendering the page for this PostsGroup.
     * If not specified in the global settings, this defaults back to "gType"
     */
   protected val layoutName =
-    getVal("layout")(globals.getOrElse(gType + "Layout")(gType))
+    getVal("layout")(globals.getOrElse(groupType + "Layout")(groupType))
 
   /** Convert the given post to a weeJson obj that will be used to render this
     * post's representative in the page of this PostsGroup. Is intended for
@@ -103,7 +82,7 @@ class PostsGroup(
   /** The local varibales that will be used to render the PostsGroup page. */
   lazy val locals: IObj =
     val obj = MObj(
-      "title" -> name,
+      "title" -> groupName,
       "url" -> permalink
     )
     obj.update(configs)
@@ -120,17 +99,19 @@ class PostsGroup(
     val context = IObj(
       "site" -> globals,
       "page" -> locals,
-      "items" -> DArr(posts.map(postToItem).toList)
+      "items" -> DArr(items.map(postToItem).toList)
     )
     layout match
       case Some(l) =>
         logger.trace(s"writing $this to $permalink")
         l.render(context)
       case None =>
-        logger.warn(s"no layout found for $gType ${ERROR(name)}")
+        logger.warn(s"no layout found for $groupType ${ERROR(groupName)}")
         ""
 
   private def compare(fst: PostLike, snd: PostLike): Boolean =
     compareBy(fst, snd, sortBy) < 0
 
-  override def toString(): String = s"$gType(${GREEN(name)})"
+  override def toString(): String = s"$groupType(${GREEN(groupName)})"
+
+  def process(dryRun: Boolean = false): Unit = write(dryRun)
