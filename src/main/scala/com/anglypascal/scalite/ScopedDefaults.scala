@@ -11,10 +11,12 @@ object ScopedDefaults extends Configurable:
 
   private val scopes = LinkedHashMap[(String, String), MObj]()
 
+  private var base: String = _
+
   val sectionName: String = "defaults"
 
   def apply(conf: MObj, globals: IObj): Unit =
-    val base = globals.getOrElse("base")(Defaults.Directories.base)
+    base = globals.getOrElse("base")(Defaults.Directories.base)
     for (k, v) <- conf do
       v match
         case v: MObj if v.contains("values") && v.contains("scope") =>
@@ -24,11 +26,13 @@ object ScopedDefaults extends Configurable:
           val p = s.getOrElse("path")("")
           val r = s.getOrElse("type")("")
 
-          scopes += (base + p, r) -> o
+          scopes += (p, r) -> o
         case _ => ()
 
   def getDefaults(file: String, rT: String) =
     val obj = MObj()
     for (k, v) <- scopes do
-      if file.contains(k._1) && (rT == k._2 || rT == "") then obj update v
+      if (file.contains(k._1) || file.contains(base + k._1)) &&
+        (rT == k._2 || rT == "")
+      then obj update v
     obj

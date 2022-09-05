@@ -9,14 +9,15 @@ import com.anglypascal.scalite.utils.StringProcessors.*
 
 import scala.collection.mutable.LinkedHashMap
 
-class TagStyle(ctype: String, configs: MObj, globals: IObj) extends GroupStyle:
+class TagStyle(val gType: String, configs: MObj, globals: IObj)
+    extends GroupStyle:
 
   def groupConstructor(name: String): PostsGroup =
-    new PostsGroup(ctype, configs, globals)(name)
+    new PostsGroup(gType, configs, globals)(name)
 
   def getGroupNames(post: PostLike): Iterable[String] =
     // check the entry in the front matter
-    val unslugged = post.getGroupsList(ctype) match
+    val unslugged = post.getGroupsList(gType) match
       case s: DStr => s.str.trim.split(",").flatMap(_.trim.split(" "))
       case a: DArr => a.arr.flatMap(_.getStr).flatMap(_.trim.split(" ")).toArray
       case _       => Array[String]()

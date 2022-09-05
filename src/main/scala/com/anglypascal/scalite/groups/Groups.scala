@@ -36,7 +36,8 @@ object Groups extends Configurable:
         "title" -> Tags.title,
         "gType" -> Tags.gType,
         "sortBy" -> Tags.sortBy,
-        "permalink" -> Tags.permalink,
+        "baseLink" -> Tags.baseLink,
+        "relativeLink" -> Tags.relativeLink,
         "separator" -> Tags.separator,
         "style" -> Tags.style
       ),
@@ -44,17 +45,18 @@ object Groups extends Configurable:
         "title" -> Categories.title,
         "gType" -> Categories.gType,
         "sortBy" -> Categories.sortBy,
-        "permalink" -> Categories.permalink,
+        "baseLink" -> Categories.baseLink,
+        "relativeLink" -> Categories.relativeLink,
         "separator" -> Categories.separator,
         "style" -> Categories.style
       )
     )
 
   /** Set of the available Groups for this site */
-  private val groupTypes: LinkedHashMap[String, GroupType] = LinkedHashMap()
+  private val groupTypes: LinkedHashMap[String, SuperGroup] = LinkedHashMap()
 
   /** Add a new Group to this site */
-  private def addNewGroup(gType: String, group: GroupType) = 
+  private def addNewGroup(gType: String, group: SuperGroup) =
     groupTypes += gType -> group
 
   /** Apply the configuration from groups section */
@@ -63,21 +65,19 @@ object Groups extends Configurable:
     for (key, value) <- groupsConfig do
       value match
         case value: MObj =>
-          val style = value.extractOrElse("style")("tag")
-          val gType = value.extractOrElse("gType")("tags")
-          val grpStyle = styles(style)(gType, value, globals)
-          addNewGroup(gType, new GroupType(grpStyle, globals))
+          val style = value.extractOrElse("style")(Defaults.Group.defaultStyle)
+          val gType = value.extractOrElse("gType")(Defaults.Group.defaultGType)
+          val cons = styles(style)
+          addNewGroup(gType, SuperGroup(cons)(gType, value, globals))
         case _ => ()
 
   /** Create pages for each PostsGroup that wishes to be rendered */
-  def process(dryRun: Boolean = false): Unit = 
-    for (_, grp) <- groupTypes do 
-      grp.process(dryRun)
+  def process(dryRun: Boolean = false): Unit =
+    for (_, grp) <- groupTypes do grp.process(dryRun)
 
   /** Called by a PostLike to add itself to all the available groups */
   def addToGroups(post: PostLike): Unit =
     for (_, groupObj) <- groupTypes do groupObj.addPostToGroups(post)
 
-  override def toString(): String = 
+  override def toString(): String =
     groupTypes.map(_._2.toString).mkString("\n")
-

@@ -1,9 +1,15 @@
 package com.anglypascal.scalite.groups
 
 import com.anglypascal.scalite.collections.PostLike
-import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.utils.Colors.*
+import com.anglypascal.scalite.data.DataExtensions.getChain
+
+import com.anglypascal.scalite.ScopedDefaults
+import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.URL
 
 import scala.collection.mutable.LinkedHashMap
 
@@ -15,16 +21,35 @@ import scala.collection.mutable.LinkedHashMap
   * @param globals
   *   Immutable DObj containing the global setting for this site
   */
-final class GroupType(style: GroupStyle, globals: DObj) extends Page:
+final class SuperGroup1(private val cons: GroupConstructor)(
+    val gType: String,
+    private val configs: MObj,
+    private val globals: IObj
+) extends Page:
+
+  private val scopedDefaults = ScopedDefaults.getDefaults("", gType)
+
+  private val _configs: MObj = configs.copy update scopedDefaults
+
+  private lazy val style = cons(gType, configs, globals)
+
+  lazy val permalink =
+    val permalinkTemplate =
+      _configs.getOrElse("baseLink")(Defaults.Tags.baseLink)
+
+    val urlObj = MObj(
+      "gType" -> gType
+    )
+    urlObj.update(_configs)
+    purifyUrl(URL(permalinkTemplate)(IObj(urlObj)))
 
   /** PostsGroup objects of this style */
   protected val groups = LinkedHashMap[String, PostsGroup]()
 
-  lazy val identifier: String = ???
+  lazy val identifier: String = permalink
 
-  lazy val permalink: String = ???
-
-  protected lazy val outputExt: String = ???
+  protected lazy val outputExt: String = 
+    _config.getOrElse("outputExt")(Defaults.PostsGroup.outputExt)
 
   protected lazy val render: String = ???
 
@@ -54,7 +79,7 @@ final class GroupType(style: GroupStyle, globals: DObj) extends Page:
 
   def process(dryRun: Boolean = false): Unit =
     for (_, grp) <- groups do grp.write(dryRun)
-    write(dryRun)
+    // write(dryRun)
 
   override def toString(): String =
     BLUE(style.getClass.getSimpleName) + ": " + groups

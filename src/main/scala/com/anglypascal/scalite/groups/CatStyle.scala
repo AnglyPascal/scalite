@@ -6,10 +6,14 @@ import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.StringProcessors.*
+import com.anglypascal.scalite.data.DataExtensions.getChain
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.ScopedDefaults
+import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.URL
 
-class CatStyle(gType: String, configs: MObj, globals: IObj) extends GroupStyle:
+class CatStyle(val gType: String, configs: MObj, globals: IObj) extends GroupStyle:
 
   /** */
   def groupConstructor(name: String): PostsGroup =

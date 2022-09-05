@@ -94,17 +94,21 @@ object Defaults:
 
   object Group:
     val permalink = "/{{ctype}}/{{name}}"
+    val defaultStyle = "tag"
+    val defaultGType = "tags"
 
   object PostsGroup:
     val outputExt = ".html"
-    val permalink = "/{{ctype}}/{{name}}"
+    val baseLink = "/{{gType}}"
+    val relativeLink = "/{{name}}"
     val sortBy = "title"
 
   object Tags:
     val title = "Tags"
     val gType = "tags"
     val sortBy = "title"
-    val permalink = "/{{ctype}}/{{name}}"
+    val baseLink = "/{{gType}}"
+    val relativeLink = "/{{name}}"
     val separator = List(" ", ",")
     val style = "tag"
 
@@ -112,7 +116,8 @@ object Defaults:
     val title = "Categories"
     val gType = "categories"
     val sortBy = "title"
-    val permalink = "/{{ctype}}/{{name}}"
+    val baseLink = "/{{gType}}"
+    val relativeLink = "/{{name}}"
     val separator = List(",")
     val style = "category"
 

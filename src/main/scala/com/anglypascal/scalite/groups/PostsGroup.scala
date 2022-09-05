@@ -64,7 +64,8 @@ class PostsGroup(
 
   lazy val permalink: String =
     val permalinkTemplate: String =
-      getVal("permalink")(Defaults.PostsGroup.permalink)
+      getVal("baseLink")(Defaults.PostsGroup.baseLink) +
+        getVal("relativeLink")(Defaults.PostsGroup.relativeLink)
 
     val urlObj = MObj(
       "name" -> name,

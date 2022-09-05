@@ -212,11 +212,22 @@ final class DObj(val obj: Map[String, Data])
               case _        => ()
           case o: DObj =>
             that(key) match
-              case ob: DObj => 
+              case ob: DObj =>
                 o.update(ob)
-              case _        => ()
+              case _ => ()
           case _ => ()
     this
+
+  def copy: DObj =
+    val nObj = DObj()
+    for (k, v) <- this do
+      v match
+        case v: DStr  => nObj += k -> DStr(v.str)
+        case v: DNum  => nObj += k -> DNum(v.num)
+        case v: DBool => nObj += k -> DBool(v.bool)
+        case v: DArr  => nObj += k -> v.copy
+        case v: DObj  => nObj += k -> v.copy
+        case _        => nObj += k -> DNull
 
   def compare(that: Data): Int = 0
 
@@ -285,6 +296,17 @@ final class DArr(val arr: ArrayBuffer[Data]) extends Data with Buffer[Data]:
   def update(idx: Int, elem: Data): Unit = arr.update(idx, elem)
 
   def compare(that: Data): Int = 0
+
+  def copy: DArr =
+    val nArr = DArr()
+    for v <- this do
+      v match
+        case v: DStr  => nObj += DStr(v.str)
+        case v: DNum  => nObj += DNum(v.num)
+        case v: DBool => nObj += DBool(v.bool)
+        case v: DArr  => nObj += v.copy
+        case v: DObj  => nObj += v.copy
+        case _        => nObj += k -> DNull
 
   override def toString(): String =
     Console.GREEN + "[ " + Console.RESET + arr.mkString(", ") +

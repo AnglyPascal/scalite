@@ -8,6 +8,13 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.utils.Colors.*
+import com.anglypascal.scalite.layouts.helpers.*
+
+class ScaliteMustache(temp: String)
+    extends Mustache(temp)
+    with SlugHelper
+    with DateHelper
+    with URLHelper
 
 /** Defines a mustache template. Can have one parent layout. Takes the partials
   * from the "/\_includes" folder, the contents from any document with this
@@ -34,7 +41,7 @@ class MustacheLayout(
   private val logger = Logger("Mustache Layout")
 
   /** The mustache object for this layout */
-  lazy val mustache = new Mustache(mainMatter)
+  lazy val mustache = ScaliteMustache(mainMatter)
 
   /** Evaluate the template by rendering it with it's context and partials
     *
