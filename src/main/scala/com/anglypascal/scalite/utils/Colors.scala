@@ -1,5 +1,7 @@
 package com.anglypascal.scalite.utils
 
+/** Provides convenient methods to give colours to strings
+ */
 object Colors:
 
   def GREEN(str: String) = Console.GREEN + str + Console.RESET

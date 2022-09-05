@@ -6,6 +6,7 @@ import com.anglypascal.scalite.layouts.DataAST
 
 object URL:
 
+  /** Initialize AST support for Data for Mustache */
   DataAST.init()
 
   /** Given the template str and the placeholders, render the template to create

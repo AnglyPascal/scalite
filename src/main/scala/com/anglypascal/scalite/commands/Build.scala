@@ -4,6 +4,7 @@ import com.anglypascal.scalite.initialize
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.utils.Cleaner
 import com.anglypascal.scalite.groups.Clusters
+import com.anglypascal.scalite.documents.Assets
 
 object Build extends Command:
 
@@ -11,19 +12,14 @@ object Build extends Command:
     run(System.getProperty("user.dir"))
 
   def run(sitePath: String): Unit =
-    // Get the global configs
-    val globals = initialize(sitePath)
-    // Clean the build site
-    Cleaner(globals)
-    Collections.process()
-    Clusters.process(false)
 
-    /** Where should posts go?
-      *
-      * this is determined by their url structure. The same hierarchy works
-      */
+    val globals = initialize(sitePath)
+    Cleaner(globals)
+
+    Collections.process()
+    Clusters.process()
+    Assets.copy()
 
     /** things:
       *   - compile _sass
-      *   - move static files
       */

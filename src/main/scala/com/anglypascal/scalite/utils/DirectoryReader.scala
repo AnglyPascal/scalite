@@ -1,14 +1,15 @@
 package com.anglypascal.scalite.utils
 
 import com.typesafe.scalalogging.Logger
-import Colors.*
 
 import java.io.File
-import scala.io.Source
-import scala.util.matching.Regex
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.nio.charset.StandardCharsets
+import scala.io.Source
+import scala.util.matching.Regex
+
+import Colors.*
 
 object DirectoryReader:
 

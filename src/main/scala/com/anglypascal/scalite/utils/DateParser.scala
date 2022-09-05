@@ -1,13 +1,10 @@
 package com.anglypascal.scalite.utils
 
+import com.anglypascal.scalite.data.mutable.DObj
 import com.github.nscala_time.time.Imports.*
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.data.mutable.DObj
 
 /** Provides methods for parsing date from string and modified date from file
-  *
-  * TODO: Provide support for timezones. Take a timezone variable as input in
-  * the configs to decide the global timezone stuff
   */
 object DateParser:
   import com.anglypascal.scalite.data.DataExtensions.*

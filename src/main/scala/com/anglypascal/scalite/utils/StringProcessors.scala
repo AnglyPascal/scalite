@@ -125,8 +125,8 @@ object StringProcessors:
     val s = str.replaceAll("[/]+", "/")
     Url.parse(s).toString
 
-
-  def quote (s: String): String = "\"" + escape(s) + "\""
+  /** Quote the given string, escaping all escapable characters */
+  def quote(s: String): String = "\"" + escape(s) + "\""
   private def escape(s: String): String = s.flatMap(escapedChar)
 
   private def escapedChar(ch: Char): String = ch match {
@@ -138,12 +138,14 @@ object StringProcessors:
     case '"'  => "\\\""
     case '\'' => "\\\'"
     case '\\' => "\\\\"
-    case _    => if (ch.isControl) "\\0" + Integer.toOctalString(ch.toInt) 
-                 else              String.valueOf(ch)
+    case _ =>
+      if (ch.isControl) "\\0" + Integer.toOctalString(ch.toInt)
+      else String.valueOf(ch)
   }
 
-  def pad(str: Any, num: Int): String = 
+  /** Pad the given string to the right by " " upto a length of num */
+  def pad(str: Any, num: Int): String =
     val s = str.toString
-    val l = s.length 
+    val l = s.length
     if l < num then s + (" " * (num - l))
     else s

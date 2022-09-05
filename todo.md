@@ -2,11 +2,16 @@
 
 ## Agenda
 
-1. **Defaults in Assets**
+1. **Implement Sass handling**
 
-    Add the defaults configuration to Assets
+    For now go with dart-sass-java. Figure out how to compile the whole folder into one
+    file. Also figure out if it's possible to create separate style files for different
+    layouts.
 
 2. **Test the rendering of Groups' pages**
+
+    Right now there SuperGroup and Group both share the same template, which is
+    definition broken.
 
     The initiation of the Group implementations should be done by the Posts object.
     But then what if someone wants to add a new impl?
@@ -16,26 +21,15 @@
     Change a template to show groups and their permalinks. Also test linking to other
     posts. 
 
-4. **Test Collection pages**
-
-    Check if all posts are found properly, if the toc page needs any more information.
-
-5. **Complete the Build command**
+4. **Complete the Build command**
 
     - Globals
     - Cleaner
     - Assets
     - Sass
     - Collections
-    - Generated Pages
 
     Should we implement another object that handles rendering all generated pages ?
-
-6. **Implement Sass handling**
-
-    For now go with dart-sass-java. Figure out how to compile the whole folder into one
-    file. Also figure out if it's possible to create separate style files for different
-    layouts.
 
 
 ## Finished
@@ -65,6 +59,9 @@
             folder: /employees
             output: false
     ```
+2. **Defaults in Assets**
+
+    Add the defaults configuration to Assets
 
 ## Documentation
 
@@ -92,29 +89,9 @@
     Creates an excerpt of the post. Add more functionality, customization.
 
 - **Mustache predefined lambdas**
-    Emulate liquid filters for mustache using lambdas. Provide built in support for
-    Handlebars and Liquid maybe? These are inspired from filters from jekyll.
 
-    Give a API that allows a custom function mapped to a placeholder with signature maybe 
-    ``` scala
-    () => String
-    String => String
-    ```
-    which will be used when `{{function_key}}` is used in mustache layouts.
-
-    Check if lambda's can be added to the Data object so that it gets rendered at the
-    same time as other keys, without having to implement mustachehelper support
-
-- We can also allow for custom placeholder classes to be passed to the renderer via the
-    MustacheHelper trait. 
-
-    For example, if someone wants to output the render time of the post, they will
-    define an extension to the mustache helper (give it a different name) and simply
-    define a function with the name `render()` and the output will be returnd by this
-    funciton. More functionality can obviously be achieved by exploiting the behaviour
-    of mustache library
-
-- Localized theming for layouts? Is it possible?
+    Add filters from jekyll in the layouts.helpers module.
+    Make this into a pluginable trait
 
 - **Hooks** 
     Fine grained control. These will be done much later. Hooks can be added via mixins.

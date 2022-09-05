@@ -68,5 +68,5 @@ object Clusters:
 
   def addCluster(cluster: Cluster[?]) = _clusters += cluster
 
-  def process(dryRun: Boolean): Unit =
+  def process(dryRun: Boolean = false): Unit =
     clusters foreach { _.process(dryRun) }

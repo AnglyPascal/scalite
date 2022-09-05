@@ -14,15 +14,13 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.nio.file.StandardCopyOption
 import scala.collection.mutable.Set
+import com.anglypascal.scalite.ScopedDefaults
 
-/** TODO: How to add metadata to assets?
-  *   - Maybe the configs will define a new Asset implementation?
-  *   - We can definitely do this for the defaults?
-  *   - That will accept strings from a particular directory, and use it's
-  *     internal settings
-  */
 case class Asset(val filepath: String, val destDir: String):
   /** */
+
+  private val scopedDefaults = ScopedDefaults.getDefaults(filepath, "asset")
+
   lazy val fileName: String = getFileName(filepath)
 
   lazy val fileType: String = Files.probeContentType(Paths.get(filepath))
@@ -38,7 +36,7 @@ case class Asset(val filepath: String, val destDir: String):
     "fileNameSlug" -> slugify(fileName, "default", true),
     "fileType" -> fileType,
     "modifiesTime" -> modifiedTime
-  )
+  ) update scopedDefaults
 
   def copy(): Unit =
     val d1 = new File(filepath).toPath

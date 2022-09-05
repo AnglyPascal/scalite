@@ -154,7 +154,7 @@ object Collections extends Configurable:
           )
 
   /** Process all the collections */
-  def process(): Unit =
+  def process(dryRun: Boolean = false): Unit =
     for col <- collections.par do col.process()
 
   override def toString(): String =

@@ -1,14 +1,14 @@
 package com.anglypascal.scalite.utils
 
+import com.anglypascal.scalite.data.mutable.DNull
+import com.anglypascal.scalite.data.mutable.DObj
+import com.anglypascal.scalite.data.mutable.Data
+import com.anglypascal.scalite.data.mutable.DataImplicits
+import com.anglypascal.scalite.utils.StringProcessors.quote
 import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Value
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.utils.StringProcessors.quote
-import com.anglypascal.scalite.data.mutable.Data
-import com.anglypascal.scalite.data.mutable.DObj
-import com.anglypascal.scalite.data.mutable.DNull
-import com.anglypascal.scalite.data.mutable.DataImplicits
 
 def yamlFileParser(path: String): Data =
   val logger = Logger("YAML File Parser")
