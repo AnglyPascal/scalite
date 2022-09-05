@@ -59,7 +59,7 @@ trait Group[A <: Renderable] extends Renderable:
   protected[groups] def process(dryRun: Boolean = false): Unit
 
   override def toString(): String =
-    s"${GREEN(groupName)}[$groupType]: " +
+    s"${GREEN(groupName)}[$groupType]: \n" +
       items.map("    " + _.toString).mkString("\n")
 
 /** SuperGroup is a Group of Groups of the same type.
@@ -99,7 +99,7 @@ trait SuperGroup[A <: Renderable] extends Group[Group[A]] with Renderable:
   def getGroupNames(item: A): Iterable[String]
 
   override def toString(): String =
-    BLUE(groupType) + items.map("  " + _.toString).mkString("\n")
+    BLUE(groupType) + "\n" + items.map("  " + _.toString).mkString("\n")
 
 /** GroupStyle provides the logic to construct a new SuperGroup. */
 trait GroupStyle[A <: Renderable] extends Plugin:

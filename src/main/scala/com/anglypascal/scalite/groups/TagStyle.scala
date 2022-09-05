@@ -5,7 +5,6 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.utils.StringProcessors.*
 
 class TagStyle(groupType: String, configs: MObj, globals: IObj)
     extends PostSuperGroup(groupType, configs, globals):

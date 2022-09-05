@@ -31,11 +31,9 @@ import java.net.URLClassLoader
 import scala.reflect.ClassTag
 
 /** Load Plugin objects form the jar files in the plugins directory */
-object PluginManager extends Configurable:
+object PluginManager:
 
   private val logger = Logger("Plugin Manager")
-
-  val sectionName: String = "plugins"
 
   /** Rerturns the URLClassLoader from jarPath */
   private def loadJar(jarPath: String): Option[URLClassLoader] =
@@ -132,13 +130,7 @@ object PluginManager extends Configurable:
       .map(_.get)
       .toList
 
-  def apply(pluginsData: MObj, globals: IObj): Unit =
-    // Layouts.addEngine(MustacheLayouts)
-
-    val pluginsDir: String =
-      globals.getOrElse("base")(Defaults.Directories.base) +
-        globals.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
-
+  def apply(pluginsDir: String, pluginsData: MObj): Unit =
     getClassLoaders(pluginsDir)
 
     def getArr(key: String): Map[String, MObj] =

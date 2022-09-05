@@ -13,7 +13,7 @@ import scala.concurrent.Future
 // @DoNotDiscover
 class GlobalsSpec extends AsyncFlatSpec:
   val root = "src/test/resources/site_template"
-  val globals = Globals(root)
+  val globals = initialize(root)
 
   it should "read the configs properly" in {
     val future = Future { globals }
@@ -39,19 +39,19 @@ class GlobalsSpec extends AsyncFlatSpec:
     future.map(unit => assert(true))
   }
 
-  "Groups" should "process the groups properly" in {
+  "Collections" should "process the collections properly" in {
     val future = Future {
-      println(ERROR("\nGROUPS"))
-      println(PostCluster)
+      println(ERROR("\nCOLLECTIONS"))
+      println(Collections)
     }
 
     future.map(unit => assert(true))
   }
 
-  "Collections" should "process the collections properly" in {
+  "Groups" should "process the groups properly" in {
     val future = Future {
-      println(ERROR("\nCOLLECTIONS"))
-      println(Collections)
+      println(ERROR("\nGROUPS"))
+      println(PostCluster)
     }
 
     future.map(unit => assert(true))

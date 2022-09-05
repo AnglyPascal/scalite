@@ -4,38 +4,71 @@ import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.{DArr => IArr}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.{DArr => MArr}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Assets
-import com.anglypascal.scalite.documents.DataFiles
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.PostCluster
+import com.anglypascal.scalite.groups.Clusters
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
+import com.anglypascal.scalite.utils.DateParser
 import com.anglypascal.scalite.utils.DirectoryReader
+import com.anglypascal.scalite.utils.DirectoryReader.getFileName
+import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.yamlFileParser
-
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.{Map => MMap}
-import com.anglypascal.scalite.data.mutable.DStr
-import com.anglypascal.scalite.utils.DateParser
 
-/** Defines the global variables and default configurations. Everything can be
-  * overwritten in "/\_config.yml" file
-  *
-  * FIXME: Turn it into a function or a class. This object would otherwise live
-  * forever during the program life time, where it's no longer needed
-  */
-object Globals:
+def getConfigs(base: String): MObj =
+  val logger = Logger("Globals")
+  logger.trace("reading config file")
 
-  private val logger = Logger("Globals")
+  yamlFileParser(base + "/_config.yml") match
+    case v: MObj => v
+    case _ =>
+      logger.error(
+        s"yaml file ${base}/_config.yml could not be read into an weejson Obj"
+      )
+      MObj()
 
-  /** Where stuff are */
-  private lazy val dirs =
+def initiatePlugins(pluginsDir: String, configs: MObj): Unit =
+  PluginManager(pluginsDir, configs.extractOrElse("plugins")(MObj()))
+
+def getConfigurations(
+    configurables: List[Configurable],
+    configs: MObj
+): List[(Configurable, MObj)] =
+  configurables.map(C => (C, configs.extractOrElse(C.sectionName)(MObj())))
+
+/** Process the assets */
+def processAssets(assetD: String, dest: String, configs: MObj): MObj =
+  val dataMap = configs.extractOrElse("assets")(MObj())
+  Assets(assetD, dest + "/assets")
+
+def initiateConfigurables(
+    configurables: List[(Configurable, MObj)],
+    globals: IObj
+): Unit =
+  configurables foreach { (C, c) => C(c, globals) }
+
+def collectData(dataDir: String, _configs: MObj): MObj =
+  val obj = MObj()
+  val configs = _configs.extractOrElse("data")(MObj())
+  for f <- getListOfFilepaths(dataDir) do
+    obj += getFileName(f) -> yamlFileParser(dataDir + f)
+  obj
+
+def initialize(baseDir: String): IObj =
+
+  val logger = Logger("initialization")
+
+  // Where stuff are
+  lazy val dirs =
     import Defaults.Directories.*
     MObj(
-      "base" -> base,
+      "base" -> baseDir,
       "collectionsDir" -> collectionsDir,
       "destination" -> destination,
       "layoutsDir" -> layoutsDir,
@@ -45,8 +78,8 @@ object Globals:
       "pluginsDir" -> pluginsDir
     )
 
-  /** Which files to read */
-  private lazy val reading =
+  // Which files to read
+  lazy val reading =
     import Defaults.Reading.*
     MObj(
       "include" -> include,
@@ -57,8 +90,8 @@ object Globals:
       "encoding" -> encoding
     )
 
-  /** Details about this website */
-  private lazy val site =
+  // Details about this website
+  lazy val site =
     MObj(
       "title" -> Defaults.title,
       "description" -> Defaults.description,
@@ -72,91 +105,48 @@ object Globals:
       "timeZone" -> Defaults.timeZone
     )
 
-  /** FIXME what do with this? */
-  private lazy val build =
+  // Details about building process
+  lazy val build =
     MObj(
       "logLevel" -> 1
     )
 
-  private val configurables =
-    List[Configurable](
-      PluginManager,
-      ScopedDefaults,
-      Converters,
-      Layouts,
-      PostCluster,
-      Collections
-    )
+  // Configurable objects
+  lazy val configurables: List[Configurable] =
+    List(ScopedDefaults, Converters, Layouts)
+      ++ Clusters.clusters ++ List(Collections)
 
-  import Defaults.Directories
-  private def _base = dirs.getOrElse("base")(Directories.base)
-  private def _dest = dirs.getOrElse("destination")(Directories.destination)
-  private def _layD = dirs.getOrElse("layoutsDir")(Directories.layoutsDir)
-  private def _parD = dirs.getOrElse("partialsDir")(Directories.partialsDir)
-  private def _plugD = dirs.getOrElse("pluginsDir")(Directories.pluginsDir)
-  private def _dataD = dirs.getOrElse("dataDir")(Directories.dataDir)
-  private def _assetD = dirs.getOrElse("assetsDir")(Directories.assetsDir)
-  private def _colD =
-    dirs.getOrElse("collectionsDir")(Directories.collectionsDir)
+  val configs = getConfigs(baseDir)
 
-  /** Load the configs from "/\_config.yml" file */
-  private lazy val configs =
-    logger.trace("reading config file")
-    yamlFileParser(_base + "/_config.yml") match
-      case v: MObj => v
-      case _ =>
-        logger.error(
-          s"yaml file ${_base} could not be read into an weejson Obj"
-        )
-        MObj()
+  for
+    key <- dirs.keys
+    if configs.contains(key)
+  do dirs(key) = configs(key)
 
-  private def getConfiguration(conf: Configurable): MObj =
-    configs.extractOrElse(conf.sectionName)(MObj())
+  import Defaults.{Directories => D}
+  val _base = dirs.getOrElse("base")(D.base)
+  val _dest = _base + dirs.getOrElse("destination")(D.destination)
+  val _dataD = _base + dirs.getOrElse("dataDir")(D.dataDir)
+  val _assetD = _base + dirs.getOrElse("assetsDir")(D.assetsDir)
+  val _plugD = _base + dirs.getOrElse("pluginsDir")(D.pluginsDir)
 
-  /** Process the defaults fro the updated config */
-  private def processDefaults() =
-    logger.trace("setting the default configurations")
-    val defMap = configs.extractOrElse("defaults")(MObj())
+  DirectoryReader(_dest)
+  initiatePlugins(_plugD, configs)
+  Pages.setup(_base)
+  DateParser.setTimeZone(configs.extractOrElse("timeZone")(Defaults.timeZone))
 
-  /** Process the assets */
-  private def processAssets =
-    logger.trace("processing the assets")
-    val dataMap = configs.extractOrElse("assets")(MObj())
-    Assets(_base + _assetD, _dest + "/assets")
+  val interm = getConfigurations(configurables, configs)
 
-  /** Load all the plugins, defaults and custom */
-  // private def loadPlugins(): Unit =
-  //   logger.trace("loading the plugins and instantiating standalone objects")
-  // default plugins
+  val glbsObj = MObj()
+  glbsObj update dirs
+  glbsObj update reading
+  glbsObj update site
+  glbsObj += "assets" -> processAssets(_assetD, _dest, configs)
+  glbsObj += "data" -> collectData(_dataD, configs)
 
-  /** Read the config, do all the initial stuff, return the global variables */
-  def apply(base: String) =
+  glbsObj update configs
 
-    val glbsObj = MObj()
-    dirs("base") = DStr(base)
+  val globals = IObj(glbsObj)
+  initiateConfigurables(interm, globals)
 
-    for key <- dirs.keys if configs.contains(key) do dirs(key) = configs(key)
-
-    val interm = configurables.map(c => (c, getConfiguration(c)))
-
-    Pages.setup(_base)
-    DateParser.setTimeZone(configs.extractOrElse("timeZone")(Defaults.timeZone))
-
-    processDefaults()
-
-    glbsObj update dirs
-    glbsObj update reading
-    glbsObj update site
-
-    glbsObj("assets") = processAssets
-    // glbsObj("data") = DataFiles(_base + _dataD)
-
-    for (key, value) <- configs do glbsObj(key) = value
-
-    val _globals = IObj(glbsObj)
-
-    interm.map(p => p._1(p._2, _globals))
-
-    DirectoryReader(_base + _dest)
-
-    _globals
+  globals

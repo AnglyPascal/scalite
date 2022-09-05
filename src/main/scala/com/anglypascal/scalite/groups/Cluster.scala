@@ -63,9 +63,10 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
 /** Holds all the Cluster implementations avaiable */
 object Clusters:
 
-  private val clusters = ListBuffer[Cluster[?]](PostCluster)
+  private val _clusters = ListBuffer[Cluster[?]](PostCluster)
+  def clusters = _clusters.toList
 
-  def addCluster(cluster: Cluster[?]) = clusters += cluster
+  def addCluster(cluster: Cluster[?]) = _clusters += cluster
 
   def process(dryRun: Boolean): Unit =
     clusters foreach { _.process(dryRun) }
