@@ -30,6 +30,13 @@ import java.net.URL
 import java.net.URLClassLoader
 import scala.reflect.ClassTag
 
+/** Trait to allow for plugin creation. Plugins to be loaded at runtime should
+  * extend this trait.
+  */
+trait Plugin:
+
+  protected[plugins] def addConfigs(conf: MObj): Plugin = this
+
 /** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager:
 

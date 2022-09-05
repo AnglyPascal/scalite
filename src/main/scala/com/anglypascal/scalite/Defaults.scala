@@ -16,6 +16,7 @@ object Defaults:
   val author = DObj()
   val timeZone = "Europe/London"
   val separator = "<--->"
+  val replaceAssets = true
 
   object Directories:
     val base = "."

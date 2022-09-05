@@ -43,7 +43,12 @@ def getConfigurations(
   configurables.map(C => (C, configs.extractOrElse(C.sectionName)(MObj())))
 
 /** Process the assets */
-def processAssets(assetD: String, dest: String, configs: MObj): MObj =
+def processAssets(
+    assetD: String,
+    dest: String,
+    replace: Boolean,
+    configs: MObj
+): MObj =
   val dataMap = configs.extractOrElse("assets")(MObj())
   Assets(assetD, dest + "/assets")
 
@@ -101,8 +106,7 @@ def initialize(baseDir: String): IObj =
       "paginate" -> Defaults.paginate,
       "showExcerpts" -> Defaults.showExceprts,
       "dateFormat" -> Defaults.dateFormat,
-      "permalink" -> Defaults.permalink,
-      "timeZone" -> Defaults.timeZone
+      "permalink" -> Defaults.permalink
     )
 
   // Details about building process
@@ -136,12 +140,14 @@ def initialize(baseDir: String): IObj =
   DateParser.setTimeZone(configs.extractOrElse("timeZone")(Defaults.timeZone))
 
   val interm = getConfigurations(configurables, configs)
+  val replaceAssets =
+    configs.extractOrElse("replaceAssets")(Defaults.replaceAssets)
 
   val glbsObj = MObj()
   glbsObj update dirs
   glbsObj update reading
   glbsObj update site
-  glbsObj += "assets" -> processAssets(_assetD, _dest, configs)
+  glbsObj += "assets" -> processAssets(_assetD, _dest, replaceAssets, configs)
   glbsObj += "data" -> collectData(_dataD, configs)
 
   glbsObj update configs

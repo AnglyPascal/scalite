@@ -1,12 +1,15 @@
 package com.anglypascal.scalite
 
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
-import scala.collection.mutable.ArrayBuffer
-import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.typesafe.scalalogging.Logger
 
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.mutable.LinkedHashMap
+
+/** Fetches scoped defaults from the "defaults" section of configurations
+  */
 object ScopedDefaults extends Configurable:
 
   private val scopes = LinkedHashMap[(String, String), MObj]()
@@ -29,10 +32,11 @@ object ScopedDefaults extends Configurable:
           scopes += (p, r) -> o
         case _ => ()
 
-  def getDefaults(file: String, rT: String) =
+  /** Given all the configurations for the given file and the scope type */
+  def getDefaults(file: String, stype: String) =
     val obj = MObj()
     for (k, v) <- scopes do
       if (file.contains(k._1) || file.contains(base + k._1)) &&
-        (rT == k._2 || rT == "")
+        (stype == k._2 || stype == "")
       then obj update v
     obj

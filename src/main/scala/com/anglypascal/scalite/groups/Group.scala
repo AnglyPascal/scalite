@@ -122,4 +122,3 @@ trait GroupStyle[A <: Renderable] extends Plugin:
   def apply(groupType: String, configs: MObj, globals: IObj): SuperGroup[A]
 
   override def toString(): String = RED(styleName)
-
