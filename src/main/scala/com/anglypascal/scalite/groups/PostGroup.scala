@@ -17,13 +17,16 @@ import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.cmpOpt
 import com.typesafe.scalalogging.Logger
 
+/** Group implementation for PostLike objects. PostGroup is a Page, so may be
+  * rendered to a webpage.
+  */
 class PostGroup(val groupType: String, val groupName: String)(
     private val configs: MObj,
     private val globals: IObj
 ) extends Group[PostLike]
     with Page:
 
-  private val logger = Logger("PostGroup")
+  protected override val logger = Logger("PostGroup")
 
   /** Each individual group object can be finetuned by adding a section in the
     * Defaults with scope = group name and type = group type.
@@ -55,7 +58,7 @@ class PostGroup(val groupType: String, val groupName: String)(
 
   /** Add a new post to this collection */
   def addPost(post: PostLike) =
-    add(post)
+    add(post.title, post)
     post.addGroup(groupType)(this)
     logger.trace(s"adding $post")
 
@@ -111,7 +114,5 @@ class PostGroup(val groupType: String, val groupName: String)(
 
   private def compare(fst: PostLike, snd: PostLike): Boolean =
     compareBy(fst, snd, sortBy) < 0
-
-  override def toString(): String = s"$groupType(${GREEN(groupName)})"
 
   def process(dryRun: Boolean = false): Unit = write(dryRun)

@@ -1,13 +1,14 @@
 package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
+import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.groups.PostCluster
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.Colors.*
 import org.scalatest.DoNotDiscover
-import com.anglypascal.scalite.converters.Converters
 import org.scalatest.flatspec.AsyncFlatSpec
+
 import scala.concurrent.Future
-import com.anglypascal.scalite.groups.PostGroups
 
 // @DoNotDiscover
 class GlobalsSpec extends AsyncFlatSpec:
@@ -41,7 +42,7 @@ class GlobalsSpec extends AsyncFlatSpec:
   "Groups" should "process the groups properly" in {
     val future = Future {
       println(ERROR("\nGROUPS"))
-      println(PostGroups)
+      println(PostCluster)
     }
 
     future.map(unit => assert(true))

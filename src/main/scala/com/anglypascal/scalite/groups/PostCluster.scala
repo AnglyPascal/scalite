@@ -1,26 +1,23 @@
 package com.anglypascal.scalite.groups
 
-import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.typesafe.scalalogging.Logger
 
-import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.Configurable
-
-/** Object in charge of creating and configuring PostGroups
-  *
-  * Is a Configurable, so the configuration can be added under the "groups"
-  * section of \_config.yml
+/** Handles Cluster of PostLike objects. The default implementation of Cluster,
+  * so looks out for the "groups" section in the configuration.
   */
-object PostGroups extends Groups[PostLike]:
+object PostCluster extends Cluster[PostLike]:
+
+  protected override val logger = Logger("PostCluster")
 
   val sectionName: String = "groups"
 
-  addNewGroupStyle(TagStyle)
-  addNewGroupStyle(CatStyle)
+  addGroupStyle(TagStyle)
+  addGroupStyle(CatStyle)
 
-  protected lazy val groupsConfig: MObj =
+  protected lazy val defaultConfig: MObj =
     import Defaults.Group
     import Defaults.Tags
     import Defaults.Categories
@@ -45,9 +42,6 @@ object PostGroups extends Groups[PostLike]:
       )
     )
 
-  /** Called by a PostLike to add itself to all the available groups */
+  /** Called by a PostLike to add itself to all available SuperGroups */
   def addToGroups(post: PostLike): Unit =
-    for (_, groupObj) <- groupTypes do groupObj.add(post)
-
-  override def toString(): String =
-    groupTypes.map(_._2.toString).mkString("\n")
+    for (_, groupObj) <- superGroups do groupObj.addItem(post.title, post)

@@ -1,32 +1,34 @@
 package com.anglypascal.scalite.plugins
 
+import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.collections.Collections
-import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.collections.ElemConstructor
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.converters.ConverterConstructor
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.converters.Identity
 import com.anglypascal.scalite.converters.Markdown
 import com.anglypascal.scalite.data.DataExtensions.*
-import com.anglypascal.scalite.groups.GroupConstructor
-import com.anglypascal.scalite.groups.PostGroups
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.DArr
+import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.data.mutable.Data
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.groups.Cluster
+import com.anglypascal.scalite.groups.Clusters
+import com.anglypascal.scalite.groups.GroupStyle
+import com.anglypascal.scalite.groups.PostCluster
 import com.anglypascal.scalite.layouts.LayoutGroupConstructor
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.mutable.Data
-import com.anglypascal.scalite.data.mutable.DArr
-import com.anglypascal.scalite.data.mutable.DStr
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import scala.reflect.ClassTag
-import com.anglypascal.scalite.Configurable
-import com.anglypascal.scalite.Defaults
 
 /** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager extends Configurable:
@@ -104,9 +106,14 @@ object PluginManager extends Configurable:
       Collections.addStyle(E.asInstanceOf[ElemConstructor])
     )
 
-  private def loadGroupConstructors(names: Map[String, MObj]) =
-    findObjects[GroupConstructor[PostLike]](names).map(C =>
-      PostGroups.addNewGroupStyle(C.asInstanceOf[GroupConstructor[PostLike]])
+  private def loadGroupStyles(names: Map[String, MObj]) =
+    findObjects[GroupStyle[PostLike]](names).map(C =>
+      PostCluster.addGroupStyle(C.asInstanceOf[GroupStyle[PostLike]])
+    )
+
+  private def loadClusters(names: Map[String, MObj]) =
+    findObjects[Cluster[?]](names).map(C =>
+      Clusters.addCluster(C.asInstanceOf[Cluster[?]])
     )
 
   private def loadLayouts(names: Map[String, MObj]) =
@@ -156,5 +163,6 @@ object PluginManager extends Configurable:
 
     loadConverterConstructors(getArr("converters"))
     loadElemConstructors(getArr("elementConstructors"))
-    loadGroupConstructors(getArr("groupConstructors"))
+    loadGroupStyles(getArr("groupStyles"))
+    loadClusters(getArr("clusters"))
     loadLayouts(getArr("layouts"))

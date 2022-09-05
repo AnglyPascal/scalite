@@ -12,6 +12,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.typesafe.scalalogging.Logger
 
+/** Defines SuperGroup for PostLike objects */
 abstract class PostSuperGroup(
     val groupType: String,
     configs: MObj,
@@ -19,31 +20,29 @@ abstract class PostSuperGroup(
 ) extends SuperGroup[PostLike]
     with Page:
 
-  private val logger = Logger("PostSuperGroup")
+  protected override val logger = Logger("PostSuperGroup")
 
-  private val _configs =
+  val groupName: String = groupType
+
+  protected lazy val _configs =
     configs.copy update ScopedDefaults.getDefaults("", groupType)
 
   lazy val identifier: String = permalink
 
-  val groupName: String = groupType
-
   lazy val permalink: String =
     val permalinkTemplate: String =
-      _configs.getOrElse("baseLink")(Defaults.PostsGroup.baseLink) +
-        _configs.getOrElse("relativeLink")(Defaults.PostsGroup.relativeLink)
+      _configs.extractOrElse("baseLink")(Defaults.PostsGroup.baseLink)
 
     val urlObj = MObj("type" -> groupType)
-    urlObj.update(_configs)
+    urlObj update _configs
 
     purifyUrl(URL(permalinkTemplate)(IObj(urlObj)))
 
   protected lazy val outputExt: String =
-    _configs.getOrElse("outputExt")(Defaults.PostsGroup.outputExt)
+    _configs.extractOrElse("outputExt")(Defaults.PostsGroup.outputExt)
 
   /** Should the tag be rendered in a separate page? */
-  val visible =
-    _configs.getOrElse("visible")(true)
+  val visible = _configs.extractOrElse("visible")(true)
 
   /** Return the rendered html string of this page */
   protected lazy val render: String =
@@ -54,14 +53,13 @@ abstract class PostSuperGroup(
     )
     layout match
       case Some(l) =>
-        logger.trace(s"writing $this to $permalink")
+        logger.trace(s"writing $groupType to $permalink")
         l.render(context)
       case None =>
-        logger.warn(s"no layout found for $groupType ${ERROR(groupName)}")
+        logger.warn(s"${ERROR(groupName)}[$groupType] has no layout")
         ""
 
-  protected val layoutName: String =
-    _configs.getOrElse("layout")(groupType)
+  protected val layoutName: String = _configs.extractOrElse("layout")(groupType)
 
-  def process(dryRun: Boolean = false): Unit =
+  protected[groups] def process(dryRun: Boolean = false): Unit =
     items foreach { _.process(dryRun) }

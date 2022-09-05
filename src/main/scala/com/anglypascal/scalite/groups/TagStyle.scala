@@ -7,18 +7,18 @@ import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.utils.StringProcessors.*
 
-import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.documents.Page
-
 class TagStyle(groupType: String, configs: MObj, globals: IObj)
     extends PostSuperGroup(groupType, configs, globals):
 
   /** */
   lazy val locals: IObj =
-    IObj(
+    val temp = MObj(
       "type" -> groupType,
-      "url" -> permalink
+      "url" -> permalink,
+      "outputExt" -> outputExt
     )
+    temp update _configs
+    IObj(temp)
 
   def createGroup(name: String): Group[PostLike] =
     new PostGroup(groupType, name)(configs, globals)
@@ -30,7 +30,7 @@ class TagStyle(groupType: String, configs: MObj, globals: IObj)
       case _       => Array[String]()
     unslugged
 
-object TagStyle extends GroupConstructor[PostLike]:
+object TagStyle extends GroupStyle[PostLike]:
 
   val styleName = "tag"
 

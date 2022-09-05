@@ -12,7 +12,7 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.mutable.{DStr => MStr}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.PostGroups
+import com.anglypascal.scalite.groups.PostCluster
 import com.anglypascal.scalite.groups.PostGroup
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
@@ -205,7 +205,7 @@ class PostLike(val rType: String)(
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
-  PostGroups.addToGroups(this)
+  PostCluster.addToGroups(this)
 
   override def toString(): String =
     CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"

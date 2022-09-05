@@ -34,7 +34,7 @@ class CatStyle(groupType: String, configs: MObj, globals: IObj)
     // slugify the category names
     unslugged
 
-object CatStyle extends GroupConstructor[PostLike]:
+object CatStyle extends GroupStyle[PostLike]:
 
   val styleName = "category"
 
