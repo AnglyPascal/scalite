@@ -21,8 +21,8 @@ import com.typesafe.scalalogging.Logger
   * rendered to a webpage.
   */
 class PostGroup(val groupType: String, val groupName: String)(
-    private val configs: MObj,
-    private val globals: IObj
+    protected val configs: MObj,
+    protected val globals: IObj
 ) extends Group[PostLike]
     with Page:
 

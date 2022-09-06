@@ -10,6 +10,7 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
+import com.anglypascal.scalite.documents.Generator
 
 /** Cluster[A] provides a Configurable that handles SuperGroups of type
   * SuperGroup[A]. It holds a hash table of GroupStyles, reads configuration
@@ -33,15 +34,16 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
   protected lazy val defaultConfig: MObj
 
   /** SuperGroup objects held in this Cluster */
-  protected val superGroups = LinkedHashMap[String, SuperGroup[A]]()
+  protected val _superGroups = LinkedHashMap[String, SuperGroup[A]]()
+  def superGroups = _superGroups.toList.map(_._2)
 
   /** Add a new SuperGroup to this site */
   protected def add(group: SuperGroup[A]) =
-    superGroups += group.groupType -> group
+    _superGroups += group.groupType -> group
 
   /** Create pages for each PostsGroup that wishes to be rendered */
   protected[groups] def process(dryRun: Boolean = false): Unit =
-    for (_, grp) <- superGroups do
+    for (_, grp) <- _superGroups do
       logger.debug(s"processing SuperGroup ${grp.groupType}")
       grp.process(dryRun)
 
@@ -58,7 +60,7 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
         case _ => ()
 
   override def toString(): String =
-    superGroups.map(_._2.toString).mkString("\n")
+    _superGroups.map(_._2.toString).mkString("\n")
 
 /** Holds all the Cluster implementations avaiable */
 object Clusters:

@@ -15,8 +15,8 @@ import com.typesafe.scalalogging.Logger
 /** Defines SuperGroup for PostLike objects */
 abstract class PostSuperGroup(
     val groupType: String,
-    configs: MObj,
-    globals: IObj
+    protected val configs: MObj,
+    protected val globals: IObj
 ) extends SuperGroup[PostLike]
     with Page:
 

@@ -1,18 +1,20 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.DataExtensions.*
+import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.plugins.PageHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.StringProcessors.slugify
-import com.anglypascal.scalite.ScopedDefaults
 import com.typesafe.scalalogging.Logger
 
 /** Elements that may be rendered into pages of the website, such as static
@@ -36,13 +38,19 @@ import com.typesafe.scalalogging.Logger
 class PageLike(val rType: String)(
     val parentDir: String,
     val relativePath: String,
-    private val globals: DObj,
-    private val collection: DObj
+    protected val globals: IObj,
+    private val collection: IObj
 ) extends Element
     with Page:
 
   private val logger = Logger(s"PageLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
+
+  protected val configs = MObj(
+    "rType" -> rType,
+    "parentDir" -> parentDir,
+    "relativePath" -> relativePath
+  )
 
   /** Name of the parent layout. Can be set in either the frontMatter, in the
     * scoped defaults, in collection configurations, or the "page" layout, in
@@ -60,19 +68,28 @@ class PageLike(val rType: String)(
     )
 
   /** Local variables publicly visible, used to render the parent template */
-  lazy val locals: DObj =
+  lazy val locals: IObj =
     val dateFormat =
       extractChain(frontMatter, collection, globals)("dateFormat")(
         Defaults.dateFormat
       )
-    DObj(
+    val mobj = MObj(
       "title" -> title,
+      "parentDir" -> parentDir,
+      "relativePath" -> relativePath,
+      "rType" -> rType,
       "outputExt" -> outputExt,
       "modifiedTime" -> lastModifiedTime(filepath, dateFormat),
       "filename" -> filename,
       "collection" -> collection.getOrElse("name")("statics"),
       "slugTitle" -> slugify(title)
     )
+
+    val nobj = PageHooks.beforeLocals
+      .collect(_.apply(globals)(IObj(mobj)))
+      .foldLeft(MObj())(_ update _)
+
+    IObj(mobj update nobj)
 
   /** Relative permanent link to this page in the website */
   lazy val permalink =
@@ -99,7 +116,7 @@ class PageLike(val rType: String)(
     */
   protected lazy val render: String =
     val str = Converters.convert(mainMatter, filepath)
-    val context = DObj(
+    val context = IObj(
       "site" -> globals,
       "page" -> locals
     )
@@ -121,7 +138,7 @@ object PageConstructor extends ElemConstructor:
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,
-      globals: DObj,
-      collection: DObj
+      globals: IObj,
+      collection: IObj
   ): Element =
     new PageLike(rType)(parentDir, relativePath, globals, collection)

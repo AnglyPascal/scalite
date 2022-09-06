@@ -49,11 +49,11 @@ class Collection(
     protected val layoutName: String
 )(
     private val directory: String,
-    private val globals: IObj,
+    protected val globals: IObj,
     private val sortBy: String,
     val visible: Boolean,
     private val permalinkTemplate: String,
-    private val _locals: MObj
+    protected val configs: MObj
 ) extends Page:
 
   private val logger = Logger(s"${BLUE(name.capitalize)}")
@@ -69,10 +69,10 @@ class Collection(
     files.filter(Converters.hasConverter).map(f).toMap
 
   lazy val locals =
-    _locals update scopedDefaults
-    _locals += "title" -> name
+    configs update scopedDefaults
+    configs += "title" -> name
 
-    IObj(_locals)
+    IObj(configs)
 
   private var constructor = elemCons(name)
 

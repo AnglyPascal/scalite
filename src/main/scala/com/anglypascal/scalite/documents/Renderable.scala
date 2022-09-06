@@ -1,5 +1,6 @@
 package com.anglypascal.scalite.documents
 
+import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.layouts.Layouts
 
 /** Defines the trait for objects that can be rendered. Each Renderable object
@@ -12,6 +13,9 @@ trait Renderable:
 
   /** The parent layout, might be None */
   protected lazy val layout = Layouts.get(layoutName)
+
+  /** An Element also has some internal variables that are publicly visible */
+  lazy val locals: DObj
 
   /** Should this object be visible to the reset of the site? */
   val visible: Boolean

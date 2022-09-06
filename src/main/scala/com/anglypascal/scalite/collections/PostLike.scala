@@ -4,16 +4,19 @@ import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
-import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.data.immutable.DStr
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DNull
+import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.mutable.{DStr => MStr}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
 import com.anglypascal.scalite.groups.PostCluster
 import com.anglypascal.scalite.groups.PostGroup
+import com.anglypascal.scalite.plugins.BeforeLocals
+import com.anglypascal.scalite.plugins.Hooks
+import com.anglypascal.scalite.plugins.PageHooks
+import com.anglypascal.scalite.plugins.PostHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
@@ -36,20 +39,28 @@ import scala.collection.mutable.ListBuffer
   * @param relativePath
   *   path to the post file relative to the parentDir
   * @param globals
-  *   DObj containing the global setting for this site
+  *   IObj containing the global setting for this site
   * @param collection
   *   the configurations passed to the whole collection
   */
 class PostLike(val rType: String)(
     val parentDir: String,
     val relativePath: String,
-    globals: DObj,
-    collection: DObj
+    protected val globals: IObj,
+    private val collection: IObj
 ) extends Element
     with Page:
 
   private val logger = Logger(s"PostLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
+
+  protected val configs = MObj(
+    "rType" -> rType,
+    "parentDir" -> parentDir,
+    "relativePath" -> relativePath
+  )
+
+  PostHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -80,7 +91,7 @@ class PostLike(val rType: String)(
     *
     * Maybe DraftPost will extend Post overriding this time handling thing
     */
-  private lazy val urlObj: DObj =
+  private lazy val urlObj: IObj =
     val dateString = frontMatter.extractOrElse("date")(filename)
     val dateFormat = extractChain(frontMatter, collection, globals)(
       "dateFormat"
@@ -98,19 +109,19 @@ class PostLike(val rType: String)(
       "slugTitleCased" -> slugify(title, "default", true)
     )
     val grpObj = MObj()
-    for (k, s) <- groups do grpObj(k) = MStr(s.map(_.groupName).mkString("/"))
+    for (k, s) <- groups do grpObj += k -> s.map(_.groupName).mkString("/")
 
     obj update newObj
     obj update grpObj
 
-    DObj(obj)
+    IObj(obj)
 
   /** Template for the permalink of the post */
   lazy val permalink =
     val permalinkTemplate =
       frontMatter.extractOrElse("permalink")(
         globals
-          .getOrElse("collection")(DObj())
+          .getOrElse("collection")(IObj())
           .getOrElse("permalink")(
             globals.getOrElse("permalink")(
               Defaults.Posts.permalink
@@ -136,12 +147,22 @@ class PostLike(val rType: String)(
       "title" -> title,
       "date" -> date,
       "url" -> permalink,
-      "filename" -> filename
+      "filename" -> filename,
+      "collection" -> collection
     )
     if frontMatter.extractOrElse("showExcerpt")(false) then
-      frontMatter("excerpt") = MStr(excerpt)
+      frontMatter += "excerpt" -> excerpt
 
-    DObj(frontMatter).add("collection" -> collection)
+    val nobj = Hooks
+      .join[BeforeLocals](
+        PostHooks.beforeLocals,
+        PageHooks.beforeLocals
+      )
+      .collect(_.apply(globals)(IObj(frontMatter)))
+      .foldLeft(MObj())(_ update _)
+
+    frontMatter update nobj
+    IObj(frontMatter)
 
   /** Get the posts from the front\_matter and get their permalinks
     *
@@ -156,27 +177,31 @@ class PostLike(val rType: String)(
   lazy val postUrls: Map[String, String] =
     def f(p: (String, Data)): Option[(String, String)] =
       p._2 match
-        case str: MStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
+        case str: DStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
         case _         => None
     frontMatter.extractOrElse("postUrls")(MObj()).obj.flatMap(f).toMap
 
   /** Convert the contents of the post to HTML */
   protected lazy val render: String =
     val str = Converters.convert(mainMatter, filepath)
-    val context = DObj(
-      postUrls.map(p => (p._1, DStr(p._2))) ++
-        Map(
-          "site" -> globals,
-          "page" -> locals
-        )
-    )
-    layout match
+    val context =
+      IObj(
+        MObj(postUrls.toList: _*) update
+          MObj(
+            "site" -> globals,
+            "page" -> locals
+          )
+      )
+    PostHooks.beforeRenders foreach { _.apply(globals)(context) }
+    val rendered = layout match
       case Some(l) =>
         logger.debug(s"$this has layout ${l.name}")
         l.render(context, str)
       case None =>
         logger.debug(s"$this has no specified layout")
         str
+    PostHooks.afterRenders foreach { _.apply(globals)(context, rendered) }
+    rendered
 
   /** For now, just gets the first part of the main matter, separated by the
     * separator.
@@ -202,6 +227,10 @@ class PostLike(val rType: String)(
     if groups.contains(grpType) then groups(grpType) += a
     else groups += grpType -> ListBuffer(a)
 
+  override def write(dryRun: Boolean): Unit = 
+    super.write(dryRun)
+    PostHooks.afterWrites foreach { _.apply(globals)(this) }
+
   /** Processes the collections this post belongs to, for the collections
     * specified in the list in CollectionsHandler companion object
     */
@@ -218,7 +247,7 @@ object PostConstructor extends ElemConstructor:
   def apply(rType: String)(
       parentDir: String,
       relativePath: String,
-      globals: DObj,
-      collection: DObj
+      globals: IObj,
+      collection: IObj
   ): Element =
     new PostLike(rType)(parentDir, relativePath, globals, collection)

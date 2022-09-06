@@ -1,6 +1,5 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.utils.cmpOpt
@@ -17,9 +16,6 @@ import com.anglypascal.scalite.utils.cmpOpt
 trait Element extends Reader with Renderable:
 
   lazy val identifier = filepath
-
-  /** An Element also has some internal variables that are publicly visible */
-  lazy val locals: DObj
 
 /** Compare two given Elements by the given key
   *

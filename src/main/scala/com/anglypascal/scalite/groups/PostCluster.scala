@@ -44,4 +44,4 @@ object PostCluster extends Cluster[PostLike]:
 
   /** Called by a PostLike to add itself to all available SuperGroups */
   def addToGroups(post: PostLike): Unit =
-    for (_, groupObj) <- superGroups do groupObj.addItem(post.title, post)
+    for groupObj <- superGroups do groupObj.addItem(post.title, post)

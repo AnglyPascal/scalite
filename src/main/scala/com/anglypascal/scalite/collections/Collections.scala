@@ -12,6 +12,7 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
+import com.anglypascal.scalite.documents.Generator
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -20,7 +21,7 @@ import scala.collection.parallel.CollectionConverters._
   * It's a Configurable, so it looks out for the "collections" section in
   * \_config.yml to configure itself.
   */
-object Collections extends Configurable:
+object Collections extends Configurable with Generator:
 
   private val logger = Logger(BLUE("Collections"))
 
@@ -82,6 +83,7 @@ object Collections extends Configurable:
     styles += elemCons.styleName -> elemCons
 
   private val collections = ListBuffer[Collection]()
+  def pages = collections.toList
 
   /** Gets the configuration set in the "collections" section of \_configs.yml
     * and creates necessary Collection objects
@@ -155,7 +157,7 @@ object Collections extends Configurable:
 
   /** Process all the collections */
   def process(dryRun: Boolean = false): Unit =
-    for col <- collections.par do col.process()
+    for col <- collections.par do col.process(dryRun)
 
   override def toString(): String =
     collections

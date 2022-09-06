@@ -5,6 +5,9 @@ import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.plugins.PageHooks
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 
 /** A Page of the website. It's a Renderable. So it can be rendered into an HTML
   * string.
@@ -25,6 +28,12 @@ import com.anglypascal.scalite.Defaults
 trait Page extends Renderable:
 
   private val logger = Logger("Page writer")
+
+  protected val globals: IObj
+
+  protected val configs: MObj
+
+  PageHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
 
   /** Unique identifier to map this page to, in order for the cross reference to
     * work.
@@ -51,11 +60,17 @@ trait Page extends Renderable:
       else permalink + outputExt
     if !dryRun then
       logger.debug(s"writing $this to $path")
-      writeTo(path, render)
+      PageHooks.beforeRenders foreach { _.apply(globals)(locals) }
+      val r = render
+      PageHooks.afterRenders foreach { _.apply(globals)(locals, r) }
+      writeTo(path, r)
+      PageHooks.afterWrites foreach { _.apply(globals)(this) }
     else logger.debug(s"would write $this to $path")
 
   // Add this page to the pages collection.
   if visible then Pages.addPage(this)
+
+  // protected def cache(): Unit
 
 /** Holds reference to all the pages of this website.
   *

@@ -10,16 +10,18 @@ layout: default
         {{ #page }}
         <div class="improve right hide-on-mobiles">
           <a data-proofer-ignore 
-            href="https://github.com/jekyll/jekyll/edit/master/docs/{{ relativePath }}">
+             href="https://github.com/jekyll/jekyll/edit/master/docs/{{ relativePath }}">
             <i class="fa fa-pencil"></i> &nbsp;Improve this page
           </a>
         </div>
-        <h1>{{ title }}</h1>
-        {{ /page }}
+        <h1>Step by Step Tutorial</h1>
+        <h2>{{ position }}. {{ title }}</h2>
         {{> content }}
+        {{> include step-index }}
       </article>
+      {{ /page }}
     </div>
-    {{> docs_contents }}
+    {{> docs_contents.html }}
     <div class="clear"></div>
   </div>
 </section>
