@@ -13,7 +13,7 @@ import scala.concurrent.Future
 // @DoNotDiscover
 class GlobalsSpec extends AsyncFlatSpec:
   val root = "src/test/resources/site_template"
-  val globals = initialize(root)
+  val globals = Site(root).globals
 
   it should "read the configs properly" in {
     val future = Future { globals }

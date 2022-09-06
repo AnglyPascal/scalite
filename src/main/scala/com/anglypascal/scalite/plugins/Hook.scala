@@ -30,8 +30,8 @@ object Hooks:
   def addHooks(hooks: Hook*) =
     hooks foreach { addHook(_) }
 
-  def join[A <: Hook](fst: List[A], snd: List[A]): List[A] =
-    (fst ++ snd).sorted
+  def join[A <: Hook](lists: List[A]*): List[A] =
+    lists.foldRight(List[A]())(_ ::: _).sorted
 
 sealed trait BeforeInit extends Hook:
   def apply(globals: IObj)(config: IObj): Unit
@@ -136,31 +136,38 @@ object LayoutHooks:
 
 sealed trait SiteHook extends Hook
 
-trait SiteBeforeInit extends SiteHook with BeforeInit
-trait SiteBeforeLocals extends SiteHook with BeforeLocals
+trait SiteAfterInit extends SiteHook:
+  def apply(globals: IObj): MObj
+
+trait SiteAfterReset extends SiteHook:
+  def apply(globals: IObj): Unit
+
+trait SiteAfterRead extends SiteHook:
+  def apply(globals: IObj): Unit
+
 trait SiteBeforeRender extends SiteHook with BeforeRender
 trait SiteAfterRender extends SiteHook with AfterRender
 trait SiteAfterWrite extends SiteHook with AfterWrite[Site]
 
 object SiteHooks:
 
-  private val _beforeInits = ListBuffer[SiteBeforeInit]()
-  private val _beforeLocals = ListBuffer[SiteBeforeLocals]()
+  private val _afterInits = ListBuffer[SiteAfterInit]()
+  private val _afterReads = ListBuffer[SiteAfterRead]()
   private val _beforeRenders = ListBuffer[SiteBeforeRender]()
   private val _afterRenders = ListBuffer[SiteAfterRender]()
   private val _afterWrites = ListBuffer[SiteAfterWrite]()
 
   def addHook(hook: SiteHook) =
     hook match
-      case hook: SiteBeforeInit   => _beforeInits += hook
-      case hook: SiteBeforeLocals => _beforeLocals += hook
+      case hook: SiteAfterInit    => _afterInits += hook
+      case hook: SiteAfterRead    => _afterReads += hook
       case hook: SiteBeforeRender => _beforeRenders += hook
       case hook: SiteAfterRender  => _afterRenders += hook
       case hook: SiteAfterWrite   => _afterWrites += hook
-      case null                   => ()
+      case _                      => ()
 
-  def beforeInits = _beforeInits.toList.sorted
-  def beforeLocals = _beforeLocals.toList.sorted
+  def afterInits = _afterInits.toList.sorted
+  def afterReads = _afterReads.toList.sorted
   def beforeRenders = _beforeRenders.toList.sorted
   def afterRenders = _afterRenders.toList.sorted
   def afterWrites = _afterWrites.toList.sorted
