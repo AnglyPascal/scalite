@@ -196,7 +196,7 @@ class PostLike(val rType: String)(
     val rendered = layout match
       case Some(l) =>
         logger.debug(s"$this has layout ${l.name}")
-        l.render(context, str)
+        l.renderWrap(context, str)
       case None =>
         logger.debug(s"$this has no specified layout")
         str

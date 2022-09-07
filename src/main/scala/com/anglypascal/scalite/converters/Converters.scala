@@ -8,6 +8,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.plugins.ConverterHooks
 
 /** Holds all implementations of Converter and ConverterConstructor.
   *
@@ -72,6 +73,7 @@ object Converters extends Configurable:
               s"outputExt: ${GREEN(oe)}, " +
               s"converter constructor: ${BLUE(cn)}"
           )
+          ConverterHooks.beforeInits foreach { _.apply(name, IObj(conv)) }
           converters += name -> C(name, ex, oe)
         case _ =>
           logger.debug(s"please provide configs for convert $name as a table")
@@ -117,13 +119,15 @@ object Converters extends Configurable:
     *   converter
     */
   def convert(str: String, filepath: String): String =
-    findByExt(filepath) match
-      case Some(converter) => converter.convert(str, filepath)
+    val nstr = findByExt(filepath) match
+      case Some(converter) =>
+        ConverterHooks.beforeConverts foreach { _.apply(str, filepath) }
+        converter.convert(str, filepath)
       case None =>
-        logger.warn(
-          "convertion failed: no converter was found for " + RED(filepath)
-        )
+        logger.warn("no converter found for " + RED(filepath))
         str
+    ConverterHooks.afterConverts foreach { _.apply(nstr) }
+    nstr
 
   override def toString(): String =
     converters.map("  " + _._2.toString).mkString("\n")

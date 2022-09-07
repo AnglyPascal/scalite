@@ -121,7 +121,7 @@ class PageLike(val rType: String)(
       "page" -> locals
     )
     layout match
-      case Some(l) => l.render(context, str)
+      case Some(l) => l.renderWrap(context, str)
       case None    => str
 
   /** Should this page be visible to the site? */

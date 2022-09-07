@@ -10,6 +10,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.plugins.LayoutHooks
 
 /** */
 object Layouts extends Configurable:
@@ -39,20 +40,21 @@ object Layouts extends Configurable:
     constructors += engine.lang -> engine
 
   def apply(configs: MObj, globals: IObj): Unit =
-    import com.anglypascal.scalite.Defaults.Directories
     conf update configs
 
-    val base = globals.getOrElse("base")(Directories.base)
+    val base = globals.getOrElse("base")(Defaults.Directories.base)
 
     for (k, v) <- conf if constructors.contains(k) do
       v match
         case v: MObj =>
+          import Defaults.Directories.layoutsDir
+          import Defaults.Directories.partialsDir
+
           val cons = constructors(k)
-          val lD =
-            extractChain(v, globals)("layoutsDir")(Directories.layoutsDir)
-          val pD =
-            extractChain(v, globals)("partialsDir")(Directories.partialsDir)
+          val lD = extractChain(v, globals)("layoutsDir")(layoutsDir)
+          val pD = extractChain(v, globals)("partialsDir")(partialsDir)
           val ext = v.getOrElse("ext")("")
+
           layouts ++= cons(base + lD, base + pD, ext).layouts
         case _ => ()
 

@@ -10,25 +10,26 @@ import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.layouts.Layout
 
 import scala.collection.mutable.ListBuffer
+import com.anglypascal.scalite.groups.Group
 
 sealed trait Hook extends Plugin with Ordered[Hook]:
   val priority: Int
   def compare(that: Hook): Int = this.priority compare that.priority
 
 object Hooks:
-  def addHook(hook: Hook) =
+  def registerHook(hook: Hook) =
     hook match
-      case hook: ConverterHook  => ConverterHooks.addHook(hook)
-      case hook: CollectionHook => CollectionHooks.addHook(hook)
-      case hook: PostHook       => PostHooks.addHook(hook)
-      case hook: ReaderHook     => ReaderHooks.addHook(hook)
-      case hook: PageHook       => PageHooks.addHook(hook)
-      case hook: LayoutHook     => LayoutHooks.addHook(hook)
-      case hook: SiteHook       => SiteHooks.addHook(hook)
+      case hook: ConverterHook  => ConverterHooks.registerHook(hook)
+      case hook: CollectionHook => CollectionHooks.registerHook(hook)
+      case hook: PostHook       => PostHooks.registerHook(hook)
+      case hook: ReaderHook     => ReaderHooks.registerHook(hook)
+      case hook: PageHook       => PageHooks.registerHook(hook)
+      case hook: LayoutHook     => LayoutHooks.registerHook(hook)
+      case hook: SiteHook       => SiteHooks.registerHook(hook)
       case null                 => ()
 
-  def addHooks(hooks: Hook*) =
-    hooks foreach { addHook(_) }
+  def registerHooks(hooks: Hook*) =
+    hooks foreach { registerHook(_) }
 
   def join[A <: Hook](lists: List[A]*): List[A] =
     lists.foldRight(List[A]())(_ ::: _).sorted
@@ -51,7 +52,7 @@ sealed trait AfterWrite[A] extends Hook:
 sealed trait ConverterHook extends Hook
 
 trait ConverterBeforeInit extends ConverterHook:
-  def apply(fileType: String, extensions: String, outputExt: String): Unit
+  def apply(fileType: String, configs: IObj): Unit
 
 trait ConverterBeforeConvert extends ConverterHook:
   def apply(str: String, filepath: String): Unit
@@ -65,7 +66,7 @@ object ConverterHooks:
   private val _beforeConverts = ListBuffer[ConverterBeforeConvert]()
   private val _afterConverts = ListBuffer[ConverterAfterConvert]()
 
-  def addHook(hook: ConverterHook) =
+  def registerHook(hook: ConverterHook) =
     hook match
       case hook: ConverterBeforeInit    => _beforeInits += hook
       case hook: ConverterBeforeConvert => _beforeConverts += hook
@@ -76,10 +77,42 @@ object ConverterHooks:
   def beforeConverts = _beforeConverts.toList.sorted
   def afterConverts = _afterConverts.toList.sorted
 
+sealed trait GroupHook extends Hook
+
+trait GroupBeforeInit extends GroupHook with BeforeInit
+trait GroupBeforeLocal extends GroupHook with BeforeLocals
+trait GroupBeforeRender extends GroupHook with BeforeRender
+trait GroupAfterRender extends GroupHook with AfterRender
+trait GroupAfterWrite extends GroupHook with AfterWrite[Group[PostLike]]
+
+object GroupHooks:
+
+  private val _beforeInits = ListBuffer[GroupBeforeInit]()
+  private val _beforeLocals = ListBuffer[GroupBeforeLocal]()
+  private val _beforeRenders = ListBuffer[GroupBeforeRender]()
+  private val _afterRenders = ListBuffer[GroupAfterRender]()
+  private val _afterWrites = ListBuffer[GroupAfterWrite]()
+
+  def registerHook(hook: GroupHook) =
+    hook match
+      case hook: GroupBeforeInit   => _beforeInits += hook
+      case hook: GroupBeforeLocal  => _beforeLocals += hook
+      case hook: GroupBeforeRender => _beforeRenders += hook
+      case hook: GroupAfterRender  => _afterRenders += hook
+      case hook: GroupAfterWrite   => _afterWrites += hook
+      case null                         => ()
+
+  def beforeInits = _beforeInits.toList.sorted
+  def beforeLocals = _beforeLocals.toList.sorted
+  def beforeRenders = _beforeRenders.toList.sorted
+  def afterRenders = _afterRenders.toList.sorted
+  def afterWrites = _afterWrites.toList.sorted
+
+
 sealed trait CollectionHook extends Hook
 
 trait CollectionBeforeInit extends CollectionHook with BeforeInit
-trait CollectionBeforeLocals extends CollectionHook with BeforeLocals
+trait CollectionBeforeLocal extends CollectionHook with BeforeLocals
 trait CollectionBeforeRender extends CollectionHook with BeforeRender
 trait CollectionAfterRender extends CollectionHook with AfterRender
 trait CollectionAfterWrite extends CollectionHook with AfterWrite[Collection]
@@ -87,15 +120,15 @@ trait CollectionAfterWrite extends CollectionHook with AfterWrite[Collection]
 object CollectionHooks:
 
   private val _beforeInits = ListBuffer[CollectionBeforeInit]()
-  private val _beforeLocals = ListBuffer[CollectionBeforeLocals]()
+  private val _beforeLocals = ListBuffer[CollectionBeforeLocal]()
   private val _beforeRenders = ListBuffer[CollectionBeforeRender]()
   private val _afterRenders = ListBuffer[CollectionAfterRender]()
   private val _afterWrites = ListBuffer[CollectionAfterWrite]()
 
-  def addHook(hook: CollectionHook) =
+  def registerHook(hook: CollectionHook) =
     hook match
       case hook: CollectionBeforeInit   => _beforeInits += hook
-      case hook: CollectionBeforeLocals => _beforeLocals += hook
+      case hook: CollectionBeforeLocal  => _beforeLocals += hook
       case hook: CollectionBeforeRender => _beforeRenders += hook
       case hook: CollectionAfterRender  => _afterRenders += hook
       case hook: CollectionAfterWrite   => _afterWrites += hook
@@ -113,9 +146,10 @@ trait LayoutBeforeInit extends LayoutHook:
   def apply(lang: String, name: String, filepath: String): Unit
 
 trait LayoutBeforeRender extends LayoutHook:
-  def apply(context: IObj, contentPartial: String = ""): Unit
+  def apply(context: IObj, content: String = ""): Unit
 
-trait LayoutAfterRender extends LayoutHook with AfterRender
+trait LayoutAfterRender extends LayoutHook:
+  def apply(str: String): String
 
 object LayoutHooks:
 
@@ -123,7 +157,7 @@ object LayoutHooks:
   private val _beforeRenders = ListBuffer[LayoutBeforeRender]()
   private val _afterRenders = ListBuffer[LayoutAfterRender]()
 
-  def addHook(hook: LayoutHook) =
+  def registerHook(hook: LayoutHook) =
     hook match
       case hook: LayoutBeforeInit   => _beforeInits += hook
       case hook: LayoutBeforeRender => _beforeRenders += hook
@@ -157,7 +191,7 @@ object SiteHooks:
   private val _afterRenders = ListBuffer[SiteAfterRender]()
   private val _afterWrites = ListBuffer[SiteAfterWrite]()
 
-  def addHook(hook: SiteHook) =
+  def registerHook(hook: SiteHook) =
     hook match
       case hook: SiteAfterInit    => _afterInits += hook
       case hook: SiteAfterRead    => _afterReads += hook
@@ -188,7 +222,7 @@ object ReaderHooks:
   private val _afterRenders = ListBuffer[ReaderAfterRender]()
   private val _afterWrites = ListBuffer[ReaderAfterWrite]()
 
-  def addHook(hook: ReaderHook) =
+  def registerHook(hook: ReaderHook) =
     hook match
       case hook: ReaderBeforeInit   => _beforeInits += hook
       case hook: ReaderBeforeLocals => _beforeLocals += hook
@@ -219,7 +253,7 @@ object PostHooks:
   private val _afterRenders = ListBuffer[PostAfterRender]()
   private val _afterWrites = ListBuffer[PostAfterWrite]()
 
-  def addHook(hook: PostHook) =
+  def registerHook(hook: PostHook) =
     hook match
       case hook: PostBeforeInit   => _beforeInits += hook
       case hook: PostBeforeLocals => _beforeLocals += hook
@@ -250,7 +284,7 @@ object PageHooks:
   private val _afterRenders = ListBuffer[PageAfterRender]()
   private val _afterWrites = ListBuffer[PageAfterWrite]()
 
-  def addHook(hook: PageHook) =
+  def registerHook(hook: PageHook) =
     hook match
       case hook: PageBeforeInit   => _beforeInits += hook
       case hook: PageBeforeLocals => _beforeLocals += hook

@@ -107,7 +107,7 @@ class PostGroup(val groupType: String, val groupName: String)(
     layout match
       case Some(l) =>
         logger.trace(s"writing $this to $permalink")
-        l.render(context)
+        l.renderWrap(context)
       case None =>
         logger.warn(s"no layout found for $groupType ${ERROR(groupName)}")
         ""

@@ -103,7 +103,7 @@ class Collection(
           "page" -> locals,
           "items" -> DArr(sortedItems.map(_.locals))
         )
-        p.render(context)
+        p.renderWrap(context)
 
   /** This sorts out the items, renders them, and writes them to the disk */
   protected[collections] def process(dryrun: Boolean = false): Unit =

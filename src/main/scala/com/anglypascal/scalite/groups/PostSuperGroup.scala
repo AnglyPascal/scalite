@@ -54,7 +54,7 @@ abstract class PostSuperGroup(
     layout match
       case Some(l) =>
         logger.trace(s"writing $groupType to $permalink")
-        l.render(context)
+        l.renderWrap(context)
       case None =>
         logger.warn(s"${ERROR(groupName)}[$groupType] has no layout")
         ""

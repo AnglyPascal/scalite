@@ -63,7 +63,7 @@ class MustacheLayout(
     parent match
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
-        p.render(context, str)
+        p.renderWrap(context, str)
       case _ => str
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory

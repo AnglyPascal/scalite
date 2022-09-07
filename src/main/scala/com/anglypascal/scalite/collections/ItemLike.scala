@@ -82,7 +82,7 @@ class ItemLike(val rType: String)(
           "site" -> globals,
           "item" -> locals
         )
-        l.render(context, str)
+        l.renderWrap(context, str)
       case None => str
 
   override def toString(): String = CYAN(title)
