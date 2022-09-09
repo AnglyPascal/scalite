@@ -10,6 +10,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
+import com.anglypascal.scalite.plugins.GroupHooks
 
 /** Group defines a group of Renderables. A Renderable can add itself to
   * multiple Groups. Group's job is to provide a `process` method that does
@@ -27,6 +28,10 @@ trait Group[A <: Renderable] extends Renderable:
   /** Contains the Renderables of this Group */
   private val _items = LinkedHashMap[String, A]()
   def items = _items.toList.map(_._2)
+
+  protected val globals: IObj 
+
+  protected val configs: MObj 
 
   /** Name of the Group, which will be called by the Renderables wishing to add
     * itself to this.
@@ -49,9 +54,6 @@ trait Group[A <: Renderable] extends Renderable:
 
   /** Returns the item stored against the key */
   def get(key: String) = _items.get(key)
-
-  /** Holds some local variables */
-  lazy val locals: IObj
 
   /** Processes the items, usually either writing them to a Page, or giving the
     * metadata about the items to another object.

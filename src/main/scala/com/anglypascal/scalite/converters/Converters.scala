@@ -110,24 +110,32 @@ object Converters extends Configurable:
         )
         true
 
-  /** Convert a given filepath with an appropriate converter if it exists
+  /** Convert a given filepath with an appropriate converter if it exists.
+    *
+    * It applies all the filters from ConverterHooks.beforeConverts to the input
+    * string and ConverterHooks.afterConverts to the output string, applying them in
+    * order of decreasing priority.
     *
     * @param str
     *   the string to be converted. In our case, the main matter of the file
     * @param filepath
     *   the path to the file containing the extension. Used to find appropriate
     *   converter
+    * @returns
+    *   The converted string returned by the first converter found for the
+    *   filepath
     */
   def convert(str: String, filepath: String): String =
     val nstr = findByExt(filepath) match
       case Some(converter) =>
-        ConverterHooks.beforeConverts foreach { _.apply(str, filepath) }
-        converter.convert(str, filepath)
+        val ns = ConverterHooks.beforeConverts
+          .foldLeft(str)((s, h) => h.apply(s, filepath))
+        converter.convert(ns, filepath)
       case None =>
         logger.warn("no converter found for " + RED(filepath))
-        str
-    ConverterHooks.afterConverts foreach { _.apply(nstr) }
-    nstr
+        ConverterHooks.beforeConverts
+          .foldLeft(str)((s, h) => h.apply(s, filepath))
+    ConverterHooks.afterConverts.foldLeft(nstr)((s, h) => h.apply(s, filepath))
 
   override def toString(): String =
     converters.map("  " + _._2.toString).mkString("\n")

@@ -6,13 +6,14 @@ import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DBool
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.documents.Generator
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
-import com.anglypascal.scalite.documents.Generator
+import com.anglypascal.scalite.plugins.CollectionHooks
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -105,10 +106,15 @@ object Collections extends Configurable with Generator:
       globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
-    for colName <- collectionsConfig.keys do
-      collectionsConfig(colName) match
-        /** the collectionObj that comes in will be an Obj type */
-        case cobj: MObj =>
+    for (colName, c) <- collectionsConfig do
+      c match
+        case c: MObj =>
+
+          // add all the updates from the CollectionHooks, with higher priority ones
+          // applied before the lower priority ones
+          val cobj = CollectionHooks.beforeInits
+            .foldLeft(c)((o, h) => o update h.apply(globals)(IObj(o)))
+
           val style = cobj.extractOrElse("style")("item")
           val output =
             if colName == "posts" || colName == "statics" then

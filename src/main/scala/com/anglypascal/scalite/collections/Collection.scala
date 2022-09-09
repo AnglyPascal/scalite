@@ -16,6 +16,7 @@ import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.parallel.CollectionConverters._
+import com.anglypascal.scalite.plugins.CollectionHooks
 
 /** Defines a new Collection of Element's. Responsible for fetching the Elements
   * from the directory and processing them into HTML pages.
@@ -71,8 +72,9 @@ class Collection(
   lazy val locals =
     configs update scopedDefaults
     configs += "title" -> name
-
-    IObj(configs)
+    val conf = CollectionHooks.beforeLocals
+      .foldLeft(configs)((o, h) => o update h(globals)(IObj(o)))
+    IObj(conf)
 
   private var constructor = elemCons(name)
 
@@ -95,23 +97,27 @@ class Collection(
     compareBy(fst, snd, sortBy) < 0
 
   protected lazy val render: String =
-    layout match
+    val str = layout match
       case None => ""
       case Some(p) =>
-        val context = IObj(
+        val c = MObj(
           "site" -> globals,
           "page" -> locals,
           "items" -> DArr(sortedItems.map(_.locals))
         )
-        p.renderWrap(context)
+        val con = CollectionHooks.beforeRenders
+          .foldLeft(c)((o, h) => o update h(globals)(IObj(o)))
+        p.renderWrap(IObj(con))
+    CollectionHooks.afterRenders.foldLeft(str)((o, h) => h(globals)(locals, o))
 
   /** This sorts out the items, renders them, and writes them to the disk */
   protected[collections] def process(dryrun: Boolean = false): Unit =
-    for (_, item) <- items.par do
+    for item <- items.values.par do
       item match
         case item: Page => item.write(dryrun)
         case _          => ()
     write(dryrun)
+    CollectionHooks.afterWrites foreach { _.apply(globals)(this) }
 
   /** TODO: Add caching options */
   protected[collections] def cache(): Unit = ???

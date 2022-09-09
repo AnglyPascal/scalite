@@ -11,6 +11,7 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import com.anglypascal.scalite.documents.Generator
+import com.anglypascal.scalite.plugins.GroupHooks
 
 /** Cluster[A] provides a Configurable that handles SuperGroups of type
   * SuperGroup[A]. It holds a hash table of GroupStyles, reads configuration
@@ -49,7 +50,8 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
 
   /** Read the configurations and create necessary SuperGroups */
   def apply(configs: MObj, globals: IObj): Unit =
-    defaultConfig.update(configs)
+    GroupHooks.beforeInits.foldLeft(configs)((o, h) => h(globals)(IObj(o)))
+    defaultConfig update configs
     for (key, value) <- defaultConfig do
       value match
         case value: MObj =>

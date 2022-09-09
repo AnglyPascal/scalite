@@ -16,6 +16,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.*
 import com.anglypascal.scalite.utils.cmpOpt
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.plugins.GroupHooks
 
 /** Group implementation for PostLike objects. PostGroup is a Page, so may be
   * rendered to a webpage.
@@ -88,7 +89,9 @@ class PostGroup(val groupType: String, val groupName: String)(
       "title" -> groupName,
       "url" -> permalink
     )
-    obj.update(configs)
+    obj update configs
+    GroupHooks.beforeLocals
+      .foldLeft(obj)((o, h) => o update h(globals)(IObj(o)))
     IObj(obj)
 
   /** Should the tag be rendered in a separate page? */
@@ -99,20 +102,25 @@ class PostGroup(val groupType: String, val groupName: String)(
 
   /** Return the rendered html string of this page */
   protected lazy val render: String =
-    val context = IObj(
+    val c = MObj(
       "site" -> globals,
       "page" -> locals,
       "items" -> DArr(items.map(postToItem).toList)
     )
-    layout match
+    val con = GroupHooks.beforeRenders
+      .foldLeft(c)((o, h) => h(globals)(IObj(o)))
+    val ren = layout match
       case Some(l) =>
         logger.trace(s"writing $this to $permalink")
-        l.renderWrap(context)
+        l.renderWrap(IObj(con))
       case None =>
         logger.warn(s"no layout found for $groupType ${ERROR(groupName)}")
         ""
+    GroupHooks.afterRenders.foldLeft(ren)((s, h) => h(globals)(locals, s))
 
   private def compare(fst: PostLike, snd: PostLike): Boolean =
     compareBy(fst, snd, sortBy) < 0
 
-  def process(dryRun: Boolean = false): Unit = write(dryRun)
+  def process(dryRun: Boolean = false): Unit =
+    write(dryRun)
+    GroupHooks.afterWrites foreach { _.apply(globals)(this) }
