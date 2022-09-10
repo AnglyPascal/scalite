@@ -118,7 +118,8 @@ class PageLike(val rType: String)(
     val str = Converters.convert(mainMatter, filepath)
     val context = IObj(
       "site" -> globals,
-      "page" -> locals
+      "page" -> locals,
+      "collectionItems" -> CollectionItems.collectionItems
     )
     layout match
       case Some(l) => l.renderWrap(context, str)

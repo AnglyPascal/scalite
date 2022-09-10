@@ -7,13 +7,13 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DBool
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Generator
+import com.anglypascal.scalite.plugins.CollectionHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import scala.collection.parallel.CollectionConverters._
-import com.anglypascal.scalite.plugins.CollectionHooks
 
 /** Companion object with set of collections this site has. Each collection has
   * a name, a list of items, and a method to render the items and if specified,
@@ -42,37 +42,37 @@ object Collections extends Configurable with Generator:
     import Defaults.Statics
     MObj(
       "posts" -> MObj(
-        "output" -> Posts.output,
-        "folder" -> Posts.folder,
-        "name" -> Posts.name,
         "directory" -> Posts.directory,
-        "sortBy" -> Posts.sortBy,
-        "toc" -> Posts.toc,
-        "permalink" -> Posts.permalink,
+        "folder" -> Posts.folder,
         "layout" -> Posts.layout,
-        "style" -> Posts.style
+        "name" -> Posts.name,
+        "output" -> Posts.output,
+        "permalink" -> Posts.permalink,
+        "sortBy" -> Posts.sortBy,
+        "style" -> Posts.style,
+        "toc" -> Posts.toc
       ),
       "drafts" -> MObj(
-        "output" -> Drafts.output,
-        "folder" -> Drafts.folder,
-        "name" -> Drafts.name,
         "directory" -> Drafts.directory,
-        "sortBy" -> Drafts.sortBy,
-        "toc" -> Drafts.toc,
-        "permalink" -> Drafts.permalink,
+        "folder" -> Drafts.folder,
         "layout" -> Drafts.layout,
-        "style" -> Drafts.style
+        "name" -> Drafts.name,
+        "output" -> Drafts.output,
+        "permalink" -> Drafts.permalink,
+        "sortBy" -> Drafts.sortBy,
+        "style" -> Drafts.style,
+        "toc" -> Drafts.toc
       ),
       "statics" -> MObj(
-        "output" -> Statics.output,
-        "folder" -> Statics.folder,
-        "name" -> Statics.name,
         "directory" -> Statics.directory,
-        "sortBy" -> Statics.sortBy,
-        "toc" -> Statics.toc,
-        "permalink" -> Statics.permalink,
+        "folder" -> Statics.folder,
         "layout" -> Statics.layout,
-        "style" -> Statics.style
+        "name" -> Statics.name,
+        "output" -> Statics.output,
+        "permalink" -> Statics.permalink,
+        "sortBy" -> Statics.sortBy,
+        "style" -> Statics.style,
+        "toc" -> Statics.toc
       )
     )
 
@@ -109,7 +109,6 @@ object Collections extends Configurable with Generator:
     for (colName, c) <- collectionsConfig do
       c match
         case c: MObj =>
-
           // add all the updates from the CollectionHooks, with higher priority ones
           // applied before the lower priority ones
           val cobj = CollectionHooks.beforeInits
@@ -152,6 +151,10 @@ object Collections extends Configurable with Generator:
               permalinkTemplate,
               cobj
             )
+
+            // If this collection has style "item" then add its elements to the
+            // CollectionItems object
+            if style == "item" then CollectionItems.addItems(colName, Col.items)
             // add this collection to the collections map
             collections += Col
 
@@ -169,3 +172,17 @@ object Collections extends Configurable with Generator:
     collections
       .map(v => MAGENTA(v.name) + YELLOW(": ") + v.toString)
       .mkString("\n")
+
+/** TODO: how will other objects access these? These should be available to
+  * objects at render time inside context.
+  */
+object CollectionItems:
+
+  private val _allItems = LinkedHashMap[String, Map[String, Element]]()
+
+  lazy val collectionItems = IObj(
+    _allItems.map(p => (p._1, IObj(p._2.map(t => (t._1, t._2.locals))))).toMap
+  )
+
+  def addItems(colName: String, items: Map[String, Element]) =
+    _allItems += colName -> items

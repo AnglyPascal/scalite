@@ -158,11 +158,9 @@ class PostLike(val rType: String)(
         PostHooks.beforeLocals,
         PageHooks.beforeLocals
       )
-      .collect(_.apply(globals)(IObj(frontMatter)))
-      .foldLeft(MObj())(_ update _)
+      .foldLeft(frontMatter)((o, h) => o update h.apply(globals)(IObj(o)))
 
-    frontMatter update nobj
-    IObj(frontMatter)
+    IObj(nobj)
 
   /** Get the posts from the front\_matter and get their permalinks
     *
@@ -189,7 +187,8 @@ class PostLike(val rType: String)(
         MObj(postUrls.toList: _*) update
           MObj(
             "site" -> globals,
-            "page" -> locals
+            "page" -> locals,
+            "collectionItems" -> CollectionItems.collectionItems
           )
       )
     PostHooks.beforeRenders foreach { _.apply(globals)(context) }
@@ -227,7 +226,7 @@ class PostLike(val rType: String)(
     if groups.contains(grpType) then groups(grpType) += a
     else groups += grpType -> ListBuffer(a)
 
-  override def write(dryRun: Boolean): Unit = 
+  override def write(dryRun: Boolean): Unit =
     super.write(dryRun)
     PostHooks.afterWrites foreach { _.apply(globals)(this) }
 

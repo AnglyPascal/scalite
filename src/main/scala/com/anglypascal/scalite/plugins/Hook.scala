@@ -11,6 +11,7 @@ import com.anglypascal.scalite.groups.Group
 import com.anglypascal.scalite.layouts.Layout
 
 import scala.collection.mutable.ListBuffer
+import com.anglypascal.scalite.collections.ItemLike
 
 /** A Hook has a priority and usually an apply function. Hooks are called at
   * various points of the site creation, and can be provided by the user to
@@ -32,11 +33,11 @@ object Hooks:
       case hook: ConverterHook  => ConverterHooks.registerHook(hook)
       case hook: CollectionHook => CollectionHooks.registerHook(hook)
       case hook: PostHook       => PostHooks.registerHook(hook)
-      case hook: ReaderHook     => ReaderHooks.registerHook(hook)
+      case hook: ItemHook       => ItemHooks.registerHook(hook)
       case hook: PageHook       => PageHooks.registerHook(hook)
       case hook: LayoutHook     => LayoutHooks.registerHook(hook)
-      case hook: SiteHook       => SiteHooks.registerHook(hook)
       case hook: GroupHook      => GroupHooks.registerHook(hook)
+      case hook: SiteHook       => SiteHooks.registerHook(hook)
       case null                 => ()
 
   /** Register many Hooks */
@@ -206,7 +207,7 @@ object GroupHooks:
       case hook: GroupBeforeLocal  => _beforeLocals += hook
       case hook: GroupBeforeRender => _beforeRenders += hook
       case hook: GroupAfterRender  => _afterRenders += hook
-      case hook: GroupAfterProcess   => _afterProcesses += hook
+      case hook: GroupAfterProcess => _afterProcesses += hook
       case null                    => ()
 
   def beforeInits = _beforeInits.toList.sorted
@@ -395,48 +396,42 @@ object SiteHooks:
   def afterWrites = _afterWrites.toList.sorted
 
 ////////////
-// Reader //
+// Item //
 ////////////
-sealed trait ReaderHook extends Hook:
-  override def toString(): String = super.toString() + "-Reader"
+sealed trait ItemHook extends Hook:
+  override def toString(): String = super.toString() + "-Item"
 
-trait ReaderBeforeInit extends ReaderHook with BeforeInit:
+trait ItemBeforeInit extends ItemHook with BeforeInit:
   override def toString(): String = super.toString() + " before init"
 
-trait ReaderBeforeLocals extends ReaderHook with BeforeLocals:
+trait ItemBeforeLocals extends ItemHook with BeforeLocals:
   override def toString(): String = super.toString() + " before locals"
 
-trait ReaderBeforeRender extends ReaderHook with BeforeRender:
+trait ItemBeforeRender extends ItemHook with BeforeRender:
   override def toString(): String = super.toString() + " before render"
 
-trait ReaderAfterRender extends ReaderHook with AfterRender:
+trait ItemAfterRender extends ItemHook with AfterRender:
   override def toString(): String = super.toString() + " after render"
 
-trait ReaderAfterWrite extends ReaderHook with AfterWrite[Reader]:
-  override def toString(): String = super.toString() + " after write"
+object ItemHooks:
 
-object ReaderHooks:
+  private val _beforeInits = ListBuffer[ItemBeforeInit]()
+  private val _beforeLocals = ListBuffer[ItemBeforeLocals]()
+  private val _beforeRenders = ListBuffer[ItemBeforeRender]()
+  private val _afterRenders = ListBuffer[ItemAfterRender]()
 
-  private val _beforeInits = ListBuffer[ReaderBeforeInit]()
-  private val _beforeLocals = ListBuffer[ReaderBeforeLocals]()
-  private val _beforeRenders = ListBuffer[ReaderBeforeRender]()
-  private val _afterRenders = ListBuffer[ReaderAfterRender]()
-  private val _afterWrites = ListBuffer[ReaderAfterWrite]()
-
-  def registerHook(hook: ReaderHook) =
+  def registerHook(hook: ItemHook) =
     hook match
-      case hook: ReaderBeforeInit   => _beforeInits += hook
-      case hook: ReaderBeforeLocals => _beforeLocals += hook
-      case hook: ReaderBeforeRender => _beforeRenders += hook
-      case hook: ReaderAfterRender  => _afterRenders += hook
-      case hook: ReaderAfterWrite   => _afterWrites += hook
-      case null                     => ()
+      case hook: ItemBeforeInit   => _beforeInits += hook
+      case hook: ItemBeforeLocals => _beforeLocals += hook
+      case hook: ItemBeforeRender => _beforeRenders += hook
+      case hook: ItemAfterRender  => _afterRenders += hook
+      case null                   => ()
 
   def beforeInits = _beforeInits.toList.sorted
   def beforeLocals = _beforeLocals.toList.sorted
   def beforeRenders = _beforeRenders.toList.sorted
   def afterRenders = _afterRenders.toList.sorted
-  def afterWrites = _afterWrites.toList.sorted
 
 //////////
 // Post //

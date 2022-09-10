@@ -1,6 +1,6 @@
 package com.anglypascal.scalite.collections
 
-import com.anglypascal.scalite.utils.DateParser.dateParseObj
+import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.data.immutable.DStr
@@ -8,10 +8,11 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.utils.Colors.*
-import com.anglypascal.scalite.utils.StringProcessors.titleParser
+import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
+import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.plugins.ItemHooks
 
 /** Elements that don't have a separate Page, but may be rendered as part of a
   * different Page.
@@ -30,8 +31,8 @@ import com.anglypascal.scalite.Defaults
 class ItemLike(val rType: String)(
     val parentDir: String,
     val relativePath: String,
-    globals: IObj,
-    collection: IObj
+    protected val globals: IObj,
+    private val collection: IObj
 ) extends Element:
 
   private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
@@ -41,6 +42,16 @@ class ItemLike(val rType: String)(
   protected val layoutName =
     extractChain(frontMatter, collection)("layout")("")
 
+  ItemHooks.beforeInits foreach {
+    _.apply(globals)(
+      IObj(
+        "rType" -> rType,
+        "parentDir" -> parentDir,
+        "relativePath" -> relativePath
+      )
+    )
+  }
+
   /** Title of this item */
   lazy val title: String =
     frontMatter.extractOrElse("title")(
@@ -49,7 +60,7 @@ class ItemLike(val rType: String)(
       )
     )
 
-  lazy val locals =
+  private lazy val _locals =
     val dateString = frontMatter.extractOrElse("date")(filename)
     val dateFormat =
       extractChain(frontMatter, collection, globals)(
@@ -62,7 +73,13 @@ class ItemLike(val rType: String)(
     obj += "lastModifiedTime" -> lastModifiedTime(filepath, dateFormat)
     obj += "filename" -> filename
 
-    IObj(obj)
+    obj
+
+  lazy val locals =
+    _locals += "content" -> render
+    val nl = ItemHooks.beforeLocals
+      .foldLeft(_locals)((o, h) => o update h(globals)(IObj(o)))
+    IObj(nl)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(false)
 
@@ -76,14 +93,18 @@ class ItemLike(val rType: String)(
     val str =
       if shouldConvert then Converters.convert(mainMatter, filepath)
       else mainMatter
-    layout match
+    val ren = layout match
       case Some(l) =>
-        val context = IObj(
+        val c = MObj(
           "site" -> globals,
-          "item" -> locals
+          "item" -> _locals
         )
-        l.renderWrap(context, str)
+        val con = ItemHooks.beforeRenders
+          .foldLeft(c)((o, h) => h.apply(globals)(IObj(o)))
+        l.renderWrap(IObj(con), str)
       case None => str
+
+    ItemHooks.afterRenders.foldLeft(ren)((s, h) => h.apply(globals)(locals, s))
 
   override def toString(): String = CYAN(title)
 
