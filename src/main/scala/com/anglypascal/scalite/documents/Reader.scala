@@ -38,8 +38,12 @@ trait Reader:
     src match
       case yaml_regex(a, b) =>
         scope update frontMatterParser(a)
+        _shouldConvert = scope.extractOrElse("shouldConvert")(true)
         (scope, b)
       case _ => (scope, src)
+
+  private var _shouldConvert: Boolean = false
+  protected lazy val shouldConvert = _shouldConvert
 
   /** yaml front matter of the file */
   def frontMatter = _frontMatter

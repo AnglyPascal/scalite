@@ -53,6 +53,11 @@ object Converters extends Configurable:
       "converter" -> "identity",
       "extensions" -> Defaults.Identity.extensions,
       "outputExt" -> Defaults.Identity.outputExt
+    ),
+    "sass" -> MObj(
+      "converter" -> "sass",
+      "extensions" -> Defaults.Sass.extensions,
+      "outputExt" -> Defaults.Sass.outputExt
     )
   )
 

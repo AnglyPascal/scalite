@@ -74,6 +74,19 @@ object Defaults:
     val layout = "default"
     val style = "page"
 
+  object Sass:
+    val output = true
+    val folder = "/_sass"
+    val name = "sass"
+    val directory = Directories.collectionsDir
+    val sortBy = "title"
+    val toc = false
+    val layout = ""
+    val permalink = "/{{title}}{{outputExt}}"
+    val style = "item"
+    val extensions = "sass,scss"
+    val outputExt = ".css"
+
   object Build:
     val logLevel = 1
 
@@ -121,7 +134,6 @@ object Defaults:
     val relativeLink = "/{{name}}"
     val separator = List(",")
     val style = "category"
-
 
   object Markdown:
     val extensions = "markdown,md,mkd,mkdn"

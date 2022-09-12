@@ -40,6 +40,7 @@ object Collections extends Configurable with Generator:
     import Defaults.Posts
     import Defaults.Drafts
     import Defaults.Statics
+    import Defaults.Sass
     MObj(
       "posts" -> MObj(
         "directory" -> Posts.directory,
@@ -73,6 +74,17 @@ object Collections extends Configurable with Generator:
         "sortBy" -> Statics.sortBy,
         "style" -> Statics.style,
         "toc" -> Statics.toc
+      ),
+      "sass" -> MObj(
+        "directory" -> Sass.directory,
+        "folder" -> Sass.folder,
+        "layout" -> Sass.layout,
+        "name" -> Sass.name,
+        "output" -> Sass.output,
+        "sortBy" -> Sass.sortBy,
+        "permalink" -> Sass.permalink,
+        "style" -> Sass.style,
+        "toc" -> Sass.toc
       )
     )
 

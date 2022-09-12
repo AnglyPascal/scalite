@@ -68,12 +68,18 @@ class ItemLike(val rType: String)(
       )(Defaults.dateFormat)
     val obj = dateParseObj(dateString, dateFormat)
 
-    obj update frontMatter
-    obj += "title" -> title
-    obj += "lastModifiedTime" -> lastModifiedTime(filepath, dateFormat)
-    obj += "filename" -> filename
+    val mobj = MObj(
+      "title" -> title,
+      "parentDir" -> parentDir,
+      "relativePath" -> relativePath,
+      "rType" -> rType,
+      "modifiedTime" -> lastModifiedTime(filepath, dateFormat),
+      "filename" -> filename,
+      "collection" -> collection.getOrElse("name")("statics")
+    )
 
-    obj
+    obj update frontMatter
+    obj update mobj
 
   lazy val locals =
     _locals += "content" -> render
@@ -82,8 +88,6 @@ class ItemLike(val rType: String)(
     IObj(nl)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(false)
-
-  private val shouldConvert = !frontMatter.isEmpty
 
   /** If there's some frontMatter, then the mainMatter will be conerted with
     * appropriate converter. Then the converted string will be processed with
