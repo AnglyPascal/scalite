@@ -9,6 +9,7 @@ import org.scalatest.DoNotDiscover
 import org.scalatest.flatspec.AsyncFlatSpec
 
 import scala.concurrent.Future
+import com.anglypascal.scalite.groups.Clusters
 
 // @DoNotDiscover
 class SiteSpecs extends AsyncFlatSpec:
@@ -53,6 +54,5 @@ class SiteSpecs extends AsyncFlatSpec:
       println(ERROR("\nGROUPS"))
       println(PostCluster)
     }
-
     future.map(unit => assert(true))
   }

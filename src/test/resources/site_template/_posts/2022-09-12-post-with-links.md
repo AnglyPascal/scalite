@@ -1,7 +1,7 @@
 ---
 title: A post with links
-cat: cat1, cat2
-tag: tag3
+categories: cat1, cat2
+tags: tag3
 showExcerpt: true
 separator: "<-->"
 

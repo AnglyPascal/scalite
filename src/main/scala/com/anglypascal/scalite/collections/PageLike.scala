@@ -69,6 +69,12 @@ class PageLike(val rType: String)(
 
   /** Local variables publicly visible, used to render the parent template */
   lazy val locals: IObj =
+    val l = _locals
+    if frontMatter.getOrElse("showExcerpt")(false) then
+      l += "excerpt" -> excerpt
+    IObj(l)
+
+  private def _locals =
     val dateFormat =
       extractChain(frontMatter, collection, globals)("dateFormat")(
         Defaults.dateFormat
@@ -89,7 +95,18 @@ class PageLike(val rType: String)(
       .collect(_.apply(globals)(IObj(mobj)))
       .foldLeft(MObj())(_ update _)
 
-    IObj(mobj update nobj)
+    mobj update nobj
+
+  /** Extract excerpt from the mainMatter */
+  private lazy val excerpt: String =
+    val separator =
+      extractChain(frontMatter, globals)("separator")(Defaults.separator)
+    Excerpt(
+      mainMatter,
+      filepath,
+      shouldConvert,
+      separator
+    )(IObj(_locals), globals).content
 
   /** Relative permanent link to this page in the website */
   lazy val permalink =

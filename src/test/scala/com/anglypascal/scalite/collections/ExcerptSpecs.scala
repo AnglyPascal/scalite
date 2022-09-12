@@ -1,10 +1,10 @@
 package com.anglypascal.scalite.collections
 
-import org.scalatest.flatspec.AnyFlatSpec
+import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.layouts.Layouts
+import org.scalatest.flatspec.AnyFlatSpec
 
 class ExcerptSpecs extends AnyFlatSpec:
 

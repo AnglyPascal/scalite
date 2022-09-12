@@ -42,6 +42,9 @@ import scala.collection.mutable.ListBuffer
   *   IObj containing the global setting for this site
   * @param collection
   *   the configurations passed to the whole collection
+  *
+  * FIXME: showExcerpt should be defaulted by the collection, and elements
+  * should have the ability to turn it off
   */
 class PostLike(val rType: String)(
     val parentDir: String,
@@ -168,6 +171,17 @@ class PostLike(val rType: String)(
 
     nobj
 
+  /** Extract excerpt from the mainMatter */
+  private lazy val excerpt: String =
+    val separator =
+      extractChain(frontMatter, globals)("separator")(Defaults.separator)
+    Excerpt(
+      mainMatter,
+      filepath,
+      shouldConvert,
+      separator
+    )(IObj(_locals), globals).content
+
   /** Get the posts from the front\_matter and get their permalinks
     *
     * @example
@@ -210,22 +224,6 @@ class PostLike(val rType: String)(
         str
     PostHooks.afterRenders foreach { _.apply(globals)(context, rendered) }
     rendered
-
-  /** For now, just gets the first part of the main matter, separated by the
-    * separator.
-    *
-    * TODO: if no separator is found, get the first paragraph. Also look into
-    * the linking issue discussed in jekyll
-    */
-  private lazy val excerpt: String =
-    val separator =
-      extractChain(frontMatter, globals)("separator")(Defaults.separator)
-    Excerpt(
-      mainMatter,
-      filepath,
-      shouldConvert,
-      separator
-    )(IObj(_locals), globals).content
 
   /** The map holding sets of collection-types */
   private val groups = LinkedHashMap[String, ListBuffer[PostGroup]]()
