@@ -12,7 +12,8 @@ trait Renderable:
   protected val layoutName: String
 
   /** The parent layout, might be None */
-  protected lazy val layout = Layouts.get(layoutName)
+  protected lazy val layout =
+    Layouts.get(layoutName) orElse Layouts.get("empty")
 
   /** An Element also has some internal variables that are publicly visible */
   lazy val locals: DObj

@@ -35,8 +35,12 @@ object Collections extends Configurable with Generator:
     "item" -> ItemConstructor
   )
 
+  /** Add a new ElemConstructor */
+  def addStyle(elemCons: ElemConstructor): Unit =
+    styles += elemCons.styleName -> elemCons
+
   /** Defaults of the `collection` section. */
-  private lazy val collectionsConfig =
+  private def defaultConfigs =
     import Defaults.Posts
     import Defaults.Drafts
     import Defaults.Statics
@@ -88,14 +92,8 @@ object Collections extends Configurable with Generator:
       )
     )
 
-  private def defaultConf(bool: Boolean): MObj =
-    MObj("output" -> bool)
-
-  /** Add a new ElemConstructor */
-  def addStyle(elemCons: ElemConstructor): Unit =
-    styles += elemCons.styleName -> elemCons
-
   private val collections = ListBuffer[Collection]()
+
   def pages = collections.toList
 
   /** Gets the configuration set in the "collections" section of \_configs.yml
@@ -108,17 +106,17 @@ object Collections extends Configurable with Generator:
     for (key, value) <- configs do
       value match
         case v: DBool =>
-          configs(key) = defaultConf(v.bool)
+          configs(key) = MObj("output" -> v.bool)
         case _ => ()
 
-    collectionsConfig update configs
+    val conf = defaultConfigs update configs
 
     val base = globals.getOrElse("base")(Defaults.Directories.base)
     val colsDir =
       globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
     // create the collection named "key" for each key in collecionsDir
-    for (colName, c) <- collectionsConfig do
+    for (colName, c) <- conf do
       c match
         case c: MObj =>
           // add all the updates from the CollectionHooks, with higher priority ones
@@ -185,6 +183,17 @@ object Collections extends Configurable with Generator:
       .map(v => MAGENTA(v.name) + YELLOW(": ") + v.toString)
       .mkString("\n")
 
+  /** Cleans up the collections to start anew */
+  protected[scalite] def reset(): Unit =
+    styles.clear()
+    styles ++= LinkedHashMap[String, ElemConstructor](
+      "post" -> PostConstructor,
+      "page" -> PageConstructor,
+      "item" -> ItemConstructor
+    )
+    collections.clear()
+    CollectionItems.reset()
+
 /** TODO: how will other objects access these? These should be available to
   * objects at render time inside context.
   */
@@ -198,3 +207,5 @@ object CollectionItems:
 
   def addItems(colName: String, items: Map[String, Element]) =
     _allItems += colName -> items
+
+  protected[collections] def reset(): Unit = _allItems.clear()

@@ -1,13 +1,13 @@
 package com.anglypascal.scalite.documents
 
+import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.plugins.PageHooks
 import com.anglypascal.scalite.utils.DirectoryReader.writeTo
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.plugins.PageHooks
-import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 
 /** A Page of the website. It's a Renderable. So it can be rendered into an HTML
   * string.
@@ -102,3 +102,6 @@ object Pages:
 
   /** Provide this object with the base source path */
   def setup(_base: String) = base = _base
+
+  def reset(): Unit = 
+    pages.clear()

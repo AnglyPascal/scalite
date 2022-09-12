@@ -56,7 +56,7 @@ class ItemLike(val rType: String)(
   lazy val title: String =
     frontMatter.extractOrElse("title")(
       frontMatter.extractOrElse("name")(
-        titleParser(filepath).getOrElse("item " + filename)
+        titleParser(filepath).getOrElse(filename)
       )
     )
 

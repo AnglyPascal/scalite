@@ -22,12 +22,27 @@ object Layouts extends Configurable:
       "mustache" -> MustacheGroupConstructor
     )
 
-  private val layouts = LinkedHashMap[String, Layout]()
+  private def empty =
+    new Layout {
+      val name = "empty"
+      val lang = "mustache"
+      val rType = "empty"
+      val parentDir: String = ""
+      val relativePath: String = ""
+      override def mainMatter = "{{> content }}"
+
+      /** The mustache object for this layout */
+      private lazy val mustache = ScaliteMustache(mainMatter)
+      def render(context: IObj, content: String): String =
+        mustache.render(context, Map("content" -> ScaliteMustache(content)))
+    }
+
+  private val layouts = LinkedHashMap[String, Layout]("empty" -> empty)
 
   private val logger = Logger("Layout object")
 
   /** TODO: add section in Defaults */
-  val conf = MObj(
+  private def defaultConfigs = MObj(
     "mustache" -> MObj(
       "layoutsDir" -> Defaults.Directories.layoutsDir,
       "partialsDir" -> Defaults.Directories.partialsDir,
@@ -40,8 +55,7 @@ object Layouts extends Configurable:
     constructors += engine.lang -> engine
 
   def apply(configs: MObj, globals: IObj): Unit =
-    conf update configs
-
+    val conf = defaultConfigs update configs
     val base = globals.getOrElse("base")(Defaults.Directories.base)
 
     for (k, v) <- conf if constructors.contains(k) do
@@ -75,3 +89,9 @@ object Layouts extends Configurable:
           m.map((k, v) => "  " + v.toString).mkString("\n")
       )
       .mkString("\n")
+
+  def reset(): Unit =
+    layouts.clear()
+    constructors.clear()
+    constructors += "mustache" -> MustacheGroupConstructor
+    layouts += "empty" -> empty

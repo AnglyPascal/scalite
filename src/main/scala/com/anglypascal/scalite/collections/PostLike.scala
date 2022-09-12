@@ -150,8 +150,6 @@ class PostLike(val rType: String)(
       "filename" -> filename,
       "collection" -> collection
     )
-    if frontMatter.extractOrElse("showExcerpt")(false) then
-      frontMatter += "excerpt" -> excerpt
 
     val nobj = Hooks
       .join[BeforeLocals](
@@ -184,12 +182,16 @@ class PostLike(val rType: String)(
     val str =
       if shouldConvert then Converters.convert(mainMatter, filepath)
       else mainMatter
+
+    val _locals = if frontMatter.getOrElse("showExcerpt")(false) then
+      locals.add("excerpt" -> com.anglypascal.scalite.data.immutable.DStr(excerpt))
+
     val context =
       IObj(
         MObj(postUrls.toList: _*) update
           MObj(
             "site" -> globals,
-            "page" -> locals,
+            "page" -> _locals,
             "collectionItems" -> CollectionItems.collectionItems
           )
       )
@@ -210,11 +212,11 @@ class PostLike(val rType: String)(
     * TODO: if no separator is found, get the first paragraph. Also look into
     * the linking issue discussed in jekyll
     */
-  def excerpt: String =
+  private lazy val excerpt: String =
     val separator =
       extractChain(frontMatter, globals)("separator")(Defaults.separator)
-    val head = getExcerpt(mainMatter, separator)
-    Converters.convert(head, filepath)
+    ""
+    // Excerpt(this, globals, separator).content
 
   /** The map holding sets of collection-types */
   private val groups = LinkedHashMap[String, ListBuffer[PostGroup]]()

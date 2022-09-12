@@ -32,18 +32,18 @@ trait Reader:
 
   /** Read the front and main matter from the file */
   private lazy val (_frontMatter, _mainMatter) =
-    val yaml_regex = raw"\A---\n?([\s\S\n]*)---\n?([\s\S\n]*)".r
+    val yaml_regex = raw"\A---\n?([\s\S\n]*?)---\n?([\s\S\n]*)".r
     val scope = ScopedDefaults.getDefaults(filepath, rType)
     val src = readFile(filepath)
     src match
       case yaml_regex(a, b) =>
         scope update frontMatterParser(a)
         _shouldConvert = scope.extractOrElse("shouldConvert")(true)
-        (scope, b)
-      case _ => (scope, src)
+        (scope, b.trim)
+      case _ => (scope, src.trim)
 
   private var _shouldConvert: Boolean = false
-  protected lazy val shouldConvert = _shouldConvert
+  lazy val shouldConvert = _shouldConvert
 
   /** yaml front matter of the file */
   def frontMatter = _frontMatter

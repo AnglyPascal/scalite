@@ -12,15 +12,14 @@ import com.anglypascal.scalite.documents.Pages
 import com.anglypascal.scalite.groups.Clusters
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
+import com.anglypascal.scalite.plugins.SiteHooks
+import com.anglypascal.scalite.utils.Cleaner
 import com.anglypascal.scalite.utils.DateParser
 import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.yamlFileParser
 import com.typesafe.scalalogging.Logger
-
-import com.anglypascal.scalite.utils.Cleaner
-import com.anglypascal.scalite.plugins.SiteHooks
 
 class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
   /** */
@@ -150,3 +149,9 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
     Collections.process(dryRun)
     Clusters.process(dryRun)
     Assets.copy(dryRun)
+
+  def reset(): Unit =
+    Collections.reset()
+    Clusters.reset()
+    Layouts.reset()
+    Pages.reset()

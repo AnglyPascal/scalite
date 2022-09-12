@@ -1,28 +1,19 @@
 package com.anglypascal.scalite
 
-import com.anglypascal.scalite.commands.DryRun
-import com.anglypascal.scalite.utils.frontMatterParser
-import scala.io.Source
-import de.larsgrefer.sass.embedded.SassCompilerFactory
-import sass.embedded_protocol.EmbeddedSass
-import java.io.File
-import de.larsgrefer.sass.embedded.importer.ClasspathImporter
-
-import collection.convert.ImplicitConversions.`seq AsJavaList`
+import com.anglypascal.scalite.utils.StringProcessors.quote
 
 @main
 def main =
-  val sassCompiler = SassCompilerFactory.bundled()
-  sassCompiler.setOutputStyle(EmbeddedSass.OutputStyle.COMPRESSED);
-  val file = new File("src/main/resources/foo/")
-  sassCompiler.setLoadPaths(List(file))
 
-  val css = sassCompiler
-    .compileScssString(
-      "@import 'baz';"
-    )
-    .getCss()
+  val str = """
+[1] hello
+[2] world
+some text with [a][2]
 
-  println(css)
+[3] bye bye
+  """
 
-  sassCompiler.close();
+  val regex = """ {0,3}(?:(\[[^\]]+\])(.+))""".r
+
+  for m <- regex.findAllMatchIn(str) do 
+    println(m.toString())

@@ -15,7 +15,7 @@ object Defaults:
   val paginate = false
   val author = DObj()
   val timeZone = "Europe/London"
-  val separator = "<--->"
+  val separator = "\n\n"
   val replaceAssets = true
 
   object Directories:

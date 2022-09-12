@@ -33,7 +33,7 @@ class PostsSpecs extends AsyncFlatSpec:
   it should "read all posts properly" in {
     val future = Future { Posts }
 
-    future.map(l => assert(l.items.toList.length === 3))
+    future.map(l => assert(l.items.toList.length === 4))
   }
 
   /** Check the overriding mechanism of configs */

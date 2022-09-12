@@ -4,14 +4,14 @@ import com.anglypascal.scalite.Configurable
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.documents.Generator
 import com.anglypascal.scalite.documents.Renderable
+import com.anglypascal.scalite.plugins.GroupHooks
 import com.anglypascal.scalite.plugins.Plugin
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
-import com.anglypascal.scalite.documents.Generator
-import com.anglypascal.scalite.plugins.GroupHooks
 
 /** Cluster[A] provides a Configurable that handles SuperGroups of type
   * SuperGroup[A]. It holds a hash table of GroupStyles, reads configuration
@@ -32,7 +32,7 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
     styles += style.styleName -> style
 
   /** Default configs held by the Cluster implementation */
-  protected lazy val defaultConfig: MObj
+  protected def defaultConfig: MObj
 
   /** SuperGroup objects held in this Cluster */
   protected val _superGroups = LinkedHashMap[String, SuperGroup[A]]()
@@ -51,8 +51,8 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
   /** Read the configurations and create necessary SuperGroups */
   def apply(configs: MObj, globals: IObj): Unit =
     GroupHooks.beforeInits.foldLeft(configs)((o, h) => h(globals)(IObj(o)))
-    defaultConfig update configs
-    for (key, value) <- defaultConfig do
+    val conf = defaultConfig update configs
+    for (key, value) <- conf do
       value match
         case value: MObj =>
           val style = value.extractOrElse("style")(Defaults.Group.defaultStyle)
@@ -64,6 +64,10 @@ trait Cluster[A <: Renderable] extends Configurable with Plugin:
   override def toString(): String =
     _superGroups.map(_._2.toString).mkString("\n")
 
+  def reset(): Unit = 
+    styles.clear()
+    _superGroups.clear()
+
 /** Holds all the Cluster implementations avaiable */
 object Clusters:
 
@@ -74,3 +78,9 @@ object Clusters:
 
   def process(dryRun: Boolean = false): Unit =
     clusters foreach { _.process(dryRun) }
+
+  /** Cleans up the collections to start anew */
+  protected[scalite] def reset(): Unit =
+    _clusters foreach { _.reset() }
+    _clusters.clear()
+    _clusters += PostCluster

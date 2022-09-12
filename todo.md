@@ -2,11 +2,15 @@
 
 ## Agenda
 
-1. **Implement Sass handling**
+1. **Complete the Build command**
 
-    For now go with dart-sass-java. Figure out how to compile the whole folder into one
-    file. Also figure out if it's possible to create separate style files for different
-    layouts.
+    - Globals
+    - Cleaner
+    - Assets
+    - Sass
+    - Collections
+
+    Should we implement another object that handles rendering all generated pages ?
 
 2. **Test the rendering of Groups' pages**
 
@@ -20,16 +24,6 @@
 
     Change a template to show groups and their permalinks. Also test linking to other
     posts. 
-
-4. **Complete the Build command**
-
-    - Globals
-    - Cleaner
-    - Assets
-    - Sass
-    - Collections
-
-    Should we implement another object that handles rendering all generated pages ?
 
 
 ## Finished
@@ -62,6 +56,13 @@
 2. **Defaults in Assets**
 
     Add the defaults configuration to Assets
+
+3. **Implement Sass handling**
+
+    For now go with dart-sass-java. Figure out how to compile the whole folder into one
+    file. Also figure out if it's possible to create separate style files for different
+    layouts.
+
 
 ## Documentation
 

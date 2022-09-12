@@ -17,7 +17,7 @@ object PostCluster extends Cluster[PostLike]:
   addGroupStyle(TagStyle)
   addGroupStyle(CatStyle)
 
-  protected lazy val defaultConfig: MObj =
+  protected def defaultConfig: MObj =
     import Defaults.Group
     import Defaults.Tags
     import Defaults.Categories
@@ -45,3 +45,8 @@ object PostCluster extends Cluster[PostLike]:
   /** Called by a PostLike to add itself to all available SuperGroups */
   def addToGroups(post: PostLike): Unit =
     for groupObj <- superGroups do groupObj.addItem(post.title, post)
+
+  override def reset(): Unit = 
+    super.reset()
+    addGroupStyle(TagStyle)
+    addGroupStyle(CatStyle)

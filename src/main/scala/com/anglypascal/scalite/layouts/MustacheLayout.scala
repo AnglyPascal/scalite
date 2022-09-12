@@ -41,7 +41,7 @@ class MustacheLayout(
   private val logger = Logger("Mustache Layout")
 
   /** The mustache object for this layout */
-  lazy val mustache = ScaliteMustache(mainMatter)
+  private lazy val mustache = ScaliteMustache(mainMatter)
 
   /** Evaluate the template by rendering it with it's context and partials
     *
@@ -58,7 +58,7 @@ class MustacheLayout(
   def render(context: DObj, contentPartial: String = ""): String =
     val str = mustache.render(
       context,
-      partials + ("content" -> new Mustache(contentPartial))
+      partials + ("content" -> ScaliteMustache(contentPartial))
     )
     parent match
       case Some(p) =>
