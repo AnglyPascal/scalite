@@ -4,19 +4,29 @@ import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.Colors.*
 
 import scala.util.matching.Regex
+import com.anglypascal.scalite.data.immutable.DObj
+import com.typesafe.scalalogging.Logger
 
 /** Converter provides the support to convert files matching the extension regex
   * to html files. Can be extended to provide support for arbitrary language.
   */
 trait Converter:
 
+  protected val logger = Logger("Converter")
+
   /** filetype that this converter handles */
-  val fileType: String
+  def fileType: String
 
   /** A comma separated list of extensions reprseneting the files this converter
     * is able to convert.
     */
-  val extensions: String
+  def extensions: String
+
+  logger.debug(
+    s"new converter: filetype: ${GREEN(fileType)}, " +
+      s"extensions: ${GREEN(extensions.split(",").map(_.trim).mkString(", "))}, " +
+      s"outputExt: ${GREEN(outputExt)}"
+  )
 
   private def ext: Regex =
     ("(" + extensions.trim
@@ -57,4 +67,4 @@ trait ConverterConstructor extends Plugin:
   val constructorName: String
 
   /** Create a new Constructor to be used in runtime */
-  def apply(fileType: String, extensions: String, outputExt: String): Converter
+  def apply(configs: DObj, globals: DObj): Converter

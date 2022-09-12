@@ -83,7 +83,7 @@ object Defaults:
     val toc = false
     val layout = ""
     val permalink = "/{{title}}{{outputExt}}"
-    val style = "item"
+    val style = "page"
     val extensions = "sass,scss"
     val outputExt = ".css"
 

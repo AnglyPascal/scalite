@@ -6,18 +6,27 @@ import laika.api
 import laika.format
 import laika.markdown.github
 import laika.parse.code
+import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.Defaults
 
 /** Markdown converter using Laika
   *
   * TODO: documentation about the sytanx highlighting
   */
 class Markdown(
-    val fileType: String,
-    val extensions: String,
-    val outputExt: String
+    protected val configs: DObj,
+    protected val globals: DObj
 ) extends Converter:
 
-  private val logger = Logger("Markdown converter")
+  protected override val logger = Logger("Markdown converter")
+
+  def fileType: String = configs.getOrElse("fileType")("none")
+
+  def extensions: String =
+    configs.getOrElse("extensions")(Defaults.Markdown.extensions)
+
+  def outputExt: String =
+    configs.getOrElse("outputExt")(Defaults.Markdown.outputExt)
 
   def convert(str: String, filepath: String): String =
     val transformer = api.Transformer
@@ -33,5 +42,5 @@ class Markdown(
 
 object Markdown extends ConverterConstructor:
   val constructorName: String = "markdown"
-  def apply(fileType: String, extensions: String, outputExt: String) =
-    new Markdown(fileType, extensions, outputExt)
+  def apply(configs: DObj, globals: DObj) =
+    new Markdown(configs, globals)

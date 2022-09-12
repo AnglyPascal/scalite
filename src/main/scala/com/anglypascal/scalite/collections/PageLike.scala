@@ -115,15 +115,18 @@ class PageLike(val rType: String)(
     * extension. That way, the Identity converter will be used.
     */
   protected lazy val render: String =
-    val str = Converters.convert(mainMatter, filepath)
-    val context = IObj(
-      "site" -> globals,
-      "page" -> locals,
-      "collectionItems" -> CollectionItems.collectionItems
-    )
+    val str =
+      if shouldConvert then Converters.convert(mainMatter, filepath)
+      else mainMatter
     layout match
-      case Some(l) => l.renderWrap(context, str)
-      case None    => str
+      case Some(l) =>
+        val context = IObj(
+          "site" -> globals,
+          "page" -> locals,
+          "collectionItems" -> CollectionItems.collectionItems
+        )
+        l.renderWrap(context, str)
+      case None => str
 
   /** Should this page be visible to the site? */
   val visible: Boolean = frontMatter.getOrElse("visible")(true)

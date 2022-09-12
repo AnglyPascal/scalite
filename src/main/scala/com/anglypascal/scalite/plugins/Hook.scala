@@ -126,7 +126,7 @@ sealed trait ConverterHook extends Hook:
   *   A mutable DObj containing the changes to be made to the configs
   */
 trait ConverterBeforeInit extends ConverterHook:
-  def apply(filetype: String, configs: IObj): MObj
+  def apply(globals: IObj)(filetype: String, configs: IObj): MObj
   override def toString(): String = super.toString() + " before init"
 
 /** To be run before the conversion of the string

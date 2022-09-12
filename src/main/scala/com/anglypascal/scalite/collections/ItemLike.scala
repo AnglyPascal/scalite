@@ -87,7 +87,7 @@ class ItemLike(val rType: String)(
       .foldLeft(_locals)((o, h) => o update h(globals)(IObj(o)))
     IObj(nl)
 
-  val visible: Boolean = frontMatter.extractOrElse("visible")(false)
+  val visible: Boolean = frontMatter.extractOrElse("visible")(true)
 
   /** If there's some frontMatter, then the mainMatter will be conerted with
     * appropriate converter. Then the converted string will be processed with

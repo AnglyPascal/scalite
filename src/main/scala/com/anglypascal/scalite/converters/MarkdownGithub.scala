@@ -9,15 +9,23 @@ import sttp.client3.UriContext
 import sttp.client3.basicRequest
 
 import java.net.URLEncoder
+import com.anglypascal.scalite.Defaults
 
 /** Basic Markdown to HTML converter using the Github API */
 class MarkdownGithub(
-    val fileType: String,
-    val extensions: String,
-    val outputExt: String
+    protected val configs: DObj,
+    protected val globals: DObj
 ) extends Converter:
 
-  private val logger = Logger("Markdown converter")
+  protected override val logger = Logger("Markdown converter")
+
+  def fileType: String = configs.getOrElse("fileType")("none")
+
+  def extensions: String =
+    configs.getOrElse("extensions")(Defaults.Markdown.extensions)
+
+  def outputExt: String =
+    configs.getOrElse("outputExt")(Defaults.Markdown.outputExt)
 
   def decode(string: String, otag: String, ctag: String): String =
     val o = URLEncoder.encode(otag, "UTF-8")
@@ -48,5 +56,5 @@ class MarkdownGithub(
 
 object MarkdownGithub extends ConverterConstructor:
   val constructorName: String = "markdownGithub"
-  def apply(fileType: String, extensions: String, outputExt: String) =
-    new MarkdownGithub(fileType, extensions, outputExt)
+  def apply(configs: DObj, globals: DObj) =
+    new MarkdownGithub(configs, globals)

@@ -32,7 +32,8 @@ object Converters extends Configurable:
     LinkedHashMap[String, ConverterConstructor](
       "markdown" -> Markdown,
       "markdownGithub" -> MarkdownGithub,
-      "identity" -> Identity
+      "identity" -> Identity,
+      "sass" -> Sass
     )
 
   /** The given converter to the converters set, mapped to its filetype. This
@@ -68,18 +69,12 @@ object Converters extends Configurable:
       conv match
         case conv: MObj =>
           val cn = conv.getOrElse("converter")("identity")
-          val ex = conv.getOrElse("extensions")("")
-          val oe = conv.getOrElse("outputExt")(".html")
           val C = converterConstructors.get(cn).getOrElse(Identity)
 
-          logger.debug(
-            s"new converter: filetype: ${GREEN(name)}, " +
-              s"extensions: ${GREEN(ex.split(",").map(_.trim).mkString(", "))}, " +
-              s"outputExt: ${GREEN(oe)}, " +
-              s"converter constructor: ${BLUE(cn)}"
-          )
-          ConverterHooks.beforeInits foreach { _.apply(name, IObj(conv)) }
-          converters += name -> C(name, ex, oe)
+          conv += "fileType" -> name
+          val con = ConverterHooks.beforeInits
+            .foldLeft(conv)((o, h) => h(globals)(name, IObj(conv)))
+          converters += name -> C(IObj(con), globals)
         case _ =>
           logger.debug(s"please provide configs for convert $name as a table")
 
@@ -118,8 +113,8 @@ object Converters extends Configurable:
   /** Convert a given filepath with an appropriate converter if it exists.
     *
     * It applies all the filters from ConverterHooks.beforeConverts to the input
-    * string and ConverterHooks.afterConverts to the output string, applying them in
-    * order of decreasing priority.
+    * string and ConverterHooks.afterConverts to the output string, applying
+    * them in order of decreasing priority.
     *
     * @param str
     *   the string to be converted. In our case, the main matter of the file

@@ -181,7 +181,9 @@ class PostLike(val rType: String)(
 
   /** Convert the contents of the post to HTML */
   protected lazy val render: String =
-    val str = Converters.convert(mainMatter, filepath)
+    val str =
+      if shouldConvert then Converters.convert(mainMatter, filepath)
+      else mainMatter
     val context =
       IObj(
         MObj(postUrls.toList: _*) update
