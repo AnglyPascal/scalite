@@ -25,10 +25,10 @@ class Excerpt(
   private val shouldConvert = element.shouldConvert
 
   private lazy val rawContent =
-    val mkdnLinkRef = raw"^ {0,3}(?:(\[[^\]]+\])(.+))".r
+    val mkdnLinkRef = """(?m)^ {0,3}(?:(\[[^\]]+\])(.+))$""".r
     val mainMatter = element.mainMatter
     val Array(head, tail) = mainMatter.split(separator, 2)
-    head + "\n" + mkdnLinkRef.findAllMatchIn(mainMatter).mkString("\n")
+    head + "\n\n" + mkdnLinkRef.findAllMatchIn(mainMatter).mkString("\n")
 
   protected val layoutName: String = "empty"
 
@@ -56,3 +56,6 @@ class Excerpt(
     rendered
 
   def content = render
+
+  override def toString(): String = 
+    "Excerpt: " + shouldConvert //+ " and string: " + render

@@ -10,8 +10,14 @@ import com.anglypascal.scalite.utils.DirectoryReader
 import org.scalatest.flatspec.AsyncFlatSpec
 
 import scala.concurrent.Future
+import com.anglypascal.scalite.groups.Clusters
 
 class PostsSpecs extends AsyncFlatSpec:
+
+  Converters.reset()
+  Layouts.reset()
+  Clusters.reset()
+
   val pDir = "src/test/resources/site_template"
   val pPth = "/_posts"
   val globals = IObj("base" -> pDir)

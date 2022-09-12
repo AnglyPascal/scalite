@@ -15,5 +15,5 @@ This is the second paragraph.
 
 This is the last paragraph, which shouldn't be in the excerpt.
 
-[1] www.google.com
-[2] this_is_another_link
+[1]: www.google.com
+[2]: this_is_another_link

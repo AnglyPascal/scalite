@@ -44,7 +44,7 @@ object Converters extends Configurable:
 
   private val logger = Logger("Converter")
 
-  private val convsConfig = MObj(
+  private def defaultConfigs = MObj(
     "markdown" -> MObj(
       "converter" -> "markdown",
       "extensions" -> Defaults.Markdown.extensions,
@@ -63,9 +63,9 @@ object Converters extends Configurable:
   )
 
   def apply(configs: MObj, globals: IObj): Unit =
-    convsConfig update configs
+    val conf = defaultConfigs update configs
 
-    for (name, conv) <- convsConfig do
+    for (name, conv) <- conf do
       conv match
         case conv: MObj =>
           val cn = conv.getOrElse("converter")("identity")
@@ -139,3 +139,11 @@ object Converters extends Configurable:
 
   override def toString(): String =
     converters.map("  " + _._2.toString).mkString("\n")
+
+  def reset(): Unit =
+    converterConstructors.clear()
+    converterConstructors += "markdown" -> Markdown
+    converterConstructors += "markdownGithub" -> MarkdownGithub
+    converterConstructors += "identity" -> Identity
+    converterConstructors += "sass" -> Sass
+    converters.clear()
