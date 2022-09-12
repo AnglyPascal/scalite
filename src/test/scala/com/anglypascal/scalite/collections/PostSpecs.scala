@@ -1,7 +1,8 @@
 package com.anglypascal.scalite.collections
 
 import org.scalatest.flatspec.AnyFlatSpec
-import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.immutable.{DObj => IObj}
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
@@ -15,14 +16,15 @@ class PostSpecs extends AnyFlatSpec:
 
   val pDir = "src/test/resources/site_template/_posts"
   val rPth = "/2016-05-19-super-short-article.md"
-  val glb1 = DObj(
+  val glb1 = IObj(
     "title" -> "Test1",
-    "rootUrl" -> "hello.world.com"
-    )
-  val glb2 = DObj(
+    "rootUrl" -> "hello.world.com",
+    "base" -> "src/test/resources/site_template"
+  )
+  val glb2 = IObj(
     "dateFormat" -> DStr("dd MMM, yyyy")
   )
-  val clcs = DObj()
+  val clcs = IObj()
 
   it should "read valid file properly" in {
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
@@ -53,11 +55,10 @@ class PostSpecs extends AnyFlatSpec:
   }
 
   it should "handle rendering and file creation properly" in {
+    Layouts.reset()
     DirectoryReader("src/test/resources/site_template/_site")
-    Layouts(
-      com.anglypascal.scalite.data.mutable.DObj(),
-      DObj("base" -> "src/test/resources/site_template")
-    )
+    Layouts(MObj(), glb1)
+
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
     pst.write(false)
     val p = Paths.get(
@@ -67,5 +68,29 @@ class PostSpecs extends AnyFlatSpec:
     assert(Files.exists(p))
     Files.delete(p)
     assert(!Files.exists(p))
+
+    Layouts.reset()
   }
 
+  it should "handle excerpts properly" in {
+    Converters.reset()
+    Layouts.reset()
+
+    val pDir = "src/test/resources/site_template"
+    val pPth = "/_posts/2022-09-12-post-with-links.md"
+    Converters(MObj(), glb1)
+    Layouts(MObj(), glb1)
+
+    val post = PostLike("posts")(pDir, pPth, glb1, clcs)
+    val locals = post.locals
+
+    val ex = locals.getOrElse("excerpt")("")
+
+    assert(
+      ex.contains("""<a href="this_is_another_link">b</a>""") &&
+        ex.contains("second paragraph")
+    )
+
+    Converters.reset()
+    Layouts.reset()
+  }

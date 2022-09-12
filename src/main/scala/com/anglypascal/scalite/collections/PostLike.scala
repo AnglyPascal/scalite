@@ -143,6 +143,12 @@ class PostLike(val rType: String)(
     )(Converters.findOutputExt(filepath))
 
   lazy val locals =
+    val l = _locals
+    if frontMatter.getOrElse("showExcerpt")(false) then
+      l += "excerpt" -> excerpt
+    IObj(l)
+
+  private def _locals =
     frontMatter update MObj(
       "title" -> title,
       "date" -> date,
@@ -151,6 +157,8 @@ class PostLike(val rType: String)(
       "collection" -> collection
     )
 
+    /** TODO: add time filters */
+
     val nobj = Hooks
       .join[BeforeLocals](
         PostHooks.beforeLocals,
@@ -158,7 +166,7 @@ class PostLike(val rType: String)(
       )
       .foldLeft(frontMatter)((o, h) => o update h.apply(globals)(IObj(o)))
 
-    IObj(nobj)
+    nobj
 
   /** Get the posts from the front\_matter and get their permalinks
     *
@@ -183,15 +191,12 @@ class PostLike(val rType: String)(
       if shouldConvert then Converters.convert(mainMatter, filepath)
       else mainMatter
 
-    val _locals = if frontMatter.getOrElse("showExcerpt")(false) then
-      locals.add("excerpt" -> com.anglypascal.scalite.data.immutable.DStr(excerpt))
-
     val context =
       IObj(
         MObj(postUrls.toList: _*) update
           MObj(
             "site" -> globals,
-            "page" -> _locals,
+            "page" -> locals,
             "collectionItems" -> CollectionItems.collectionItems
           )
       )
@@ -215,8 +220,12 @@ class PostLike(val rType: String)(
   private lazy val excerpt: String =
     val separator =
       extractChain(frontMatter, globals)("separator")(Defaults.separator)
-    ""
-    // Excerpt(this, globals, separator).content
+    Excerpt(
+      mainMatter,
+      filepath,
+      shouldConvert,
+      separator
+    )(IObj(_locals), globals).content
 
   /** The map holding sets of collection-types */
   private val groups = LinkedHashMap[String, ListBuffer[PostGroup]]()

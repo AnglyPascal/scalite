@@ -11,30 +11,27 @@ import com.typesafe.scalalogging.Logger
   * opitons? Like a permalink as jekyll does?
   */
 class Excerpt(
-    private val element: Element,
-    private val globals: DObj,
+    private val mainMatter: String,
+    val filepath: String,
+    private val shouldConvert: Boolean,
     private val separator: String
+)(
+    private val _locals: DObj,
+    private val globals: DObj
 ) extends Renderable:
-
-  val visible = true
-
-  val filepath: String = element.parentDir + element.relativePath
-
-  val rType = element.rType + "#excerpt"
-
-  private val shouldConvert = element.shouldConvert
-
-  private lazy val rawContent =
-    val mkdnLinkRef = """(?m)^ {0,3}(?:(\[[^\]]+\])(.+))$""".r
-    val mainMatter = element.mainMatter
-    val Array(head, tail) = mainMatter.split(separator, 2)
-    head + "\n\n" + mkdnLinkRef.findAllMatchIn(mainMatter).mkString("\n")
-
-  protected val layoutName: String = "empty"
 
   private val logger = Logger("Excerpt")
 
-  lazy val locals: DObj = element.locals
+  val visible: Boolean = true
+
+  private lazy val rawContent =
+    val mkdnLinkRef = """(?m)^ {0,3}(?:(\[[^\]]+\])(.+))$""".r
+    val Array(head, tail) = mainMatter.split(separator, 2)
+    head + "\n\n" + mkdnLinkRef.findAllMatchIn(mainMatter).mkString("\n")
+
+  lazy val locals = _locals
+
+  protected val layoutName: String = "empty"
 
   protected lazy val render: String =
     val str =
@@ -57,5 +54,5 @@ class Excerpt(
 
   def content = render
 
-  override def toString(): String = 
-    "Excerpt: " + shouldConvert //+ " and string: " + render
+  override def toString(): String =
+    "Excerpt: " + shouldConvert // + " and string: " + render
