@@ -22,14 +22,14 @@ By default Scalite provides three kind of user-written contents called Elements:
 Type     | Description
 ---------|-------------
 ItemLike | Anything that won't be rendered as a separate webpage, but will be used as
-         | part of other contents.
+           part of other contents.
 ---------|-------------
 PageLike | Contents that will be rendered as a webpage, but unlike PostLike contents,
-         | doesn't have groups metadata.
+           doesn't have groups metadata.
 ---------|-------------
 PostLike | Blog-like posts with the functionality of groups. A post can belong to
-         | different groups. By default, two kinds of groups are defined: tags and
-         | categories. 
+           different groups. By default, two kinds of groups are defined: tags and
+           categories. 
 
 Besides, there's a plugin api that supports the definition of a custom Element.
 
