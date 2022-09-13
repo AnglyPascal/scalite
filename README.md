@@ -1,5 +1,4 @@
-Scalite
--------
+# Scalite
 
 [Under development]
 

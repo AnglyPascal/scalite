@@ -89,13 +89,6 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
   ): Unit =
     configurables foreach { (C, c) => C(c, globals) }
 
-  private def collectData(dataDir: String, _configs: MObj): MObj =
-    val obj = MObj()
-    val configs = _configs.extractOrElse("data")(MObj())
-    for f <- getListOfFilepaths(dataDir) do
-      obj += getFileName(f) -> yamlFileParser(dataDir + f)
-    obj
-
   private def getConfigurables(configs: MObj): List[(Configurable, MObj)] =
     val plugD =
       configs.getOrElse("base")(Defaults.Directories.base) +
@@ -105,6 +98,13 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
       List(ScopedDefaults, Converters, Layouts)
         ++ Clusters.clusters ++ List(Collections)
     configurables.map(C => (C, configs.extractOrElse(C.sectionName)(MObj())))
+
+  private def collectData(dataDir: String, _configs: MObj): MObj =
+    val obj = MObj()
+    val configs = _configs.extractOrElse("data")(MObj())
+    for f <- getListOfFilepaths(dataDir) do
+      obj += getFileName(f) -> yamlFileParser(dataDir + f)
+    obj
 
   def globals: IObj =
 

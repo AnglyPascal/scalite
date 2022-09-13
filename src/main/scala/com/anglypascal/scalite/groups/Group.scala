@@ -12,14 +12,22 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.LinkedHashMap
 import com.anglypascal.scalite.plugins.GroupHooks
 
-/** Group defines a group of Renderables. A Renderable can add itself to
-  * multiple Groups. Group's job is to provide a `process` method that does
-  * something with the Renderables of this Group, maybe render them into a table
-  * of contents like Page, or provide the metadata of the Renderables to some
-  * other object.
+/** A Group is a set of Renderables. It's the convenient way of grouping
+  * together similar content to be indexed in a hierarchical structure.
   *
-  * A Group is itself a Renderable, so it can be rendered into a resulting
-  * String, and can have a Layout.
+  * A Renderable can add itself to multiple Groups. Group's job is to provide a
+  * `process` method that does something with the Renderables of this Group,
+  * maybe render them into a table of contents Page, or provide the metadata of
+  * the Renderables to some other object.
+  *
+  * A Group is itself a Renderable, and it's rendered output has access to the
+  * metadata of all the Renderables of this group. So the output of a Group can
+  * act as the toc Page.
+  *
+  * Two predefined examples of this are Tags and Cateories, for PostLike
+  * contents. A Tag is a Group, and a PostLike can belong to multiple Tags.
+  * Similarly for Categories. The order of Categories a PostLike belongs to
+  * defines it's hierarchy in the site.
   */
 trait Group[A <: Renderable] extends Renderable:
 
@@ -29,9 +37,9 @@ trait Group[A <: Renderable] extends Renderable:
   private val _items = LinkedHashMap[String, A]()
   def items = _items.toList.map(_._2)
 
-  protected val globals: IObj 
+  protected val globals: IObj
 
-  protected val configs: MObj 
+  protected val configs: MObj
 
   /** Name of the Group, which will be called by the Renderables wishing to add
     * itself to this.

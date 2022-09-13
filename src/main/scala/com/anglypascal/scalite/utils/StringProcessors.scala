@@ -149,3 +149,7 @@ object StringProcessors:
     val l = s.length
     if l < num then s + (" " * (num - l))
     else s
+
+
+  /** TODO: Merge two given directories */
+  def mergePaths(path1: String, path2: String): String = ???

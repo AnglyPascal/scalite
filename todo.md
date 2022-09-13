@@ -36,6 +36,10 @@
 
 6. Caching files
 
+7. Create ID for posts, and check if posts can find other posts by that ID
+
+8. Taxonomical groups, how to? Oh just category style
+
 
 ## Finished
 

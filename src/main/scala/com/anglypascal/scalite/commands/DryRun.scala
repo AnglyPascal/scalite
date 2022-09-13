@@ -8,14 +8,17 @@ import com.anglypascal.scalite.Site
 
 object DryRun extends Command:
 
-  def run(): Unit =
-    run(System.getProperty("user.dir"))
+  def run(site: Site): Unit =
+    run(System.getProperty("user.dir"), site)
 
-  def run(sitePath: String): Unit =
+  private def run(sitePath: String, site: Site): Unit =
 
-    val globals = Site(sitePath)
+    val site = Site(sitePath)
 
-    Collections.process(true)
-    Clusters.process(true)
+    Collections.process()
+    Clusters.process()
     Assets.copy()
 
+    /** things:
+      *   - compile _sass
+      */
