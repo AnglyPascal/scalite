@@ -24,7 +24,7 @@ collections:
     permalink: "/{{collection}}/{{path}}/"
     output: true
 
-show_excerpts: false # set to true to show excerpts on the homepage
+showExcerpts: false # set to true to show excerpts on the homepage
 
 defaults:
 - scope:
