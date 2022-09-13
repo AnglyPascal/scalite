@@ -61,8 +61,12 @@ class PostLike(val rType: String)(
     "rType" -> rType,
     "parentDir" -> parentDir,
     "relativePath" -> relativePath
-  )
+  ) update collection
 
+  /** Isn't it useless? like even if someone changes the collection infos,
+    * nothing will change really. FIXME don't take specific arguments like that,
+    * take the whole configs
+    */
   PostHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
@@ -161,7 +165,6 @@ class PostLike(val rType: String)(
     )
 
     /** TODO: add time filters */
-
     val nobj = Hooks
       .join[BeforeLocals](
         PostHooks.beforeLocals,
@@ -182,22 +185,27 @@ class PostLike(val rType: String)(
       separator
     )(IObj(_locals), globals).content
 
-  /** Get the posts from the front\_matter and get their permalinks
+  /** Prepares hyperlinks to local pages for use in the templates.
+    *
+    * Picks up all maps "link_name" -> "relative or absolute path to the file"
+    * under the hyperlinks section of frontMatter. This link will be available
+    * to the templates in the root context as "link name", and can be used as
+    * {{link_name}} in mustache.
     *
     * @example
     *   {{{
-    * postUrls:
+    * hyperlinks:
     *   post1: /_posts/2022-04-01-post-name.md
     *   post2: /_posts/cat1/2022-04-01-post-name-2.md
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  lazy val postUrls: Map[String, String] =
+  private lazy val postUrls: Map[String, String] =
     def f(p: (String, Data)): Option[(String, String)] =
       p._2 match
         case str: DStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
         case _         => None
-    frontMatter.extractOrElse("postUrls")(MObj()).obj.flatMap(f).toMap
+    frontMatter.extractOrElse("hyperlinks")(MObj()).obj.flatMap(f).toMap
 
   /** Convert the contents of the post to HTML */
   protected lazy val render: String =
@@ -237,13 +245,12 @@ class PostLike(val rType: String)(
     if groups.contains(grpType) then groups(grpType) += a
     else groups += grpType -> ListBuffer(a)
 
+  /** Write the post and run all the AfterWrite hooks */
   override def write(dryRun: Boolean): Unit =
     super.write(dryRun)
     PostHooks.afterWrites foreach { _.apply(globals)(this) }
 
-  /** Processes the collections this post belongs to, for the collections
-    * specified in the list in CollectionsHandler companion object
-    */
+  /** Processes the groups in PostCluster this post belongs to. */
   PostCluster.addToGroups(this)
 
   override def toString(): String =

@@ -8,7 +8,22 @@ import com.typesafe.scalalogging.Logger
 import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.LinkedHashMap
 
-/** Fetches scoped defaults from the "defaults" section of configurations
+/** Fetches scoped defaults from the "defaults" section of configurations.
+  *
+  * Each entry under the "defaults" section will have the following format:
+  * {{{
+  *  defaults:
+  *    scopeName:
+  *      scope:
+  *        path: /_posts
+  *        type: "posts"
+  *      values:
+  *        # default values for posts in /_posts are set here
+  * }}}
+  *
+  * At creation time, all the objects with type "posts" from "/\_posts" will
+  * have access to these default variables. If an object matches several scoped
+  * defaults, the ones defined later will override the ones defined earlier.
   */
 object ScopedDefaults extends Configurable:
 
@@ -18,6 +33,7 @@ object ScopedDefaults extends Configurable:
 
   val sectionName: String = "defaults"
 
+  /** Fetch the scoped defaults from the "defaults" section */
   def apply(conf: MObj, globals: IObj): Unit =
     base = globals.getOrElse("base")(Defaults.Directories.base)
     for (k, v) <- conf do

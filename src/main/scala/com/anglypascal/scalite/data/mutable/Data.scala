@@ -5,6 +5,7 @@ import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Null
 import com.rallyhealth.weejson.v1.Num
 import com.rallyhealth.weejson.v1.Obj
+import com.anglypascal.scalite.data.immutable
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
@@ -217,6 +218,12 @@ final class DObj(val obj: Map[String, Data])
               case _ => ()
           case _ => ()
     this
+
+  def update(that: immutable.DObj): this.type =
+    DataImplicits.fromIObj(that) match
+      case v: DObj => this update v
+      case _ => this
+    
 
   def copy: DObj =
     val nObj = DObj()
@@ -449,6 +456,16 @@ object DataImplicits:
       case v: Num  => DNum(v)
       case v: Bool => DBool(v)
       case Null    => DNull
+
+  given fromIObj: Conversion[immutable.Data, Data] =
+    _ match
+      case v: immutable.DObj =>
+        DObj(v.map(p => (p._1, fromIObj(p._2))).toSeq: _*)
+      case v: immutable.DArr  => DArr(v.map(d => fromIObj(d)).toSeq: _*)
+      case v: immutable.DStr  => DStr(v.str)
+      case v: immutable.DNum  => DNum(v.num)
+      case v: immutable.DBool => DBool(v.bool)
+      case immutable.DNull => DNull
 
 /** FEATURE: Add wrappers for lambda functions. Text lambda AST with
   * mustache.Then define the predefined filter functions in terms of these

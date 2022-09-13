@@ -25,6 +25,17 @@
     Change a template to show groups and their permalinks. Also test linking to other
     posts. 
 
+4. **Hooks** 
+    Some default hooks to finetune some specific behaviour and to check hooks. For
+    example, something with Sass.
+
+5. **Functional, remove mutable states in Standalone objects**
+    Change everything to functional style. Remove standalone objects, they linger for
+    way too long. Instead create the objects during runtime and pass around the
+    references.
+
+6. Caching files
+
 
 ## Finished
 
@@ -86,16 +97,7 @@
 
 ## Feature Options
 
-- **Excerpt**
-    Creates an excerpt of the post. Add more functionality, customization.
-
 - **Mustache predefined lambdas**
 
     Add filters from jekyll in the layouts.helpers module.
     Make this into a pluginable trait
-
-- **Hooks** 
-    Fine grained control. These will be done much later. Hooks can be added via mixins.
-    There will be a Hooks object with all the hooks available. A Hook class will be
-    provided with a single method call(). Now in places where Hooks need to be called,
-    all the Hook objects in that array in Hooks will be called sequentially. 

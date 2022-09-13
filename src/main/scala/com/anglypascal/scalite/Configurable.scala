@@ -3,7 +3,7 @@ package com.anglypascal.scalite
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 
-/** Objects that can be configured by the \_config.yml file
+/** Objects that can be configured by the `/_config.yml` file
   *
   * Objects that implement Configurable will look for the section named
   * `sectionName` in the configs file, and configure itself with the
