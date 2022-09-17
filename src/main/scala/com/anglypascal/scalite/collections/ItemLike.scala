@@ -2,6 +2,7 @@ package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.data.DataExtensions.*
 import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
@@ -37,6 +38,12 @@ class ItemLike(val rType: String)(
 
   private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
+
+  protected val reader = StrictReader(rType, filepath)
+
+  private val frontMatter = reader.frontMatter
+  private lazy val mainMatter = reader.mainMatter
+  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
   // by default ItemLike objects don't have layouts
   protected val layoutName =

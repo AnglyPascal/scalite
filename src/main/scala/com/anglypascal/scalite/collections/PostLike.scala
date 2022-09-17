@@ -1,6 +1,7 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
+import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
@@ -62,6 +63,12 @@ class PostLike(val rType: String)(
     "parentDir" -> parentDir,
     "relativePath" -> relativePath
   ) update collection
+
+  protected val reader = StrictReader(rType, filepath)
+
+  private val frontMatter = reader.frontMatter
+  private lazy val mainMatter = reader.mainMatter
+  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
   /** Isn't it useless? like even if someone changes the collection infos,
     * nothing will change really. FIXME don't take specific arguments like that,

@@ -1,5 +1,6 @@
 package com.anglypascal.scalite.collections
 
+import com.anglypascal.scalite.documents.SourceFile
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.utils.cmpOpt
@@ -13,9 +14,11 @@ import com.anglypascal.scalite.utils.cmpOpt
   * An Element is also a Renderable, so it can have a parent layout and it can
   * be rendered into some HTML string.
   */
-trait Element extends Reader with Renderable:
+trait Element extends Renderable with SourceFile:
 
   lazy val identifier = filepath
+
+  protected val reader: Reader
 
 /** Compare two given Elements by the given key
   *

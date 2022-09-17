@@ -40,7 +40,7 @@ object Collections extends Configurable with Generator:
     styles += elemCons.styleName -> elemCons
 
   /** Defaults of the `collection` section. */
-  private def defaultConfigs =
+  private def defaultConfigs: MObj =
     import Defaults.Posts
     import Defaults.Drafts
     import Defaults.Statics
@@ -205,7 +205,7 @@ object CollectionItems:
     _allItems.map(p => (p._1, IObj(p._2.map(t => (t._1, t._2.locals))))).toMap
   )
 
-  def addItems(colName: String, items: Map[String, Element]) =
+  def addItems(colName: String, items: Map[String, Element]): Unit =
     _allItems += colName -> items
 
   protected[collections] def reset(): Unit = _allItems.clear()

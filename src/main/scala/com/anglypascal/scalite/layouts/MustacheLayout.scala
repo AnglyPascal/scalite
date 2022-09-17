@@ -6,7 +6,7 @@ import com.anglypascal.scalite.plugins.Plugin
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.layouts.helpers.*
 
@@ -39,6 +39,10 @@ class MustacheLayout(
   val rType = "mustache"
 
   private val logger = Logger("Mustache Layout")
+
+  protected val reader = StrictReader(rType, filepath)
+  private val frontMatter = reader.frontMatter
+  private lazy val mainMatter = reader.mainMatter
 
   /** The mustache object for this layout */
   private lazy val mustache = ScaliteMustache(mainMatter)
@@ -97,11 +101,7 @@ class MustacheLayouts(
     val ls = partialFiles
       .filter(matches(_))
       .map(f => {
-        object R extends Reader:
-          val parentDir = partialsDir
-          val relativePath = f
-          val rType = "mustachePartials"
-
+        val R = StrictReader("mustachePartials", partialsDir + f)
         (getFileName(f), new Mustache(R.mainMatter))
       })
       .toMap

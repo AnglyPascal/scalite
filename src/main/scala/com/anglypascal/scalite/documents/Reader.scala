@@ -8,6 +8,7 @@ import com.anglypascal.scalite.ScopedDefaults
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.anglypascal.scalite.data.mutable.DObj
 
 /** Document represents the pages of the site that are generated from the
   * templates and user created content files. This includes all mustache
@@ -15,20 +16,20 @@ import java.nio.file.Paths
   */
 trait Reader:
 
-  /** The base directory this file lies in */
-  val parentDir: String
-
-  /** The path to the file relative to the parent directory */
-  val relativePath: String
-
   /** type of this file, used to determine the defaults */
-  val rType: String
+  protected val rType: String
 
   /** path to the file */
-  lazy val filepath: String = parentDir + relativePath
+  protected val filepath: String
 
-  /** Strip the filepath to get the filename */
-  lazy val filename: String = getFileName(filepath)
+  /** yaml front matter of the file */
+  def frontMatter: DObj
+
+  /** main matter containing the contents of the file */
+  def mainMatter: String
+
+class StrictReader(protected val rType: String, protected val filepath: String)
+    extends Reader:
 
   /** Read the front and main matter from the file */
   private lazy val (_frontMatter, _mainMatter) =
@@ -37,16 +38,48 @@ trait Reader:
     val src = readFile(filepath)
     src match
       case yaml_regex(a, b) =>
+        scope += "shouldConvert" -> true
         scope update frontMatterParser(a)
-        _shouldConvert = scope.extractOrElse("shouldConvert")(true)
         (scope, b.trim)
-      case _ => (scope, src.trim)
+      case _ => (scope += "shouldConvert" -> false, src.trim)
 
-  private var _shouldConvert: Boolean = false
-  lazy val shouldConvert = _shouldConvert
+  def frontMatter: DObj = _frontMatter
+  def mainMatter: String = _mainMatter
 
-  /** yaml front matter of the file */
-  def frontMatter = _frontMatter
+class LazyReader(protected val rType: String, protected val filepath: String)
+    extends Reader:
 
-  /** main matter containing the contents of the file */
-  def mainMatter = _mainMatter
+  private val yaml_regex = raw"\A---\n?([\s\S\n]*?)---\n?([\s\S\n]*)".r
+
+  /** Read the front and main matter from the file */
+  private lazy val _frontMatter =
+    val scope = ScopedDefaults.getDefaults(filepath, rType)
+    val src = readFile(filepath)
+    src match
+      case yaml_regex(a, b) =>
+        scope += "shouldConvert" -> true
+        scope update frontMatterParser(a)
+      case _ => scope += "shouldConvert" -> false
+
+  /** Read the front and main matter from the file */
+  private lazy val _mainMatter =
+    val src = readFile(filepath)
+    src match
+      case yaml_regex(a, b) => b.trim
+      case _                => src.trim
+
+  def frontMatter: DObj = _frontMatter
+  def mainMatter: String = _mainMatter
+
+
+trait SourceFile:
+  
+  val relativePath: String
+
+  val parentDir: String
+
+  def filepath: String = parentDir + relativePath
+
+  def filename: String = getFileName(filepath)
+
+  protected val shouldConvert: Boolean
