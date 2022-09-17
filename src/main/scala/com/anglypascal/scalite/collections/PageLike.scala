@@ -1,7 +1,6 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
@@ -53,10 +52,10 @@ class PageLike(val rType: String)(
     "relativePath" -> relativePath
   )
 
-  protected val reader = StrictReader(rType, filepath)
-
-  private val frontMatter = reader.frontMatter
-  private lazy val mainMatter = reader.mainMatter
+  private val frontMatter =
+    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
+  private lazy val mainMatter = 
+    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
   protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
   /** Name of the parent layout. Can be set in either the frontMatter, in the

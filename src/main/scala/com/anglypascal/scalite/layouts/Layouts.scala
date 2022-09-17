@@ -2,7 +2,6 @@ package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.Configurable
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
@@ -24,13 +23,10 @@ object Layouts extends Configurable:
     )
 
   private def empty =
-    new Layout {
-      val name = "empty"
-      val lang = "mustache"
+    new Layout("mustache", "empty") {
       val rType = "empty"
       val parentDir: String = ""
       val relativePath: String = ""
-      protected val reader = StrictReader(rType, "")
 
       /** The mustache object for this layout */
       private lazy val mustache = ScaliteMustache("{{> content }}")

@@ -1,7 +1,6 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.documents.SourceFile
-import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.utils.cmpOpt
 
@@ -17,8 +16,6 @@ import com.anglypascal.scalite.utils.cmpOpt
 trait Element extends Renderable with SourceFile:
 
   lazy val identifier = filepath
-
-  protected val reader: Reader
 
 /** Compare two given Elements by the given key
   *

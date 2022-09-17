@@ -9,14 +9,14 @@ import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.documents.SourceFile
 
 /** Defines an abstract Layout. */
-trait Layout extends SourceFile:
+abstract class Layout(val lang: String, val name: String) extends SourceFile:
 
-  val lang: String
-
-  val name: String
-
-  protected val reader: Reader
   protected val shouldConvert = false
+
+  protected val frontMatter =
+    com.anglypascal.scalite.documents.Reader.frontMatter(name, filepath)
+  protected lazy val mainMatter =
+    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 
   LayoutHooks.beforeInits foreach { _.apply(lang, name, filepath) }
 
@@ -47,7 +47,6 @@ trait Layout extends SourceFile:
 
   /** Take a list of layouts, and find the parent layout */
   def setParent(layouts: Map[String, Layout]): Unit =
-    val frontMatter = reader.frontMatter
     if frontMatter.contains("layout") then
       val pn = frontMatter.getOrElse("layout")("")
       layouts.get(pn) match

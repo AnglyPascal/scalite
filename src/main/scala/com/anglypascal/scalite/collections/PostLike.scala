@@ -1,7 +1,6 @@
 package com.anglypascal.scalite.collections
 
 import com.anglypascal.scalite.Defaults
-import com.anglypascal.scalite.documents.StrictReader
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.DataExtensions.*
@@ -64,10 +63,10 @@ class PostLike(val rType: String)(
     "relativePath" -> relativePath
   ) update collection
 
-  protected val reader = StrictReader(rType, filepath)
-
-  private val frontMatter = reader.frontMatter
-  private lazy val mainMatter = reader.mainMatter
+  private val frontMatter =
+    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
+  private lazy val mainMatter = 
+    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
   protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
   /** Isn't it useless? like even if someone changes the collection infos,
