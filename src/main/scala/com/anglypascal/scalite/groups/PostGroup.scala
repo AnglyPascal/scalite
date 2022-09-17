@@ -60,7 +60,7 @@ class PostGroup(val groupType: String, val groupName: String)(
   /** Add a new post to this collection */
   def addPost(post: PostLike) =
     add(post.title, post)
-    post.addGroup(groupType)(this)
+    // post.addGroup(groupType)(this)
     logger.trace(s"adding $post")
 
   /** Name of the layout to be used for rendering the page for this PostsGroup.

@@ -117,6 +117,16 @@ object Defaults:
     val relativeLink = "/{{name}}"
     val sortBy = "title"
 
+  object Tree:
+    val permalink = "/{{ctype}}/{{name}}"
+    val defaultStyle = "tag"
+    val defaultGType = "tags"
+
+  object PostTree:
+    val outputExt = ".html"
+    val permalink = "/{{path}}"
+    val sortBy = "title"
+
   object Tags:
     val title = "Tags"
     val gType = "tags"

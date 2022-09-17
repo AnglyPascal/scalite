@@ -259,11 +259,12 @@ object DataImplicits:
   given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
   given fromAny: Conversion[Any, Data] = any =>
     any match
-      case any: String     => DStr(any)
-      case any: BigDecimal => DNum(any)
-      case any: Boolean    => DBool(any)
-      case any: Data       => any
-      case _               => DNull
+      case any: String       => DStr(any)
+      case any: BigDecimal   => DNum(any)
+      case any: Boolean      => DBool(any)
+      case any: Data         => any
+      case any: mutable.Data => fromMutData(any)
+      case _                 => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match
@@ -276,11 +277,10 @@ object DataImplicits:
 
   given fromMutData: Conversion[mutable.Data, Data] =
     _ match
-      case v: mutable.DObj =>
-        DObj(v.obj.toMap.map((k, vv) => (k, fromMutData(vv))))
-      case v: mutable.DArr  => DArr(v.toList.map(fromMutData))
-      case v: mutable.DStr  => DStr(v.str)
-      case v: mutable.DNum  => DNum(v.num)
+      case v: mutable.DObj => DObj(v.toMap.map((k, vv) => (k, fromMutData(vv))))
+      case v: mutable.DArr => DArr(v.toList.map(fromMutData))
+      case v: mutable.DStr => DStr(v.str)
+      case v: mutable.DNum => DNum(v.num)
       case v: mutable.DBool => DBool(v.bool)
       case mutable.DNull    => DNull
 
