@@ -18,7 +18,15 @@ class CategoryTree(
   def createChild(name: String): CategoryTree =
     CategoryTree(catType, name, Some(this))(_configs, _globals)
 
-  lazy val locals: IObj = ???
+  lazy val locals: IObj =
+    val temp = MObj(
+      "type" -> treeType,
+      "url" -> permalink,
+      "outputExt" -> outputExt,
+      "path" -> pathToRootNames.mkString("/")
+    )
+    temp update _configs
+    IObj(temp)
 
 class CategoryTreeRoot(catType: String)(_configs: MObj, _globals: IObj)
     extends CategoryTree(catType, catType, None)(_configs, _globals)
@@ -29,13 +37,13 @@ class CategoryTreeRoot(catType: String)(_configs: MObj, _globals: IObj)
     def dataToPath(data: Data): Iterable[List[String]] =
       data match
         case s: DStr =>
-          List(s.str.trim.split(",").flatMap(_.trim.split(" ")).toList)
+          s.str.trim.split(",").map(_.trim.split("/").toList)
         case a: DArr => a.flatMap(dataToPath(_)).toList
         case o: MObj =>
           o.map((k, v) => dataToPath(v).map(k :: _)).flatten
         case _ => List()
 
-    dataToPath(post.getGroupsList(catType))
+    dataToPath(post.getTreesList(catType))
 
 object CategoryStyle extends TreeStyle[PostLike]:
 

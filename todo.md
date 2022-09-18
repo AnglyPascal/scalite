@@ -35,6 +35,8 @@
 
 7. Create ID for posts, and check if posts can find other posts by that ID
 
+8. Make TagStyle and CategoryStyle into traits
+
 
 ## Rewriting ideas:
 

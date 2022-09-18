@@ -12,7 +12,7 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
 // import com.anglypascal.scalite.groups.PostCluster
-// import com.anglypascal.scalite.groups.PostGroup
+// import com.anglypascal.scalite.groups.PostTree
 import com.anglypascal.scalite.plugins.BeforeLocals
 import com.anglypascal.scalite.plugins.Hooks
 import com.anglypascal.scalite.plugins.PageHooks
@@ -244,14 +244,14 @@ class PostLike(val rType: String)(
   /** The map holding sets of collection-types */
   private val trees = LinkedHashMap[String, ListBuffer[PostTree]]()
 
-  /** Return the global settings for the collection-type grpType */
-  def getGroupsList(grpType: String): Data =
-    frontMatter.extractOrElse(grpType)(DNull)
+  /** Return the global settings for the collection-type treeType */
+  def getTreesList(treeType: String): Data =
+    frontMatter.extractOrElse(treeType)(DNull)
 
   /** Adds the collection in the set of this collection-type */
-  def addGroup[A <: PostTree](grpType: String)(a: A): Unit =
-    if trees.contains(grpType) then trees(grpType) += a
-    else trees += grpType -> ListBuffer(a)
+  def addTree[A <: PostTree](treeType: String)(a: A): Unit =
+    if trees.contains(treeType) then trees(treeType) += a
+    else trees += treeType -> ListBuffer(a)
 
   /** Write the post and run all the AfterWrite hooks */
   override def write(dryRun: Boolean): Unit =

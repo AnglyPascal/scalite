@@ -17,7 +17,15 @@ class TagTree(
   def createChild(name: String): TagTree =
     TagTree(tagType, name, Some(this))(_configs, _globals)
 
-  lazy val locals: IObj = ???
+  lazy val locals: IObj =
+    val temp = MObj(
+      "type" -> treeType,
+      "url" -> permalink,
+      "outputExt" -> outputExt,
+      "path" -> pathToRootNames.mkString("/")
+    )
+    temp update _configs
+    IObj(temp)
 
 class TagTreeRoot(tagType: String)(_configs: MObj, _globals: IObj)
     extends TagTree(tagType, tagType, None)(_configs, _globals)
@@ -25,7 +33,7 @@ class TagTreeRoot(tagType: String)(_configs: MObj, _globals: IObj)
 
   def getPaths(post: PostLike): Iterable[List[String]] =
     val unslugged =
-      post.getGroupsList(tagType) match
+      post.getTreesList(tagType) match
         case s: DStr => s.str.trim.split(",").flatMap(_.trim.split(" "))
         case a: DArr =>
           a.arr.flatMap(_.getStr).flatMap(_.trim.split(" ")).toArray
