@@ -15,10 +15,8 @@ import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.groups.Cluster
-import com.anglypascal.scalite.groups.Clusters
-import com.anglypascal.scalite.groups.GroupStyle
-import com.anglypascal.scalite.groups.PostCluster
+import com.anglypascal.scalite.trees.Forests
+import com.anglypascal.scalite.trees.TreeStyle
 import com.anglypascal.scalite.layouts.LayoutGroupConstructor
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.layouts.MustacheLayouts
@@ -29,6 +27,10 @@ import java.io.File
 import java.net.URL
 import java.net.URLClassLoader
 import scala.reflect.ClassTag
+import com.anglypascal.scalite.trees.TreeStyle
+import com.anglypascal.scalite.trees.Forests
+import com.anglypascal.scalite.trees.PostForests
+import com.anglypascal.scalite.trees.Forest
 
 /** Trait to allow for plugin creation. Plugins to be loaded at runtime should
   * extend this trait.
@@ -111,14 +113,14 @@ object PluginManager:
       Collections.addStyle(E.asInstanceOf[ElemConstructor])
     )
 
-  private def loadGroupStyles(names: Map[String, MObj]) =
-    findObjects[GroupStyle[PostLike]](names).map(C =>
-      PostCluster.addGroupStyle(C.asInstanceOf[GroupStyle[PostLike]])
+  private def loadTreeStyles(names: Map[String, MObj]) =
+    findObjects[TreeStyle[PostLike]](names).map(C =>
+      PostForests.addTreeStyle(C.asInstanceOf[TreeStyle[PostLike]])
     )
 
-  private def loadClusters(names: Map[String, MObj]) =
-    findObjects[Cluster[?]](names).map(C =>
-      Clusters.addCluster(C.asInstanceOf[Cluster[?]])
+  private def loadForests(names: Map[String, MObj]) =
+    findObjects[Forest[?]](names).map(C =>
+      Forests.addForest(C.asInstanceOf[Forest[?]])
     )
 
   private def loadLayouts(names: Map[String, MObj]) =
@@ -162,6 +164,6 @@ object PluginManager:
 
     loadConverterConstructors(getArr("converters"))
     loadElemConstructors(getArr("elementConstructors"))
-    loadGroupStyles(getArr("groupStyles"))
-    loadClusters(getArr("clusters"))
+    loadTreeStyles(getArr("groupStyles"))
+    loadForests(getArr("clusters"))
     loadLayouts(getArr("layouts"))

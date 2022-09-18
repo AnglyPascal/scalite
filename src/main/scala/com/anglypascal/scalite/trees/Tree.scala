@@ -10,7 +10,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.plugins.GroupHooks
+import com.anglypascal.scalite.plugins.TreeHooks 
 
 /** Tree defines a tree containing Renderables of type A.
   *

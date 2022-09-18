@@ -6,7 +6,7 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Generator
 import com.anglypascal.scalite.documents.Renderable
-import com.anglypascal.scalite.plugins.GroupHooks
+import com.anglypascal.scalite.plugins.TreeHooks
 import com.anglypascal.scalite.plugins.Plugin
 import com.typesafe.scalalogging.Logger
 
@@ -44,7 +44,7 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
 
   /** Read the configurations and create necessary SuperGroups */
   def apply(configs: MObj, globals: IObj): Unit =
-    GroupHooks.beforeInits.foldLeft(configs)((o, h) => h(globals)(IObj(o)))
+    TreeHooks.beforeInits.foldLeft(configs)((o, h) => h(globals)(IObj(o)))
     val conf = defaultConfig update configs
     for (key, value) <- conf do
       value match

@@ -7,11 +7,12 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Reader
-import com.anglypascal.scalite.groups.Group
+import com.anglypascal.scalite.trees.Tree
 import com.anglypascal.scalite.layouts.Layout
 
 import scala.collection.mutable.ListBuffer
 import com.anglypascal.scalite.collections.ItemLike
+import com.anglypascal.scalite.trees.RootNode
 
 /** A Hook has a priority and usually an apply function. Hooks are called at
   * various points of the site creation, and can be provided by the user to
@@ -36,7 +37,7 @@ object Hooks:
       case hook: ItemHook       => ItemHooks.registerHook(hook)
       case hook: PageHook       => PageHooks.registerHook(hook)
       case hook: LayoutHook     => LayoutHooks.registerHook(hook)
-      case hook: GroupHook      => GroupHooks.registerHook(hook)
+      case hook: TreeHook      => TreeHooks.registerHook(hook)
       case hook: SiteHook       => SiteHooks.registerHook(hook)
       case null                 => ()
 
@@ -173,41 +174,41 @@ object ConverterHooks:
   def afterConverts = _afterConverts.toList.sorted
 
 ///////////
-// Group //
+// Tree //
 ///////////
-sealed trait GroupHook extends Hook:
-  override def toString(): String = super.toString() + "-Group"
+sealed trait TreeHook extends Hook:
+  override def toString(): String = super.toString() + "-Tree"
 
-trait GroupBeforeInit extends GroupHook with BeforeInit:
+trait TreeBeforeInit extends TreeHook with BeforeInit:
   override def toString(): String = super.toString() + " before init"
 
-trait GroupBeforeLocal extends GroupHook with BeforeLocals:
+trait TreeBeforeLocal extends TreeHook with BeforeLocals:
   override def toString(): String = super.toString() + " before local"
 
-trait GroupBeforeRender extends GroupHook with BeforeRender:
+trait TreeBeforeRender extends TreeHook with BeforeRender:
   override def toString(): String = super.toString() + " before render"
 
-trait GroupAfterRender extends GroupHook with AfterRender:
+trait TreeAfterRender extends TreeHook with AfterRender:
   override def toString(): String = super.toString() + " after render"
 
-trait GroupAfterProcess extends GroupHook with AfterWrite[Group[PostLike]]:
+trait TreeAfterProcess extends TreeHook with AfterWrite[RootNode[PostLike]]:
   override def toString(): String = super.toString() + " after write"
 
-object GroupHooks:
+object TreeHooks:
 
-  private val _beforeInits = ListBuffer[GroupBeforeInit]()
-  private val _beforeLocals = ListBuffer[GroupBeforeLocal]()
-  private val _beforeRenders = ListBuffer[GroupBeforeRender]()
-  private val _afterRenders = ListBuffer[GroupAfterRender]()
-  private val _afterProcesses = ListBuffer[GroupAfterProcess]()
+  private val _beforeInits = ListBuffer[TreeBeforeInit]()
+  private val _beforeLocals = ListBuffer[TreeBeforeLocal]()
+  private val _beforeRenders = ListBuffer[TreeBeforeRender]()
+  private val _afterRenders = ListBuffer[TreeAfterRender]()
+  private val _afterProcesses = ListBuffer[TreeAfterProcess]()
 
-  def registerHook(hook: GroupHook) =
+  def registerHook(hook: TreeHook) =
     hook match
-      case hook: GroupBeforeInit   => _beforeInits += hook
-      case hook: GroupBeforeLocal  => _beforeLocals += hook
-      case hook: GroupBeforeRender => _beforeRenders += hook
-      case hook: GroupAfterRender  => _afterRenders += hook
-      case hook: GroupAfterProcess => _afterProcesses += hook
+      case hook: TreeBeforeInit   => _beforeInits += hook
+      case hook: TreeBeforeLocal  => _beforeLocals += hook
+      case hook: TreeBeforeRender => _beforeRenders += hook
+      case hook: TreeAfterRender  => _afterRenders += hook
+      case hook: TreeAfterProcess => _afterProcesses += hook
       case null                    => ()
 
   def beforeInits = _beforeInits.toList.sorted
