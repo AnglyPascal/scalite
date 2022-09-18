@@ -35,8 +35,10 @@ class CategoryTree(
         case s: DStr =>
           s.str.trim.split(",").map(_.trim.split("/").toList)
         case a: DArr => a.flatMap(dataToPath(_)).toList
-        case o: MObj =>
-          o.map((k, v) => dataToPath(v).map(k :: _)).flatten
+        // FIXME: can't figure out a way to handle objects. We need to find a way to
+        // specify the nodes where we want to add our post.
+        // case o: MObj =>
+        //   o.map((k, v) => dataToPath(v).map(k :: _)).flatten
         case _ => List()
 
     dataToPath(post.getTreesList(catType))

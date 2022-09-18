@@ -257,7 +257,8 @@ class PostLike(val rType: String)(
     PostHooks.afterWrites foreach { _.apply(globals)(this) }
 
   /** Processes the groups in PostCluster this post belongs to. */
-  PostForests.addToForests(this)
+  if visible then 
+    PostForests.addToForests(this)
 
   override def toString(): String =
     CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"
