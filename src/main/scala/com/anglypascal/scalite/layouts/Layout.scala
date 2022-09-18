@@ -6,17 +6,22 @@ import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.plugins.LayoutHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.documents.SourceFile
 
 /** Defines an abstract Layout. */
-trait Layout extends Reader:
-
-  val lang: String
-
-  val name: String
-
-  LayoutHooks.beforeInits foreach { _.apply(lang, name, filepath) }
+abstract class Layout(val lang: String, val name: String) extends SourceFile:
 
   private val logger = Logger(s"${lang.capitalize} layout")
+  logger.debug(s"creating $lang layout $name")
+
+  protected val shouldConvert = false
+
+  protected val frontMatter =
+    com.anglypascal.scalite.documents.Reader.frontMatter(name, filepath)
+  protected lazy val mainMatter =
+    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
+
+  LayoutHooks.beforeInits foreach { _.apply(lang, name, filepath) }
 
   /** Render the layout with the given Data object as context
     *

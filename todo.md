@@ -29,16 +29,24 @@
     Some default hooks to finetune some specific behaviour and to check hooks. For
     example, something with Sass.
 
-5. **Functional, remove mutable states in Standalone objects**
-    Change everything to functional style. Remove standalone objects, they linger for
-    way too long. Instead create the objects during runtime and pass around the
-    references.
+5. Taxonomical groups, how to? Oh just category style
 
 6. Caching files
 
 7. Create ID for posts, and check if posts can find other posts by that ID
 
-8. Taxonomical groups, how to? Oh just category style
+8. Make TagStyle and CategoryStyle into traits
+
+
+## Rewriting ideas:
+
+1. **Functional, remove mutable states in Standalone objects**
+    Change everything to functional style. Remove standalone objects, they linger for
+    way too long. Instead create the objects during runtime and pass around the
+    references.
+
+2. **Composition over inheritance**
+    Page and Reader seem like something that should be composed. Look into it more
 
 
 ## Finished

@@ -5,7 +5,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.groups.PostCluster
+import com.anglypascal.scalite.trees.PostForests
 import com.anglypascal.scalite.collections.PageLike
 import com.anglypascal.scalite.collections.Excerpt
 

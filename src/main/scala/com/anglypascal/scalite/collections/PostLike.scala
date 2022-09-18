@@ -11,8 +11,6 @@ import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.PostCluster
-import com.anglypascal.scalite.groups.PostGroup
 import com.anglypascal.scalite.plugins.BeforeLocals
 import com.anglypascal.scalite.plugins.Hooks
 import com.anglypascal.scalite.plugins.PageHooks
@@ -29,6 +27,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
+import com.anglypascal.scalite.trees.PostTree
+import com.anglypascal.scalite.trees.PostForests
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -62,6 +62,12 @@ class PostLike(val rType: String)(
     "parentDir" -> parentDir,
     "relativePath" -> relativePath
   ) update collection
+
+  private val frontMatter =
+    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
+  private lazy val mainMatter = 
+    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
+  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
   /** Isn't it useless? like even if someone changes the collection infos,
     * nothing will change really. FIXME don't take specific arguments like that,
@@ -115,11 +121,11 @@ class PostLike(val rType: String)(
       "slugTitlePretty" -> slugify(title, "pretty"),
       "slugTitleCased" -> slugify(title, "default", true)
     )
-    val grpObj = MObj()
-    for (k, s) <- groups do grpObj += k -> s.map(_.groupName).mkString("/")
+    val treeObj = MObj()
+    for (k, s) <- trees do treeObj += k -> s.map(_.treeName).mkString("/")
 
     obj update newObj
-    obj update grpObj
+    obj update treeObj
 
     IObj(obj)
 
@@ -234,16 +240,16 @@ class PostLike(val rType: String)(
     rendered
 
   /** The map holding sets of collection-types */
-  private val groups = LinkedHashMap[String, ListBuffer[PostGroup]]()
+  private val trees = LinkedHashMap[String, ListBuffer[PostTree]]()
 
-  /** Return the global settings for the collection-type grpType */
-  def getGroupsList(grpType: String): Data =
-    frontMatter.extractOrElse(grpType)(DNull)
+  /** Return the global settings for the collection-type treeType */
+  def getTreesList(treeType: String): Data =
+    frontMatter.extractOrElse(treeType)(DNull)
 
   /** Adds the collection in the set of this collection-type */
-  def addGroup[A <: PostGroup](grpType: String)(a: A): Unit =
-    if groups.contains(grpType) then groups(grpType) += a
-    else groups += grpType -> ListBuffer(a)
+  def addTree[A <: PostTree](treeType: String)(a: A): Unit =
+    if trees.contains(treeType) then trees(treeType) += a
+    else trees += treeType -> ListBuffer(a)
 
   /** Write the post and run all the AfterWrite hooks */
   override def write(dryRun: Boolean): Unit =
@@ -251,7 +257,8 @@ class PostLike(val rType: String)(
     PostHooks.afterWrites foreach { _.apply(globals)(this) }
 
   /** Processes the groups in PostCluster this post belongs to. */
-  PostCluster.addToGroups(this)
+  if visible then 
+    PostForests.addToForests(this)
 
   override def toString(): String =
     CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"

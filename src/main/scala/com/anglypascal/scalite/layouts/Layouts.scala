@@ -23,16 +23,13 @@ object Layouts extends Configurable:
     )
 
   private def empty =
-    new Layout {
-      val name = "empty"
-      val lang = "mustache"
+    new Layout("mustache", "empty") {
       val rType = "empty"
       val parentDir: String = ""
       val relativePath: String = ""
-      override def mainMatter = "{{> content }}"
 
       /** The mustache object for this layout */
-      private lazy val mustache = ScaliteMustache(mainMatter)
+      private lazy val mustache = ScaliteMustache("{{> content }}")
       def render(context: IObj, content: String): String =
         mustache.render(context, Map("content" -> ScaliteMustache(content)))
     }

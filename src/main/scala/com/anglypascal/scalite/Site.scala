@@ -9,7 +9,7 @@ import com.anglypascal.scalite.data.mutable.{DArr => MArr}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Assets
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.groups.Clusters
+import com.anglypascal.scalite.trees.Forests
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
 import com.anglypascal.scalite.plugins.SiteHooks
@@ -96,7 +96,7 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
     initiatePlugins(plugD, configs)
     val configurables =
       List(ScopedDefaults, Converters, Layouts)
-        ++ Clusters.clusters ++ List(Collections)
+        ++ Forests.forests ++ List(Collections)
     configurables.map(C => (C, configs.extractOrElse(C.sectionName)(MObj())))
 
   private def collectData(dataDir: String, _configs: MObj): MObj =
@@ -147,11 +147,11 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
 
     Cleaner(_globals)
     Collections.process(dryRun)
-    Clusters.process(dryRun)
+    Forests.process(dryRun)
     Assets.copy(dryRun)
 
   def reset(): Unit =
     Collections.reset()
-    Clusters.reset()
+    Forests.reset()
     Layouts.reset()
     Pages.reset()
