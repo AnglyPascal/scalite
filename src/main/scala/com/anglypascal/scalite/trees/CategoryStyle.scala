@@ -28,10 +28,6 @@ class CategoryTree(
     temp update _configs
     IObj(temp)
 
-class CategoryTreeRoot(catType: String)(_configs: MObj, _globals: IObj)
-    extends CategoryTree(catType, catType, None)(_configs, _globals)
-    with RootNode[PostLike]:
-
   def getPaths(post: PostLike): Iterable[List[String]] =
 
     def dataToPath(data: Data): Iterable[List[String]] =
@@ -47,10 +43,10 @@ class CategoryTreeRoot(catType: String)(_configs: MObj, _globals: IObj)
 
 object CategoryStyle extends TreeStyle[PostLike]:
 
-  val styleName: String = "categories"
+  val styleName: String = "category"
 
   def apply(treeType: String)(
       configs: MObj,
       globals: IObj
-  ): RootNode[PostLike] =
-    new CategoryTreeRoot(treeType)(configs, globals)
+  ): Tree[PostLike] =
+    new CategoryTree(treeType, treeType, None)(configs, globals)

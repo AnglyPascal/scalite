@@ -27,10 +27,6 @@ class TagTree(
     temp update _configs
     IObj(temp)
 
-class TagTreeRoot(tagType: String)(_configs: MObj, _globals: IObj)
-    extends TagTree(tagType, tagType, None)(_configs, _globals)
-    with RootNode[PostLike]:
-
   def getPaths(post: PostLike): Iterable[List[String]] =
     val unslugged =
       post.getTreesList(tagType) match
@@ -42,10 +38,10 @@ class TagTreeRoot(tagType: String)(_configs: MObj, _globals: IObj)
 
 object TagStyle extends TreeStyle[PostLike]:
 
-  val styleName: String = "tags"
+  val styleName: String = "tag"
 
   def apply(treeType: String)(
       configs: MObj,
       globals: IObj
-  ): RootNode[PostLike] =
-    new TagTreeRoot(treeType)(configs, globals)
+  ): Tree[PostLike] =
+    new TagTree(treeType, treeType, None)(configs, globals)

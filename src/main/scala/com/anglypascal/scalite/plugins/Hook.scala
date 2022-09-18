@@ -12,7 +12,7 @@ import com.anglypascal.scalite.layouts.Layout
 
 import scala.collection.mutable.ListBuffer
 import com.anglypascal.scalite.collections.ItemLike
-import com.anglypascal.scalite.trees.RootNode
+import com.anglypascal.scalite.trees.Tree
 
 /** A Hook has a priority and usually an apply function. Hooks are called at
   * various points of the site creation, and can be provided by the user to
@@ -191,7 +191,7 @@ trait TreeBeforeRender extends TreeHook with BeforeRender:
 trait TreeAfterRender extends TreeHook with AfterRender:
   override def toString(): String = super.toString() + " after render"
 
-trait TreeAfterProcess extends TreeHook with AfterWrite[RootNode[PostLike]]:
+trait TreeAfterProcess extends TreeHook with AfterWrite[Tree[PostLike]]:
   override def toString(): String = super.toString() + " after write"
 
 object TreeHooks:

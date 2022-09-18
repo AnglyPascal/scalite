@@ -6,11 +6,11 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.plugins.Plugin
+import com.anglypascal.scalite.plugins.TreeHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.plugins.TreeHooks 
 
 /** Tree defines a tree containing Renderables of type A.
   *
@@ -74,7 +74,8 @@ trait Tree[A <: Renderable] extends Renderable:
   private val _children = LinkedHashMap[String, Tree[A]]()
   def children = _children.toList.map(_._2)
 
-  def addChild(key: String, child: Tree[A]) = _children += key -> child
+  def addChild(key: String) =
+    _children += key -> createChild(key)
 
   def createChild(name: String): Tree[A]
 
@@ -97,8 +98,13 @@ trait Tree[A <: Renderable] extends Renderable:
       case child :: p =>
         if _children.contains(child) then _children(child).add(key, item, p)
         else
-          addChild(child, createChild(child))
+          addChild(child)
           _children(child).add(key, item, p)
+
+  def addItem(key: String, item: A): Unit =
+    for path <- getPaths(item) do add(key, item, path)
+
+  def getPaths(item: A): Iterable[List[String]]
 
   /** Returns the item stored against the key */
   def get(key: String) = _items.get(key)
@@ -127,19 +133,18 @@ trait Tree[A <: Renderable] extends Renderable:
   protected[trees] def process(dryRun: Boolean = false): Unit
 
   override def toString(): String =
-    s"${GREEN(treeName)}[$treeType]: \n" +
-      items.map("    " + _.toString).mkString("\n")
+    toString("", "")
 
-/** The root node of a Tree. It provides the `getPaths` methods that takes an
-  * item of type A and from its frontMatter collects the paths down from the
-  * root to the node where this item will be added.
-  */
-trait RootNode[A <: Renderable] extends Tree[A]:
+  protected def toString(ctab: String, itab: String): String =
+    val iStr =
+      if _items.isEmpty then itab + "| \n"
+      else
+        itab + _items
+          .map(i => "[" + BLUE(i._1.toString) + "]")
+          .mkString(", ") + "\n"
 
-  def addItem(key: String, item: A): Unit =
-    for path <- getPaths(item) do add(key, item, path)
-
-  def getPaths(item: A): Iterable[List[String]]
+    ctab + s"${GREEN(treeName)} \n" + iStr +
+      _children.map(_._2.toString(itab + "+-", itab + "| ")).mkString("")
 
 /** Plugin that defines a new Tree from the given treeType, configurations and
   * global variables, returnin a RootNode instance
@@ -148,4 +153,4 @@ trait TreeStyle[A <: Renderable] extends Plugin:
 
   val styleName: String
 
-  def apply(treeType: String)(configs: MObj, globals: IObj): RootNode[A]
+  def apply(treeType: String)(configs: MObj, globals: IObj): Tree[A]

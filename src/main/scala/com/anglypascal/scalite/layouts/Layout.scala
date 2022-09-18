@@ -11,6 +11,9 @@ import com.anglypascal.scalite.documents.SourceFile
 /** Defines an abstract Layout. */
 abstract class Layout(val lang: String, val name: String) extends SourceFile:
 
+  private val logger = Logger(s"${lang.capitalize} layout")
+  logger.debug(s"creating $lang layout $name")
+
   protected val shouldConvert = false
 
   protected val frontMatter =
@@ -19,8 +22,6 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 
   LayoutHooks.beforeInits foreach { _.apply(lang, name, filepath) }
-
-  private val logger = Logger(s"${lang.capitalize} layout")
 
   /** Render the layout with the given Data object as context
     *

@@ -2,14 +2,14 @@ package com.anglypascal.scalite
 
 import com.anglypascal.scalite.collections.Collections
 import com.anglypascal.scalite.converters.Converters
-import com.anglypascal.scalite.groups.PostCluster
+import com.anglypascal.scalite.trees.PostForests
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.utils.Colors.*
 import org.scalatest.DoNotDiscover
 import org.scalatest.flatspec.AsyncFlatSpec
 
 import scala.concurrent.Future
-import com.anglypascal.scalite.groups.Clusters
+import com.anglypascal.scalite.trees.Forests
 
 // @DoNotDiscover
 class SiteSpecs extends AsyncFlatSpec:
@@ -49,10 +49,10 @@ class SiteSpecs extends AsyncFlatSpec:
     future.map(unit => assert(true))
   }
 
-  "Groups" should "process the groups properly" in {
+  "Trees" should "process the trees properly" in {
     val future = Future {
-      println(ERROR("\nGROUPS"))
-      println(PostCluster)
+      println(ERROR("\nTREES"))
+      println(Forests)
     }
     future.map(unit => assert(true))
   }

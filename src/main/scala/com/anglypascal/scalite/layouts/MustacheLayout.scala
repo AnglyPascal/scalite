@@ -30,7 +30,7 @@ class MustacheLayout(
     val parentDir: String,
     val relativePath: String,
     private val partials: Map[String, Mustache]
-) extends Layout("mustache", "mustache"):
+) extends Layout("mustache", name):
 
   private val logger = Logger("Mustache Layout")
 

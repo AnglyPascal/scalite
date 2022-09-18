@@ -11,8 +11,6 @@ import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
-// import com.anglypascal.scalite.groups.PostCluster
-// import com.anglypascal.scalite.groups.PostTree
 import com.anglypascal.scalite.plugins.BeforeLocals
 import com.anglypascal.scalite.plugins.Hooks
 import com.anglypascal.scalite.plugins.PageHooks

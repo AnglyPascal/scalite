@@ -29,11 +29,11 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
   protected def defaultConfig: MObj
 
   /** SuperGroup objects held in this Forest */
-  protected val _trees = LinkedHashMap[String, RootNode[A]]()
+  protected val _trees = LinkedHashMap[String, Tree[A]]()
   def trees = _trees.toList.map(_._2)
 
   /** Add a new SuperGroup to this site */
-  protected def addTree(tree: RootNode[A]): Unit =
+  protected def addTree(tree: Tree[A]): Unit =
     _trees += tree.treeType -> tree
 
   /** Create pages for each PostsGroup that wishes to be rendered */
@@ -41,6 +41,8 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
     for (_, tree) <- _trees do
       logger.debug(s"processing Tree ${tree.treeType}")
       tree.process(dryRun)
+
+  def addToForests(post: A): Unit
 
   /** Read the configurations and create necessary SuperGroups */
   def apply(configs: MObj, globals: IObj): Unit =
@@ -62,7 +64,6 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
     styles.clear()
     _trees.clear()
 
-
 /** Holds all the Forest implementations avaiable */
 object Forests:
 
@@ -79,3 +80,6 @@ object Forests:
     _forests foreach { _.reset() }
     _forests.clear()
     _forests += PostForests
+
+  override def toString(): String =
+    _forests.map(_.toString()).mkString("\n")
