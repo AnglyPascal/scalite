@@ -4,6 +4,7 @@ import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
 import com.anglypascal.scalite.converters.Converters
+import com.anglypascal.scalite.data.DataExtensions.extractChain
 import com.anglypascal.scalite.data.immutable.DArr
 import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
@@ -52,39 +53,49 @@ import scala.collection.parallel.CollectionConverters._
   * ```
   *
   * @param elemCons
-  *   An ElemConstructor, defines how elements of this collection should be
-  *   created
+  *   defines how elements of this collection should be created
   * @param name
   *   Name of this Collection
-  * @param layoutName
-  *   Name of the layout of this Collection Page
   * @param directory
   *   Absolute path to the directory where this collection resides
+  * @param configs
+  *   configurations of this Collection
   * @param globals
   *   Global settings
-  * @param sortBy
-  *   How should the elements of this Collection be sorted
-  * @param visible
-  *   Should this Collection be made into a Page?
-  * @param permalinkTemplate
-  *   The template for the permalink of this Page
-  * @param locals
-  *   Local variables set in the collections.name section in /_configs.yml
   */
 class Collection(
     private val elemCons: ElemConstructor,
     val name: String,
-    protected val layoutName: String
-)(
     private val directory: String,
-    protected val globals: IObj,
-    private val sortBy: String,
-    val visible: Boolean,
-    private val permalinkTemplate: String,
-    protected val configs: MObj
+    _configs: MObj,
+    protected val globals: IObj
 ) extends Page:
 
   private val logger = Logger(s"${BLUE(name.capitalize)}")
+
+  protected val configs: MObj =
+    CollectionHooks.beforeInits
+      .foldLeft(_configs)((o, h) => o update h(globals)(IObj(o)))
+
+  private val sortBy: String =
+    configs.extractOrElse("sortBy")(Defaults.Collection.sortBy)
+
+  private val permalinkTemplate =
+    extractChain(configs, globals)("permalink")(Defaults.permalink)
+
+  protected val layoutName: String = configs.extractOrElse("layout")(name)
+
+  val visible: Boolean =
+    configs.extractOrElse("sortBy")(Defaults.Collection.toc)
+
+  private val constructor: (String, String, IObj, IObj) => Element =
+    elemCons(name)
+
+  logger.debug(
+    s"Init: source: ${GREEN(directory)}, " +
+      s"sortBy: ${GREEN(sortBy)}, toc: ${GREEN(visible.toString)}, " +
+      s"permalink: ${GREEN(permalinkTemplate)}"
+  )
 
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items: Map[String, Element] =
@@ -103,9 +114,6 @@ class Collection(
       .foldLeft(configs)((o, h) => o update h(globals)(IObj(o)))
 
     IObj(conf)
-
-  private var constructor: (String, String, IObj, IObj) => Element =
-    elemCons(name)
 
   lazy val identifier = s"/collections/$name"
 

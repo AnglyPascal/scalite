@@ -96,82 +96,50 @@ object Collections extends Configurable with Generator:
 
   def pages = collections.toList
 
-  /** Gets the configuration set in the "collections" section of \_configs.yml
+  /** Gets the configuration set in the "collections" section of `_configs.yml`
     * and creates necessary Collection objects
     */
-  def apply(
-      configs: MObj,
-      globals: IObj
-  ): Unit =
-    for (key, value) <- configs do
+  def apply(_configs: MObj, globals: IObj): Unit =
+    for (key, value) <- _configs do
       value match
-        case v: DBool =>
-          configs(key) = MObj("output" -> v.bool)
-        case _ => ()
+        case v: DBool => _configs(key) = MObj("output" -> v.bool)
+        case _        => ()
 
-    val conf = defaultConfigs update configs
+    val configs = defaultConfigs update _configs
 
     val base = globals.getOrElse("base")(Defaults.Directories.base)
     val colsDir =
       globals.getOrElse("collectionsDir")(Defaults.Directories.collectionsDir)
 
-    // create the collection named "key" for each key in collecionsDir
-    for (colName, c) <- conf do
-      c match
-        case c: MObj =>
-          // add all the updates from the CollectionHooks, with higher priority ones
-          // applied before the lower priority ones
-          val cobj = CollectionHooks.beforeInits
-            .foldLeft(c)((o, h) => o update h.apply(globals)(IObj(o)))
-
-          val style = cobj.extractOrElse("style")("item")
+    // create the collection named "name" for each name in collecionsDir
+    for (name, config) <- configs do
+      config match
+        case config: MObj =>
+          val style = config.extractOrElse("style")("item")
           val output =
-            if colName == "posts" || colName == "statics" then
-              cobj.extractOrElse("output")(true)
-            else cobj.extractOrElse("output")(false)
+            if name == "posts" || name == "statics" then
+              config.extractOrElse("output")(true)
+            else config.extractOrElse("output")(false)
 
-          if !output then logger.debug(s"won't output ${RED(colName)}")
+          if !output then logger.debug(s"won't output ${RED(name)}")
           else
-            val layout = cobj.extractOrElse("layout")(colName)
+            val parentDir = config.extractOrElse("directory")(colsDir)
+            val folder = config.extractOrElse("folder")(s"/_$name")
+            val dir = base + parentDir +
+              (if folder.startsWith("/") then "" else "/") + folder
 
-            val prn = cobj.extractOrElse("directory")(colsDir)
-            val fld = cobj.extractOrElse("folder")(s"/_$colName")
-            val dir =
-              base + prn + (if fld.startsWith("/") then fld else "/" + fld)
-
-            logger.debug(s"${CYAN(colName)} source: ${GREEN(dir)}")
-
-            val sortBy =
-              cobj.extractOrElse("sortBy")(Defaults.Collection.sortBy)
-            val toc = cobj.extractOrElse("sortBy")(Defaults.Collection.toc)
-            val permalinkTemplate =
-              extractChain(cobj, globals)("permalink")(Defaults.permalink)
-
-            logger.debug(
-              s"${CYAN(colName)}: " +
-                s"sortBy: ${GREEN(sortBy)}, toc: ${GREEN(toc.toString)}, " +
-                s"permalink: ${GREEN(permalinkTemplate)}"
-            )
-
-            val Col = Collection(styles(style), colName, layout)(
-              dir,
-              globals,
-              sortBy,
-              toc,
-              permalinkTemplate,
-              cobj
-            )
+            val Col = Collection(styles(style), name, dir, configs, globals)
 
             // If this collection has style "item" then add its elements to the
             // CollectionItems object
-            if style == "item" then CollectionItems.addItems(colName, Col.items)
+            if style == "item" then CollectionItems.addItems(name, Col.items)
             // add this collection to the collections map
             collections += Col
 
         // wasn't mentioned in the configuration
         case _ =>
           logger.error(
-            s"${RED(colName)}: provide collection metadata in a table or a boolean"
+            s"${RED(name)}: provide collection metadata in a table or a boolean"
           )
 
   /** Process all the collections */
