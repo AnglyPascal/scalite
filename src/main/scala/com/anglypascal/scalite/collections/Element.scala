@@ -17,13 +17,12 @@ trait Element extends Renderable with SourceFile:
 
   lazy val identifier = filepath
 
-/** Compare two given Elements by the given key
-  *
-  * TODO: Instead I think we can give a list of keys by which the elements
-  * should be sorted? Also I think we can add this as an Orderable to Element
-  * itself.
-  */
-def compareBy(fst: Element, snd: Element, key: String): Int =
-  val s = cmpOpt(fst.locals.get(key), snd.locals.get(key))
+/** Compare two given Elements by the given keys */
+def compareBy(fst: Element, snd: Element, key1: String, keys: String*): Int =
+  val s = cmpOpt(fst.locals.get(key1), snd.locals.get(key1))
   if s != 0 then s
-  else cmpOpt(fst.locals.get("title"), snd.locals.get("title"))
+  else
+    for key <- keys do
+      val t = cmpOpt(fst.locals.get(key), snd.locals.get(key))
+      if t != 0 then return t
+    cmpOpt(fst.locals.get("title"), snd.locals.get("title"))

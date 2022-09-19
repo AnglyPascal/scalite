@@ -1,17 +1,28 @@
 package com.anglypascal.scalite.utils
 
 import com.anglypascal.scalite.data.immutable.DObj
+import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.data.immutable.Data
+import com.anglypascal.scalite.data.mutable.{Data => MData}
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
 import com.typesafe.scalalogging.Logger
 
 import java.io.File
 import scala.util.matching.Regex
+import com.anglypascal.scalite.Configurable
+import com.anglypascal.scalite.Defaults
+import scala.collection.mutable.ArrayBuffer
 
 /** Cleans the build directory before write files to it */
-object Cleaner:
+object Cleaner extends Configurable:
+
+  val sectionName: String = "cleaner"
 
   private val logger = Logger("Cleaner")
+
+  private val configs: MObj = MObj(
+    "keepFiles" -> Defaults.Reading.keepFiles // give regex list
+  )
 
   /** Clears the folder with absolute path cleanSite, keeping the files matching
     * the patterns in excludes
@@ -43,19 +54,21 @@ object Cleaner:
     dirs.map(fn(_, true))
 
   /** Clean the destination site according to the global configuration */
-  def apply(globals: DObj): Unit =
+  def apply(_configs: MObj, globals: DObj): Unit =
+    configs update _configs
 
-    var cleanSite = // FIXME default would not be the absolute path though
-      globals.getOrElse("base")(".") +
-        globals.getOrElse("destination")("/_site")
+    var cleanSite = 
+      globals.getOrElse("base")(Defaults.Directories.base) +
+        globals.getOrElse("destination")(Defaults.Directories.destination)
 
     val excludes =
-      def f(l: List[String], d: Data): List[String] =
+      def f(l: List[String], d: MData): List[String] =
         d.getStr match
           case Some(s) => s :: l
           case _       => l
-      globals
-        .getOrElse("keepFiles")(List[Data]())
+      configs
+        .extractOrElse("keepFiles")(ArrayBuffer[MData]())
+        .toList
         .foldLeft(List[String]())(f)
 
     clean(cleanSite, excludes)

@@ -41,7 +41,6 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
         // Which files to read
         "include" -> include,
         "exclude" -> exclude,
-        "keepFiles" -> keepFiles, // give regex list
         "markdownExt" -> markdownExt,
         "textileExt" -> textileExt,
         "encoding" -> encoding,
@@ -95,7 +94,7 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
         configs.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
     initiatePlugins(plugD, configs)
     val configurables =
-      List(ScopedDefaults, Converters, Layouts)
+      List(Cleaner, ScopedDefaults, Converters, Layouts)
         ++ Forests.forests ++ List(Collections)
     configurables.map(C => (C, configs.extractOrElse(C.sectionName)(MObj())))
 
@@ -145,7 +144,6 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
   def build(): Unit =
     val _globals = globals
 
-    Cleaner(_globals)
     Collections.process(dryRun)
     Forests.process(dryRun)
     Assets.copy(dryRun)
