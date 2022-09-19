@@ -12,17 +12,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
-abstract class PostTree(
-    val treeType: String,
-    val treeName: String,
-    _parent: Option[PostTree]
-)(
-    _configs: MObj,
-    protected val globals: IObj
-) extends Tree[PostLike]
-    with Page:
-
-  protected val parent = _parent
+abstract class PostTree(_configs: MObj) extends Tree[PostLike] with Page:
 
   protected override val logger = Logger("PostSuperTree")
 
@@ -31,7 +21,7 @@ abstract class PostTree(
       o update ScopedDefaults.getDefaults(s, treeType)
     )
 
-  lazy val identifier: String = permalink
+  lazy val identifier: String = s"/$treeType/$treeName"
 
   lazy val permalink: String =
     val permalinkTemplate: String =
@@ -53,6 +43,16 @@ abstract class PostTree(
   /** Should the tag be rendered in a separate page? */
   val visible = configs.extractOrElse("visible")(true)
 
+  lazy val locals: IObj =
+    val temp = MObj(
+      "type" -> treeType,
+      "url" -> permalink,
+      "outputExt" -> outputExt,
+      "path" -> pathToRootNames.mkString("/")
+    )
+    temp update _configs
+    IObj(temp)
+
   /** Return the rendered html string of this page */
   protected lazy val render: String =
     val context = IObj(
@@ -72,7 +72,8 @@ abstract class PostTree(
   protected val layoutName: String = configs.extractOrElse("layout")(treeType)
 
   protected[trees] def process(dryRun: Boolean = false): Unit =
-    ???
+    write(dryRun)
+    children foreach { _.process(dryRun) }
 
 object PostForests extends Forest[PostLike]:
 
@@ -90,7 +91,7 @@ object PostForests extends Forest[PostLike]:
     MObj(
       "tags" -> MObj(
         "title" -> Tags.title,
-        "gType" -> Tags.gType,
+        "type" -> Tags.tType,
         "sortBy" -> Tags.sortBy,
         "baseLink" -> Tags.baseLink,
         "relativeLink" -> Tags.relativeLink,
@@ -99,7 +100,7 @@ object PostForests extends Forest[PostLike]:
       ),
       "categories" -> MObj(
         "title" -> Categories.title,
-        "gType" -> Categories.gType,
+        "type" -> Categories.tType,
         "sortBy" -> Categories.sortBy,
         "baseLink" -> Categories.baseLink,
         "relativeLink" -> Categories.relativeLink,
@@ -112,7 +113,7 @@ object PostForests extends Forest[PostLike]:
   def addToForests(post: PostLike): Unit =
     for tree <- trees do tree.addItem(post.title, post)
 
-  override def reset(): Unit = 
+  override def reset(): Unit =
     super.reset()
     addTreeStyle(TagStyle)
     addTreeStyle(CategoryStyle)

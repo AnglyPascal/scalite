@@ -1,47 +1,41 @@
 package com.anglypascal.scalite.trees
 
+import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
+import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.collections.PostLike
 
 class TagTree(
-    tagType: String,
-    treeName: String,
-    _parent: Option[PostTree]
-)(_configs: MObj, _globals: IObj)
-    extends PostTree(tagType, treeName, _parent)(_configs, _globals):
+    val treeType: String,
+    val treeName: String,
+    protected val parent: Option[PostTree]
+)(_configs: MObj, protected val globals: IObj)
+    extends PostTree(_configs):
 
   /** */
   def createChild(name: String): TagTree =
-    TagTree(tagType, name, Some(this))(_configs, _globals)
-
-  lazy val locals: IObj =
-    val temp = MObj(
-      "type" -> treeType,
-      "url" -> permalink,
-      "outputExt" -> outputExt,
-      "path" -> pathToRootNames.mkString("/")
-    )
-    temp update _configs
-    IObj(temp)
+    TagTree(treeType, name, Some(this))(_configs, globals)
 
   def getPaths(post: PostLike): Iterable[List[String]] =
-    val unslugged =
-      post.getTreesList(tagType) match
-        case s: DStr => s.str.trim.split(",").flatMap(_.trim.split(" "))
-        case a: DArr =>
-          a.arr.flatMap(_.getStr).flatMap(_.trim.split(" ")).toArray
-        case _ => Array[String]()
-    unslugged.map(_ :: List())
 
-object TagStyle extends TreeStyle[PostLike]:
+    def dataToPath(data: Data): Iterable[String] =
+      data match
+        case s: DStr =>
+          s.str.trim
+            .split(",")
+            .flatMap(
+              _.trim match
+                /** FIXME test this */
+                case s if s.startsWith("\"") && s.endsWith("\"") => Array(s)
+                case s                                           => s.split(",")
+            )
+        case a: DArr => a.flatMap(_.getStr)
+        case _       => Iterable()
 
-  val styleName: String = "tag"
+    dataToPath(post.getTreesList(treeType)).map(_ :: List())
 
-  def apply(treeType: String)(
-      configs: MObj,
-      globals: IObj
-  ): Tree[PostLike] =
-    new TagTree(treeType, treeType, None)(configs, globals)
+object TagStyle extends TreeStyle[PostLike]("tag"):
+  def apply(treeType: String)(configs: MObj, globals: IObj): Tree[PostLike] =
+    TagTree(treeType, treeType, None)(configs, globals)

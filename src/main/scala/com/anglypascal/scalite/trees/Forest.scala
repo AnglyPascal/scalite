@@ -51,10 +51,12 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
     for (key, value) <- conf do
       value match
         case value: MObj =>
-          val style = value.extractOrElse("style")(Defaults.Group.defaultStyle)
-          val gType = value.extractOrElse("gType")(Defaults.Group.defaultGType)
-          logger.debug(s"adding new SuperGroup $gType of style $style")
-          addTree(styles(style)(gType)(value, globals))
+          val style = value.extractOrElse("style")(Defaults.Tree.defaultStyle)
+          val tType = value.extractOrElse("type")(Defaults.Tree.defaultType)
+          logger.debug(s"adding new Forest $tType of style $style")
+          styles.get(style) match
+            case Some(treeStyle) => addTree(treeStyle(tType)(value, globals))
+            case None            => ()
         case _ => ()
 
   override def toString(): String =

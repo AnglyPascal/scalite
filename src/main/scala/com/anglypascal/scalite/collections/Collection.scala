@@ -9,6 +9,7 @@ import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.plugins.CollectionHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
@@ -16,13 +17,39 @@ import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.parallel.CollectionConverters._
-import com.anglypascal.scalite.plugins.CollectionHooks
 
-/** Defines a new Collection of Element's. Responsible for fetching the Elements
-  * from the directory and processing them into HTML pages.
+/** A Collection is a collection of Renderable objects with a SourceFile, that
+  * is, a Collection is made up of similar objects that are read from source
+  * files residing in the source directory of the site.
   *
-  * It's a Page, so can be rendered into a tableOfContents page using the layout
-  * with the given layout name.
+  * For example, `posts`, `drafts`, `sass` are predefined Collections:
+  *   - `posts` handles the default implementation of PostLike objects, these
+  *     are the "posts" of a blog. This Collection first collects all the files
+  *     inside `/_posts` folder (or the reassigned folder), converts them using
+  *     avaiable Converters, then renders them with available Layouts, finally
+  *     writing them on the target destination.
+  *   - `drafts` defines what it sounds like, draft pages and posts. By default
+  *     draft posts and pages are not written to the destination.
+  *   - `sass` collection handles the conversion of .sass and .scss files into
+  *     .css files
+  *
+  * Another default use of Collection is the `statics` collection, which handles
+  * all the static pages like index.html, about.html etc.
+  *
+  * The available Collections can be edited via the global configs file like so:
+  * ```
+  * collections:
+  *   posts:
+  *     folder: /posts # reassigns the directory
+  *     sortBy: title # changes how posts are sorted in the table of contents
+  *   drafts:
+  *     output: true # marks the defaults to be added to the site
+  *     permalink: "/drafts/{{date}}_{{title}}" # changes the permalink
+  *   docs: # creates a new collection
+  *     folder: /docs # reassigns the directory from the default /_docs
+  *     layout: docs # defines the Layout to be used for the Elements
+  *     style: post # the Elements should be PostLike
+  * ```
   *
   * @param elemCons
   *   An ElemConstructor, defines how elements of this collection should be
@@ -59,10 +86,8 @@ class Collection(
 
   private val logger = Logger(s"${BLUE(name.capitalize)}")
 
-  private val scopedDefaults = ScopedDefaults.getDefaults(name, "collection")
-
   /** Set of posts or other elements for use in context for rendering pages. */
-  lazy val items =
+  lazy val items: Map[String, Element] =
     val files = getListOfFilepaths(directory)
     logger.debug(s"$name source ${GREEN(directory)}: ${files.length} files")
     def f(fn: String) =
@@ -70,22 +95,30 @@ class Collection(
     files.filter(Converters.hasConverter).map(f).toMap
 
   lazy val locals =
+    val scopedDefaults = ScopedDefaults.getDefaults(name, "collection")
     configs update scopedDefaults
+
     configs += "title" -> name
     val conf = CollectionHooks.beforeLocals
       .foldLeft(configs)((o, h) => o update h(globals)(IObj(o)))
+
     IObj(conf)
 
-  private var constructor = elemCons(name)
+  private var constructor: (String, String, IObj, IObj) => Element =
+    elemCons(name)
 
   lazy val identifier = s"/collections/$name"
 
   lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
-  /** TODO why is there an @uncheckedVariance annotation? */
-  private def sortedItems =
-    val v = items.map(_._2).filter(_.visible).toArray.sortWith(compare)
-    v
+  private def sortedItems: Array[Element] =
+    items
+      .collect(p =>
+        p._2.visible match
+          case true => p._2
+      )
+      .toArray
+      .sortWith(compare)
 
   /** The toc will have default output extension html */
   protected lazy val outputExt = locals.getOrElse("outputExt")(".html")

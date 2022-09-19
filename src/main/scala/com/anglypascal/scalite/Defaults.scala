@@ -106,21 +106,10 @@ object Defaults:
     val none =
       "{{categories}}/{{slugTitle}}{{output_ext}}"
 
-  object Group:
-    val permalink = "/{{ctype}}/{{name}}"
-    val defaultStyle = "tag"
-    val defaultGType = "tags"
-
-  object PostsGroup:
-    val outputExt = ".html"
-    val baseLink = "/{{gType}}"
-    val relativeLink = "/{{name}}"
-    val sortBy = "title"
-
   object Tree:
     val permalink = "/{{ctype}}/{{name}}"
     val defaultStyle = "tag"
-    val defaultGType = "tags"
+    val defaultType = "tags"
 
   object PostTree:
     val outputExt = ".html"
@@ -129,7 +118,7 @@ object Defaults:
 
   object Tags:
     val title = "Tags"
-    val gType = "tags"
+    val tType = "tags"
     val sortBy = "title"
     val baseLink = "/{{gType}}"
     val relativeLink = "/{{name}}"
@@ -138,7 +127,7 @@ object Defaults:
 
   object Categories:
     val title = "Categories"
-    val gType = "categories"
+    val tType = "categories"
     val sortBy = "title"
     val baseLink = "/{{gType}}"
     val relativeLink = "/{{name}}"

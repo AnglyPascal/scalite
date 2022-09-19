@@ -65,14 +65,10 @@ class PostLike(val rType: String)(
 
   private val frontMatter =
     com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
-  private lazy val mainMatter = 
+  private lazy val mainMatter =
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
   protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
 
-  /** Isn't it useless? like even if someone changes the collection infos,
-    * nothing will change really. FIXME don't take specific arguments like that,
-    * take the whole configs
-    */
   PostHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
@@ -122,6 +118,8 @@ class PostLike(val rType: String)(
       "slugTitleCased" -> slugify(title, "default", true)
     )
     val treeObj = MObj()
+
+    /** FIXME: what if a post is in multiple different paths down a Tree? */
     for (k, s) <- trees do treeObj += k -> s.map(_.treeName).mkString("/")
 
     obj update newObj
@@ -144,9 +142,9 @@ class PostLike(val rType: String)(
       )
     purifyUrl(URL(permalinkTemplate)(urlObj))
 
-  /** Returns whether to render this post or not. Default is true. Putting
-    * output: false inside collection.post complete turns off rendering of
-    * posts.
+  /** Returns whether to render this post or not. Can be set in the the front
+    * matter of the post, in the defaults of its scope, or in the collections as
+    * a global value. Default is true.
     */
   val visible = extractChain(frontMatter, collection)("visible")(true)
 
@@ -181,7 +179,7 @@ class PostLike(val rType: String)(
     nobj
 
   /** Extract excerpt from the mainMatter */
-  private lazy val excerpt: String =
+  private def excerpt: String =
     val separator =
       extractChain(frontMatter, globals)("separator")(Defaults.separator)
     Excerpt(
@@ -206,7 +204,7 @@ class PostLike(val rType: String)(
     *   }}}
     *   These links then can be used as mustache or other tags like {{post1}}
     */
-  private lazy val postUrls: Map[String, String] =
+  private def postUrls: Map[String, String] =
     def f(p: (String, Data)): Option[(String, String)] =
       p._2 match
         case str: DStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
@@ -257,8 +255,7 @@ class PostLike(val rType: String)(
     PostHooks.afterWrites foreach { _.apply(globals)(this) }
 
   /** Processes the groups in PostCluster this post belongs to. */
-  if visible then 
-    PostForests.addToForests(this)
+  if visible then PostForests.addToForests(this)
 
   override def toString(): String =
     CYAN(title) + s"($date)" + "[" + BLUE(permalink) + "]"

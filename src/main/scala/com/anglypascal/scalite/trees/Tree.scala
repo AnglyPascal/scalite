@@ -109,23 +109,14 @@ trait Tree[A <: Renderable] extends Renderable:
   /** Returns the item stored against the key */
   def get(key: String) = _items.get(key)
 
-  lazy val pathToRoot: List[Tree[A]] =
-    var path = List[Tree[A]]()
-    var now = this
-    path = now :: path
-    while now.parent != None do
-      now = now.parent.get
-      path = now :: path
-    path.toList
+  def pathToRoot: LazyList[Tree[A]] =
+    this #:: parent.map(_.pathToRoot).getOrElse(LazyList())
 
-  lazy val pathToRootNames: List[String] =
-    var path = List[String]()
-    var now = this
-    path = now.treeName :: path
-    while now.parent != None do
-      now = now.parent.get
-      path = now.treeName :: path
-    path.toList
+  def pathToRootNames: LazyList[String] =
+    pathToRoot.map(_.treeName)
+
+  def dfs: LazyList[Tree[A]] =
+    this #:: children.foldRight(LazyList[Tree[A]]())((l, r) => l.dfs #::: r)
 
   /** Processes the items, usually either writing them to a Page, or giving the
     * metadata about the items to another object.
@@ -149,8 +140,5 @@ trait Tree[A <: Renderable] extends Renderable:
 /** Plugin that defines a new Tree from the given treeType, configurations and
   * global variables, returnin a RootNode instance
   */
-trait TreeStyle[A <: Renderable] extends Plugin:
-
-  val styleName: String
-
+abstract class TreeStyle[A <: Renderable](val styleName: String) extends Plugin:
   def apply(treeType: String)(configs: MObj, globals: IObj): Tree[A]

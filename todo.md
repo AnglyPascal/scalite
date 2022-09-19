@@ -29,13 +29,12 @@
     Some default hooks to finetune some specific behaviour and to check hooks. For
     example, something with Sass.
 
-5. Taxonomical groups, how to? Oh just category style
-
 6. Caching files
 
 7. Create ID for posts, and check if posts can find other posts by that ID
 
-8. Make TagStyle and CategoryStyle into traits
+8. Make TagStyle and CategoryStyle into traits, also try to generalize the getPaths
+   maybe? We can factor out a few more fields from these two.
 
 
 ## Rewriting ideas:
