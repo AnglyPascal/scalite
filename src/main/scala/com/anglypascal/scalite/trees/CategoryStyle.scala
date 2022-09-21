@@ -6,19 +6,21 @@ import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.documents.Renderable
+import com.anglypascal.scalite.documents.SourceFile
 
-class CategoryTree(
+class CategoryTree[A <: Renderable with WithTree[A] with SourceFile](
     val treeType: String,
     val treeName: String,
-    protected val parent: Option[PostTree]
+    protected val parent: Option[AnyTree[A]]
 )(_configs: MObj, protected val globals: IObj)
-    extends PostTree(_configs):
+    extends AnyTree[A](_configs):
 
   /** */
-  def createChild(name: String): CategoryTree =
+  def createChild(name: String): CategoryTree[A] =
     CategoryTree(treeType, name, Some(this))(_configs, globals)
 
-  def getPaths(post: PostLike): Iterable[List[String]] =
+  def getPaths(post: A): Iterable[List[String]] =
     val rP = post.relativePath.split("/").init.toList
 
     def dataToPath(data: Data): Iterable[List[String]] =
@@ -30,6 +32,7 @@ class CategoryTree(
 
     dataToPath(post.getTreesList(treeType))
 
-object CategoryStyle extends TreeStyle[PostLike]("category"):
-  def apply(treeType: String)(configs: MObj, globals: IObj): Tree[PostLike] =
+class CategoryStyle[A <: Renderable with WithTree[A] with SourceFile]
+    extends TreeStyle[A]("category"):
+  def apply(treeType: String)(configs: MObj, globals: IObj): Tree[A] =
     CategoryTree(treeType, treeType, None)(configs, globals)

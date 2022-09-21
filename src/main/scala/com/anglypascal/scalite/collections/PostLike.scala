@@ -16,7 +16,7 @@ import com.anglypascal.scalite.plugins.Hooks
 import com.anglypascal.scalite.plugins.PageHooks
 import com.anglypascal.scalite.plugins.PostHooks
 import com.anglypascal.scalite.trees.PostForests
-import com.anglypascal.scalite.trees.PostTree
+import com.anglypascal.scalite.trees.AnyTree
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime

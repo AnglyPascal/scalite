@@ -8,3 +8,5 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 trait Plugin:
 
   protected[plugins] def addConfigs(conf: MObj): Plugin = this
+
+  override def toString(): String

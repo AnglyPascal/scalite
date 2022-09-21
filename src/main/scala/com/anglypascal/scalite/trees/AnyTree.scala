@@ -3,16 +3,18 @@ package com.anglypascal.scalite.trees
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.ScopedDefaults
 import com.anglypascal.scalite.URL
-import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
+import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
-abstract class PostTree(_configs: MObj) extends Tree[PostLike] with Page:
+abstract class AnyTree[A <: Renderable with WithTree[A]](_configs: MObj)
+    extends Tree[A]
+    with Page:
 
   protected override val logger = Logger("PostSuperTree")
 
@@ -75,46 +77,3 @@ abstract class PostTree(_configs: MObj) extends Tree[PostLike] with Page:
   protected[trees] def process(dryRun: Boolean = false): Unit =
     write(dryRun)
     children foreach { _.process(dryRun) }
-
-object PostForests extends Forest[PostLike]:
-
-  protected override val logger = Logger("PostForest")
-
-  val sectionName: String = "forests"
-
-  addTreeStyle(TagStyle)
-  addTreeStyle(CategoryStyle)
-
-  protected def defaultConfig: MObj =
-    import Defaults.Tree
-    import Defaults.Tags
-    import Defaults.Categories
-    MObj(
-      "tags" -> MObj(
-        "title" -> Tags.title,
-        "type" -> Tags.tType,
-        "sortBy" -> Tags.sortBy,
-        "baseLink" -> Tags.baseLink,
-        "relativeLink" -> Tags.relativeLink,
-        "separator" -> Tags.separator,
-        "style" -> Tags.style
-      ),
-      "categories" -> MObj(
-        "title" -> Categories.title,
-        "type" -> Categories.tType,
-        "sortBy" -> Categories.sortBy,
-        "baseLink" -> Categories.baseLink,
-        "relativeLink" -> Categories.relativeLink,
-        "separator" -> Categories.separator,
-        "style" -> Categories.style
-      )
-    )
-
-  /** Called by a PostLike to add itself to all available SuperGroups */
-  def addToForests(post: PostLike): Unit =
-    for tree <- trees do tree.addItem(post.title, post)
-
-  override def reset(): Unit =
-    super.reset()
-    addTreeStyle(TagStyle)
-    addTreeStyle(CategoryStyle)
