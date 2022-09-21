@@ -4,6 +4,7 @@ import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.Defaults
 
+/** Identity Converter, defaulted to convert only html files. */
 class Identity(
     protected val configs: DObj,
     protected val globals: DObj
@@ -14,7 +15,7 @@ class Identity(
   def extensions: String =
     configs.getOrElse("extensions")(Defaults.Identity.extensions)
 
-  def outputExt: String = 
+  def outputExt: String =
     configs.getOrElse("outputExt")(Defaults.Identity.outputExt)
 
   private val logger = Logger("Identity converter")
@@ -23,7 +24,6 @@ class Identity(
     logger.debug(s"Converting $filepath using the identity converter")
     str
 
-object Identity extends ConverterConstructor:
-  val constructorName: String = "identity"
+object Identity extends ConverterConstructor("identity"):
   def apply(configs: DObj, globals: DObj) =
     new Identity(configs, globals)

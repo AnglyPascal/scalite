@@ -23,8 +23,7 @@ trait Converter:
   protected val logger = Logger(s"${fileType} converter")
 
   logger.debug(
-    s"new converter: filetype: ${GREEN(fileType)}, " +
-      s"extensions: ${GREEN(extensions.split(",").map(_.trim).mkString(", "))}, " +
+    s"new, extensions: ${GREEN(extensions.split(",").map(_.trim).mkString(", "))}, " +
       s"outputExt: ${GREEN(outputExt)}"
   )
 
@@ -61,10 +60,6 @@ trait Converter:
     BLUE(fileType) + ": " + extensions.split(",").map(_.trim).mkString(", ")
 
 /** Constructor for a Converter */
-trait ConverterConstructor extends Plugin:
-
-  /** Name of the converter */
-  val constructorName: String
-
+abstract class ConverterConstructor(val constructorName: String) extends Plugin:
   /** Create a new Constructor to be used in runtime */
   def apply(configs: DObj, globals: DObj): Converter

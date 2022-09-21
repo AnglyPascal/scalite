@@ -38,7 +38,6 @@ class Markdown(
         str
       case Right(s) => s
 
-object Markdown extends ConverterConstructor:
-  val constructorName: String = "markdown"
+object Markdown extends ConverterConstructor("markdown"):
   def apply(configs: DObj, globals: DObj) =
     new Markdown(configs, globals)

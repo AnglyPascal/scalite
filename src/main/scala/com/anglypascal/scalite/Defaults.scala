@@ -86,6 +86,7 @@ object Defaults:
     val style = "page"
     val extensions = "sass,scss"
     val outputExt = ".css"
+    val outputStyle = "compressed"
 
   object Build:
     val logLevel = 1

@@ -54,7 +54,6 @@ class MarkdownGithub(
         logger.debug(s"Successfully converted $filepath")
         decode(convertedText, "{{", "}}")
 
-object MarkdownGithub extends ConverterConstructor:
-  val constructorName: String = "markdownGithub"
+object MarkdownGithub extends ConverterConstructor("markdownGithub"):
   def apply(configs: DObj, globals: DObj) =
     new MarkdownGithub(configs, globals)

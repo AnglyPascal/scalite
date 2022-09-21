@@ -40,7 +40,7 @@ Scalite supports [Sass][sass] stylesheets. If you fancy other contents that need
 converted to something else, it's as simple as providing a converter, and adding a few
 lines in the YAML configuration!
 
-### No fixed directory structure
+### Dynamic directory structure
 
 You don't need to put your content in any of the default specified directories, add a
 line in the configuration, and the new directories will be used.

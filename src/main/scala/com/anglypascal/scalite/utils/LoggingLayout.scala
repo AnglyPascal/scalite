@@ -1,12 +1,15 @@
 package com.anglypascal.scalite.utils
 
-import com.anglypascal.scalite.utils.StringProcessors.pad
-import com.anglypascal.scalite.utils.Colors.*
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.LayoutBase
+import com.anglypascal.scalite.utils.Colors.*
+import com.anglypascal.scalite.utils.StringProcessors.pad
 import com.github.nscala_time.time.Imports.*
+
 import java.time.Instant
 
+/** FIXME Checkout what's happening
+ */
 class LoggingLayout extends LayoutBase[ILoggingEvent]:
   def doLayout(event: ILoggingEvent): String =
     val sbuf = new StringBuffer(128)
@@ -15,7 +18,7 @@ class LoggingLayout extends LayoutBase[ILoggingEvent]:
     val date = new DateTime(s).withZone(s)
     val dateFormat = "HH:mm:ss.SSS"
 
-    sbuf.append(date.toString(dateFormat).take(12))
+    sbuf.append(date.toString(dateFormat))
     sbuf.append(" ")
     sbuf.append(level(event))
     sbuf.append(" [")
