@@ -3,10 +3,10 @@ package com.anglypascal.scalite.layouts
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.documents.SourceFile
 import com.anglypascal.scalite.plugins.LayoutHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.documents.SourceFile
 
 /** Defines an abstract Layout. */
 abstract class Layout(val lang: String, val name: String) extends SourceFile:
@@ -14,10 +14,11 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
   private val logger = Logger(s"${lang.capitalize} layout")
   logger.debug(s"creating $lang layout $name")
 
-  protected val shouldConvert = false
+  protected lazy val shouldConvert = false
 
   protected val frontMatter =
-    com.anglypascal.scalite.documents.Reader.frontMatter(name, filepath)
+    com.anglypascal.scalite.documents.Reader.frontMatter(lang, filepath)
+
   protected lazy val mainMatter =
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 

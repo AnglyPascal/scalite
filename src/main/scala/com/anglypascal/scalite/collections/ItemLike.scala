@@ -38,14 +38,8 @@ class ItemLike(val rType: String)(
   private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
 
-  private val frontMatter =
-    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
-  private lazy val mainMatter = 
-    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
-  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
-
   // by default ItemLike objects don't have layouts
-  protected val layoutName =
+  protected lazy val layoutName =
     extractChain(frontMatter, collection)("layout")("")
 
   ItemHooks.beforeInits foreach {

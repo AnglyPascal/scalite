@@ -70,7 +70,7 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
     glbsObj
 
   private def initiatePlugins(pluginsDir: String, configs: MObj): Unit =
-    PluginManager(pluginsDir, configs.extractOrElse("plugins")(MObj()))
+    PluginManager(pluginsDir, configs.extractOrElse("plugins")(MArr()))
 
   /** Process the assets */
   private def processAssets(

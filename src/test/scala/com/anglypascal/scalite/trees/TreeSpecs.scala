@@ -8,7 +8,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 class TreeSpecs extends AnyFlatSpec:
 
   class Item(val getPaths: Iterable[List[String]]) extends Renderable:
-    protected val layoutName: String = "empty"
+    protected lazy val layoutName: String = "empty"
     lazy val locals: IObj = IObj()
     val visible: Boolean = true
     protected lazy val render: String = ""
@@ -26,7 +26,7 @@ class TreeSpecs extends AnyFlatSpec:
     def getPaths(item: Item): Iterable[List[String]] =
       item.getPaths
 
-    protected val layoutName: String = "empty"
+    protected lazy val layoutName: String = "empty"
     lazy val locals: IObj = IObj()
     val visible: Boolean = true
     protected lazy val render: String = ""

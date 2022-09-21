@@ -6,17 +6,14 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DArr
 
 class CleanerSpecs extends AnyFlatSpec:
-  val ob1 = MObj(
-    "base" -> "src/test/resources/site_template",
-    "destination" -> "/_site",
+  val obj1 = MObj(
     "keepFiles" -> DArr()
   )
-  val ob2 = MObj(
+  val obj2 = IObj(
     "base" -> "src/test/resources/site_template",
     "destination" -> "/_site",
-    "keepFiles" -> DArr(".*\\.jpg")
   )
 
   ignore should "clean target diectory properly" in {
-    Cleaner(IObj(ob1))
+    Cleaner(obj1, obj2)
   }

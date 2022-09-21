@@ -8,12 +8,12 @@ import com.anglypascal.scalite.layouts.Layouts
   */
 trait Renderable:
 
-  /** Name of the parent layout */
-  protected val layoutName: String
-
   /** The parent layout, might be None */
   protected lazy val layout =
     Layouts.get(layoutName) orElse Layouts.get("empty")
+
+  /** Name of the parent layout */
+  protected lazy val layoutName: String
 
   /** An Element also has some internal variables that are publicly visible */
   lazy val locals: DObj

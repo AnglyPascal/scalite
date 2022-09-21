@@ -40,4 +40,9 @@ trait SourceFile:
 
   def filename: String = getFileName(filepath)
 
-  protected val shouldConvert: Boolean
+  protected val frontMatter: DObj
+
+  protected lazy val mainMatter: String
+
+  protected lazy val shouldConvert: Boolean
+

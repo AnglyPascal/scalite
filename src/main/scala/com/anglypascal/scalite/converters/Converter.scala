@@ -12,8 +12,6 @@ import com.typesafe.scalalogging.Logger
   */
 trait Converter:
 
-  protected val logger = Logger("Converter")
-
   /** filetype that this converter handles */
   def fileType: String
 
@@ -21,6 +19,8 @@ trait Converter:
     * is able to convert.
     */
   def extensions: String
+
+  protected val logger = Logger(s"${fileType} converter")
 
   logger.debug(
     s"new converter: filetype: ${GREEN(fileType)}, " +

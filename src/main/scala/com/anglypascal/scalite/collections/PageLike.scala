@@ -52,17 +52,11 @@ class PageLike(val rType: String)(
     "relativePath" -> relativePath
   )
 
-  private val frontMatter =
-    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
-  private lazy val mainMatter = 
-    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
-  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
-
   /** Name of the parent layout. Can be set in either the frontMatter, in the
     * scoped defaults, in collection configurations, or the "page" layout, in
     * order of precedence.
     */
-  protected val layoutName: String =
+  protected lazy val layoutName: String =
     extractChain(frontMatter, collection)("layout")(rType)
 
   /** Title of this page, can be specified in the frontMatter under key "title",

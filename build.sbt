@@ -1,10 +1,10 @@
-val scala3Version = "3.1.3"
+val scala3Version = "3.2.0"
 
 lazy val root = project
   .in(file("."))
   .settings(
     name := "scalite",
-    version := "0.1.1",
+    version := "0.1.1-SNAPSHOT",
     organization := "com.anglypascal",
     scalaVersion := scala3Version,
     libraryDependencies ++= Seq(
@@ -27,6 +27,8 @@ lazy val root = project
     ),
     libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.1.2.1",
   )
+
+isSnapshot := true
 
 scalacOptions ++= Seq(
   "-deprecation",

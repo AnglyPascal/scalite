@@ -12,7 +12,7 @@ import org.scalatest.flatspec.AsyncFlatSpec
 
 import scala.concurrent.Future
 
-class PostsSpecs extends AsyncFlatSpec:
+class CollectionsSpecs extends AsyncFlatSpec:
 
   Converters.reset()
   Layouts.reset()
@@ -36,33 +36,3 @@ class PostsSpecs extends AsyncFlatSpec:
   val posts =
     Collection(PostConstructor, "posts", pDir + pPth, configs, globals)
 
-  it should "read all posts properly" in {
-    val future = Future { posts }
-
-    future.map(l =>
-      println(posts)
-      assert(l.items.toList.length === 7)
-    )
-  }
-
-  it should "sort and filter the posts properly" in {
-    val future = Future { posts }
-
-    future.map(l =>
-      assert(l.sortedItems.length === 6)
-    )
-  }
-
-  it should "create local variables properly" in {
-    val future = Future { posts }
-
-    future.map(l =>
-      println(l.locals)
-      assert(
-        l.locals.getOrElse("haha")("") === "bruh"
-          && !l.locals.getOrElse("toc")(false)
-      )
-    )
-  }
-
-  /** Check the overriding mechanism of configs */

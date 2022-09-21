@@ -69,7 +69,8 @@ abstract class PostTree(_configs: MObj) extends Tree[PostLike] with Page:
         logger.warn(s"${ERROR(treeName)}[$treeType] has no layout")
         ""
 
-  protected val layoutName: String = configs.extractOrElse("layout")(treeType)
+  protected lazy val layoutName: String =
+    configs.extractOrElse("layout")(treeType)
 
   protected[trees] def process(dryRun: Boolean = false): Unit =
     write(dryRun)

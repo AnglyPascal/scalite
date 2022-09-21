@@ -18,8 +18,6 @@ class Markdown(
     protected val globals: DObj
 ) extends Converter:
 
-  protected override val logger = Logger("Markdown converter")
-
   def fileType: String = configs.getOrElse("fileType")("none")
 
   def extensions: String =

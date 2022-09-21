@@ -68,7 +68,7 @@ class Excerpt(
 
   lazy val locals = _locals
 
-  protected val layoutName: String = "empty"
+  protected lazy val layoutName: String = "empty"
 
   protected lazy val render: String =
     val str =

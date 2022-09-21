@@ -15,6 +15,8 @@ import com.anglypascal.scalite.plugins.BeforeLocals
 import com.anglypascal.scalite.plugins.Hooks
 import com.anglypascal.scalite.plugins.PageHooks
 import com.anglypascal.scalite.plugins.PostHooks
+import com.anglypascal.scalite.trees.PostForests
+import com.anglypascal.scalite.trees.PostTree
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
@@ -27,8 +29,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
-import com.anglypascal.scalite.trees.PostTree
-import com.anglypascal.scalite.trees.PostForests
+import com.anglypascal.scalite.trees.WithTree
+import com.anglypascal.scalite.trees.Tree
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -52,7 +54,8 @@ class PostLike(val rType: String)(
     protected val globals: IObj,
     private val collection: IObj
 ) extends Element
-    with Page:
+    with Page
+    with WithTree[PostLike]:
 
   private val logger = Logger(s"PostLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
@@ -63,18 +66,12 @@ class PostLike(val rType: String)(
     "relativePath" -> relativePath
   ) update collection
 
-  private val frontMatter =
-    com.anglypascal.scalite.documents.Reader.frontMatter(rType, filepath)
-  private lazy val mainMatter =
-    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
-  protected val shouldConvert = frontMatter.getOrElse("shouldConvert")(true)
-
   PostHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
     */
-  protected val layoutName =
+  protected lazy val layoutName =
     extractChain(frontMatter, collection)("layout")(rType)
 
   /** Get the title of the post from the front matter, defaulting back to the
@@ -117,10 +114,6 @@ class PostLike(val rType: String)(
       "slugTitlePretty" -> slugify(title, "pretty"),
       "slugTitleCased" -> slugify(title, "default", true)
     )
-    val treeObj = MObj()
-
-    /** FIXME: what if a post is in multiple different paths down a Tree? */
-    for (k, s) <- trees do treeObj += k -> s.map(_.treeName).mkString("/")
 
     obj update newObj
     obj update treeObj
@@ -223,31 +216,27 @@ class PostLike(val rType: String)(
           MObj(
             "site" -> globals,
             "page" -> locals,
-            "collectionItems" -> CollectionItems.collectionItems
+            "collectionItems" -> CollectionItems.collectionItems,
+            "trees" -> treeObj
           )
       )
     PostHooks.beforeRenders foreach { _.apply(globals)(context) }
-    val rendered = layout match
+
+    val r = layout match
       case Some(l) =>
         logger.debug(s"$this has layout ${l.name}")
         l.renderWrap(context, str)
       case None =>
         logger.debug(s"$this has no specified layout")
         str
-    PostHooks.afterRenders foreach { _.apply(globals)(context, rendered) }
-    rendered
 
-  /** The map holding sets of collection-types */
-  private val trees = LinkedHashMap[String, ListBuffer[PostTree]]()
+    PostHooks.afterRenders.foldLeft(r)((s, h) =>
+      h.apply(globals)(context, s)
+    )
 
   /** Return the global settings for the collection-type treeType */
   def getTreesList(treeType: String): Data =
     frontMatter.extractOrElse(treeType)(DNull)
-
-  /** Adds the collection in the set of this collection-type */
-  def addTree[A <: PostTree](treeType: String)(a: A): Unit =
-    if trees.contains(treeType) then trees(treeType) += a
-    else trees += treeType -> ListBuffer(a)
 
   /** Write the post and run all the AfterWrite hooks */
   override def write(dryRun: Boolean): Unit =

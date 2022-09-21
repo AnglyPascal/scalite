@@ -2,17 +2,16 @@ package com.anglypascal.scalite.plugins
 
 import com.anglypascal.scalite.Site
 import com.anglypascal.scalite.collections.Collection
+import com.anglypascal.scalite.collections.ItemLike
 import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Reader
-import com.anglypascal.scalite.trees.Tree
 import com.anglypascal.scalite.layouts.Layout
+import com.anglypascal.scalite.trees.Tree
 
 import scala.collection.mutable.ListBuffer
-import com.anglypascal.scalite.collections.ItemLike
-import com.anglypascal.scalite.trees.Tree
 
 /** A Hook has a priority and usually an apply function. Hooks are called at
   * various points of the site creation, and can be provided by the user to
@@ -37,7 +36,7 @@ object Hooks:
       case hook: ItemHook       => ItemHooks.registerHook(hook)
       case hook: PageHook       => PageHooks.registerHook(hook)
       case hook: LayoutHook     => LayoutHooks.registerHook(hook)
-      case hook: TreeHook      => TreeHooks.registerHook(hook)
+      case hook: TreeHook       => TreeHooks.registerHook(hook)
       case hook: SiteHook       => SiteHooks.registerHook(hook)
       case null                 => ()
 
@@ -209,7 +208,7 @@ object TreeHooks:
       case hook: TreeBeforeRender => _beforeRenders += hook
       case hook: TreeAfterRender  => _afterRenders += hook
       case hook: TreeAfterProcess => _afterProcesses += hook
-      case null                    => ()
+      case null                   => ()
 
   def beforeInits = _beforeInits.toList.sorted
   def beforeLocals = _beforeLocals.toList.sorted

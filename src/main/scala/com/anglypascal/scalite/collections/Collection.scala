@@ -77,32 +77,44 @@ class Collection(
     CollectionHooks.beforeInits
       .foldLeft(_configs)((o, h) => o update h(globals)(IObj(o)))
 
-  private val sortBy: String =
-    configs.extractOrElse("sortBy")(Defaults.Collection.sortBy)
+  private lazy val sortBy =
+    configs.remove("sortBy") match
+      case None => Array("title")
+      case Some(v) =>
+        val arr = v match
+          case v: com.anglypascal.scalite.data.mutable.DStr =>
+            v.str.trim.split(",").map(_.trim)
+          case v: com.anglypascal.scalite.data.mutable.DArr =>
+            v.arr.flatMap(_.getStr).toArray
+          case _ => Array[String]()
+        if arr.length == 0 then Array("title")
+        else arr
 
-  private val permalinkTemplate =
+  private lazy val permalinkTemplate =
     extractChain(configs, globals)("permalink")(Defaults.permalink)
 
-  protected val layoutName: String = configs.extractOrElse("layout")(name)
+  protected lazy val layoutName: String = configs.extractOrElse("layout")(name)
 
   val visible: Boolean =
-    configs.extractOrElse("sortBy")(Defaults.Collection.toc)
-
-  private val constructor: (String, String, IObj, IObj) => Element =
-    elemCons(name)
+    configs.extractOrElse("toc")(Defaults.Collection.toc)
 
   logger.debug(
     s"Init: source: ${GREEN(directory)}, " +
-      s"sortBy: ${GREEN(sortBy)}, toc: ${GREEN(visible.toString)}, " +
+      s"sortBy: ${GREEN(sortBy.mkString(", "))}, " +
+      s"toc: ${GREEN(visible.toString)}, " +
       s"permalink: ${GREEN(permalinkTemplate)}"
   )
 
   /** Set of posts or other elements for use in context for rendering pages. */
   lazy val items: Map[String, Element] =
+    lazy val constructor: (String, String, IObj, IObj) => Element =
+      elemCons(name)
+
     val files = getListOfFilepaths(directory)
     logger.debug(s"$name source ${GREEN(directory)}: ${files.length} files")
     def f(fn: String) =
       (getFileName(fn), constructor(directory, fn, globals, locals))
+
     files.filter(Converters.hasConverter).map(f).toMap
 
   lazy val locals =
@@ -119,7 +131,10 @@ class Collection(
 
   lazy val permalink = purifyUrl(URL(permalinkTemplate)(locals))
 
-  private def sortedItems: Array[Element] =
+  def sortedItems: Array[Element] =
+    def compare(fst: Element, snd: Element): Boolean =
+      compareBy(fst, snd, sortBy(0), sortBy.tail: _*) < 0
+
     items
       .collect(p =>
         p._2.visible match
@@ -130,12 +145,6 @@ class Collection(
 
   /** The toc will have default output extension html */
   protected lazy val outputExt = locals.getOrElse("outputExt")(".html")
-
-  /** The compare function to be used with sortWith to sort the posts in this
-    * collection. This first tries sortBy then falls back to "title".
-    */
-  private def compare(fst: Element, snd: Element): Boolean =
-    compareBy(fst, snd, sortBy) < 0
 
   protected lazy val render: String =
     val str = layout match
@@ -164,4 +173,21 @@ class Collection(
   protected[collections] def cache(): Unit = ???
 
   override def toString(): String =
-    "\n" + sortedItems.map("  " + _.toString).mkString("\n")
+    s"${GREEN(name)} collection: \n" +
+      sortedItems.map("  " + _.toString).mkString("\n")
+
+  /** Compare two given Elements by the given keys */
+  private def compareBy(
+      fst: Element,
+      snd: Element,
+      key1: String,
+      keys: String*
+  ): Int =
+    import com.anglypascal.scalite.utils.cmpOpt
+    val s = cmpOpt(fst.locals.get(key1), snd.locals.get(key1))
+    if s != 0 then s
+    else
+      for key <- keys do
+        val t = cmpOpt(fst.locals.get(key), snd.locals.get(key))
+        if t != 0 then return t
+      cmpOpt(fst.locals.get("title"), snd.locals.get("title"))

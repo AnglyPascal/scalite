@@ -1,0 +1,3 @@
+[submodule "plugins/scaliteTextile"]
+	path = plugins/scaliteTextile
+	url = https://github.com/AnglyPascal/scaliteTextile

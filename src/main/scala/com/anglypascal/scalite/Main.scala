@@ -8,13 +8,10 @@ import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.trees.PostForests
 import com.anglypascal.scalite.collections.PageLike
 import com.anglypascal.scalite.collections.Excerpt
+import com.anglypascal.scalite.plugins.PluginManager
 
 @main
 def main(args: String*) = 
-  val usage = """ """
-  
-  var command = "build"
-  var directory = System.getProperty("user.dir")
-
-
-  /** do some parsing */
+  val file = "plugins/scaliteTextile/target/scala-3.2.0/scalitetextile_3-0.1.0-SNAPSHOT.jar"
+  val cl = PluginManager.loadJar(file)
+  // println(cl)
