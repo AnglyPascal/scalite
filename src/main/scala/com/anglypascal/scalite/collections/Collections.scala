@@ -7,7 +7,7 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.DBool
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Generator
-import com.anglypascal.scalite.plugins.CollectionHooks
+import com.anglypascal.scalite.hooks.CollectionHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 

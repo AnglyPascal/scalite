@@ -6,7 +6,7 @@ import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Renderable
 import com.anglypascal.scalite.plugins.Plugin
-import com.anglypascal.scalite.plugins.TreeHooks
+import com.anglypascal.scalite.hooks.TreeHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 

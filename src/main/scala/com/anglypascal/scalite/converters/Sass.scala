@@ -3,8 +3,8 @@ package com.anglypascal.scalite.converters
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.data.immutable.DObj
-import com.anglypascal.scalite.plugins.CollectionAfterWrite
-import com.anglypascal.scalite.plugins.Hooks
+import com.anglypascal.scalite.hooks.CollectionAfterWrite
+import com.anglypascal.scalite.hooks.Hooks
 import com.typesafe.scalalogging.Logger
 import de.larsgrefer.sass.embedded.SassCompilerFactory
 import sass.embedded_protocol.EmbeddedSass

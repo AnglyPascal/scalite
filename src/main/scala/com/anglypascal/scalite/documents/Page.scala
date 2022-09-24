@@ -3,7 +3,7 @@ package com.anglypascal.scalite.documents
 import com.anglypascal.scalite.Defaults
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import com.anglypascal.scalite.plugins.PageHooks
+import com.anglypascal.scalite.hooks.PageHooks
 import com.anglypascal.scalite.utils.DirectoryReader.writeTo
 import com.typesafe.scalalogging.Logger
 
@@ -33,7 +33,8 @@ trait Page extends Renderable:
 
   protected val configs: MObj
 
-  PageHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
+  /** FIXME wth? why is it here doing nothing? */
+  PageHooks.beforeInits(globals)(IObj(configs))
 
   /** Unique identifier to map this page to, in order for the cross reference to
     * work.

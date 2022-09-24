@@ -8,7 +8,7 @@ import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.plugins.ConverterHooks
+import com.anglypascal.scalite.hooks.ConverterHooks
 
 /** Holds all implementations of Converter and ConverterConstructor.
   *
@@ -72,9 +72,8 @@ object Converters extends Configurable:
           val C = converterConstructors.get(cn).getOrElse(Identity)
 
           conv += "fileType" -> name
-          val con = ConverterHooks.beforeInits
-            .foldLeft(conv)((o, h) => h(globals)(name, IObj(conv)))
-          converters += name -> C(IObj(con), globals)
+          conv update ConverterHooks.beforeInits(globals)(name, IObj(conv))
+          converters += name -> C(IObj(conv), globals)
         case _ =>
           logger.debug(s"please provide configs for convert $name as a table")
 
@@ -126,16 +125,14 @@ object Converters extends Configurable:
     *   filepath
     */
   def convert(str: String, filepath: String): String =
-    val nstr = findByExt(filepath) match
+    val ns = ConverterHooks.beforeConverts(str, filepath)
+    findByExt(filepath) match
       case Some(converter) =>
-        val ns = ConverterHooks.beforeConverts
-          .foldLeft(str)((s, h) => h.apply(s, filepath))
-        converter.convert(ns, filepath)
+        val nstr = converter.convert(ns, filepath)
+        ConverterHooks.afterConverts(nstr, filepath)
       case None =>
         logger.warn("no converter found for " + RED(filepath))
-        ConverterHooks.beforeConverts
-          .foldLeft(str)((s, h) => h.apply(s, filepath))
-    ConverterHooks.afterConverts.foldLeft(nstr)((s, h) => h.apply(s, filepath))
+        ns
 
   override def toString(): String =
     converters.map("  " + _._2.toString).mkString("\n")

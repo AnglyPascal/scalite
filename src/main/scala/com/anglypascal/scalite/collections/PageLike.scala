@@ -9,7 +9,7 @@ import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
-import com.anglypascal.scalite.plugins.PageHooks
+import com.anglypascal.scalite.hooks.PageHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName

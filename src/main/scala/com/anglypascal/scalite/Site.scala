@@ -12,7 +12,7 @@ import com.anglypascal.scalite.documents.Pages
 import com.anglypascal.scalite.trees.Forests
 import com.anglypascal.scalite.layouts.Layouts
 import com.anglypascal.scalite.plugins.PluginManager
-import com.anglypascal.scalite.plugins.SiteHooks
+import com.anglypascal.scalite.hooks.SiteHooks
 import com.anglypascal.scalite.utils.Cleaner
 import com.anglypascal.scalite.utils.DateParser
 import com.anglypascal.scalite.utils.DirectoryReader
@@ -23,7 +23,7 @@ import com.typesafe.scalalogging.Logger
 
 class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
   /** */
-  val logger = Logger("Site")
+  private val logger = Logger("Site")
 
   private def getConfigs: MObj =
     val glbsObj =
@@ -69,9 +69,6 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
         )
     glbsObj
 
-  private def initiatePlugins(pluginsDir: String, configs: MObj): Unit =
-    PluginManager(pluginsDir, configs.extractOrElse("plugins")(MArr()))
-
   /** Process the assets */
   private def processAssets(
       assetD: String,
@@ -92,7 +89,7 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
     val plugD =
       configs.getOrElse("base")(Defaults.Directories.base) +
         configs.getOrElse("pluginsDir")(Defaults.Directories.pluginsDir)
-    initiatePlugins(plugD, configs)
+    PluginManager(plugD, configs.extractOrElse("plugins")(MArr()))
     val configurables =
       List(Cleaner, ScopedDefaults, Converters, Layouts)
         ++ Forests.forests ++ List(Collections)
@@ -107,7 +104,6 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
 
   def globals: IObj =
 
-    val logger = Logger("initialization")
     val configs = getConfigs
 
     val configurables = getConfigurables(configs)

@@ -23,6 +23,8 @@ import scalite.trees.Forests
 import scalite.trees.PostForests
 import scalite.trees.TreeStyle
 import scalite.trees.AnyStylePost
+import scalite.hooks.Hook
+import scalite.hooks.Hooks
 
 /** Load Plugin objects form the jar files in the plugins directory */
 object PluginManager:

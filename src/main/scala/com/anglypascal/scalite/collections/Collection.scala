@@ -10,7 +10,7 @@ import com.anglypascal.scalite.data.immutable.DStr
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
-import com.anglypascal.scalite.plugins.CollectionHooks
+import com.anglypascal.scalite.hooks.CollectionHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
@@ -72,8 +72,7 @@ class Collection(
   private val logger = Logger(s"${BLUE(name.capitalize)}")
 
   protected val configs: MObj =
-    CollectionHooks.beforeInits
-      .foldLeft(_configs)((o, h) => o update h(globals)(IObj(o)))
+    _configs update CollectionHooks.beforeInits(globals)(IObj(_configs))
 
   private lazy val sortBy =
     configs.remove("sortBy") match

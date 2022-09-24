@@ -12,7 +12,7 @@ import com.anglypascal.scalite.utils.DateParser.dateParseObj
 import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.typesafe.scalalogging.Logger
-import com.anglypascal.scalite.plugins.ItemHooks
+import com.anglypascal.scalite.hooks.ItemHooks
 
 /** Elements that don't have a separate Page, but may be rendered as part of a
   * different Page.
@@ -42,15 +42,13 @@ class ItemLike(val rType: String)(
   protected lazy val layoutName =
     extractChain(frontMatter, collection)("layout")("")
 
-  ItemHooks.beforeInits foreach {
-    _.apply(globals)(
-      IObj(
-        "rType" -> rType,
-        "parentDir" -> parentDir,
-        "relativePath" -> relativePath
-      )
+  private val beforeInits = ItemHooks.beforeInits(globals)(
+    IObj(
+      "rType" -> rType,
+      "parentDir" -> parentDir,
+      "relativePath" -> relativePath
     )
-  }
+  )
 
   /** Title of this item */
   lazy val title: String =
@@ -66,7 +64,7 @@ class ItemLike(val rType: String)(
       extractChain(frontMatter, collection, globals)(
         "dateFormat"
       )(Defaults.dateFormat)
-    val obj = dateParseObj(dateString, dateFormat)
+    val obj = beforeInits update dateParseObj(dateString, dateFormat)
 
     val mobj = MObj(
       "title" -> title,

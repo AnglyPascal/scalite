@@ -4,7 +4,7 @@ import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.mutable.DStr
 import com.anglypascal.scalite.documents.Reader
 import com.anglypascal.scalite.documents.SourceFile
-import com.anglypascal.scalite.plugins.LayoutHooks
+import com.anglypascal.scalite.hooks.LayoutHooks
 import com.anglypascal.scalite.utils.Colors.*
 import com.typesafe.scalalogging.Logger
 
@@ -22,7 +22,7 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
   protected lazy val mainMatter =
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 
-  LayoutHooks.beforeInits foreach { _.apply(lang, name, filepath) }
+  LayoutHooks.beforeInits(lang, name, filepath)
 
   /** Render the layout with the given Data object as context
     *

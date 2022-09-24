@@ -11,10 +11,10 @@ import com.anglypascal.scalite.data.mutable.Data
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 import com.anglypascal.scalite.documents.Page
 import com.anglypascal.scalite.documents.Pages
-import com.anglypascal.scalite.plugins.BeforeLocals
-import com.anglypascal.scalite.plugins.Hooks
-import com.anglypascal.scalite.plugins.PageHooks
-import com.anglypascal.scalite.plugins.PostHooks
+import com.anglypascal.scalite.hooks.BeforeLocals
+import com.anglypascal.scalite.hooks.Hooks
+import com.anglypascal.scalite.hooks.PageHooks
+import com.anglypascal.scalite.hooks.PostHooks
 import com.anglypascal.scalite.trees.PostForests
 import com.anglypascal.scalite.trees.AnyTree
 import com.anglypascal.scalite.utils.Colors.*
@@ -60,13 +60,14 @@ class PostLike(val rType: String)(
   private val logger = Logger(s"PostLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
 
-  protected val configs = MObj(
-    "rType" -> rType,
-    "parentDir" -> parentDir,
-    "relativePath" -> relativePath
-  ) update collection
+  protected val configs =
+    MObj(
+      "rType" -> rType,
+      "parentDir" -> parentDir,
+      "relativePath" -> relativePath
+    ) update collection
 
-  PostHooks.beforeInits foreach { _.apply(globals)(IObj(configs)) }
+  private val beforeInits = PostHooks.beforeInits(globals)(IObj(configs))
 
   /** Get the parent layout name, if it exists. Layouts might not have a parent
     * layout, but each post needs to have one.
@@ -230,9 +231,7 @@ class PostLike(val rType: String)(
         logger.debug(s"$this has no specified layout")
         str
 
-    PostHooks.afterRenders.foldLeft(r)((s, h) =>
-      h.apply(globals)(context, s)
-    )
+    PostHooks.afterRenders.foldLeft(r)((s, h) => h.apply(globals)(context, s))
 
   /** Return the global settings for the collection-type treeType */
   def getTreesList(treeType: String): Data =

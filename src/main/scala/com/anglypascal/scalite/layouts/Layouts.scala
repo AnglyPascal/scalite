@@ -10,7 +10,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.typesafe.scalalogging.Logger
 
 import scala.collection.mutable.LinkedHashMap
-import com.anglypascal.scalite.plugins.LayoutHooks
+import com.anglypascal.scalite.hooks.LayoutHooks
 
 /** */
 object Layouts extends Configurable:
