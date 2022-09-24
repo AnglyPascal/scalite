@@ -104,6 +104,10 @@ final class DObj(val obj: Map[String, Data])
 
   def compare(that: Data): Int = 0
 
+  def update(that: mutable.DObj): DObj =
+    val o = obj ++ DObj(that)
+    DObj(o)
+
   override def toString(): String = toString(0)
 
   override protected[data] def toString(depth: Int): String =

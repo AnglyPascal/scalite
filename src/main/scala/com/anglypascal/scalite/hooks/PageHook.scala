@@ -5,12 +5,9 @@ import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.Logger
 
-//////////
-// Page //
-//////////
 sealed trait PageHook extends Hook:
   override def toString(): String = super.toString() + "-Page"
 
@@ -29,30 +26,30 @@ trait PageAfterRender extends PageHook with AfterRender:
 trait PageAfterWrite extends PageHook with AfterWrite[Page]:
   override def toString(): String = super.toString() + " after write"
 
-object PageHooks:
+object PageHooks
+    extends HookObject[PageHook]
+    with WithBeforeInit[PageHook, PageBeforeInit]
+    with WithBeforeLocals[PageHook, PageBeforeLocals]
+    with WithBeforeRenders[PageHook, PageBeforeRender]
+    with WithAfterRenders[PageHook, PageAfterRender]
+    with WithAfterWrites[PageHook, PageAfterWrite, Page]:
 
-  private val logger = Logger("PageHooks")
+  protected val logger = Logger("PageHooks")
 
-  private val _beforeInits = ListBuffer[PageBeforeInit]()
-  private val _beforeLocals = ListBuffer[PageBeforeLocals]()
-  private val _beforeRenders = ListBuffer[PageBeforeRender]()
-  private val _afterRenders = ListBuffer[PageAfterRender]()
-  private val _afterWrites = ListBuffer[PageAfterWrite]()
-
-  def registerHook(hook: PageHook) =
+  protected[hooks] def registerHook(hook: PageHook) =
     hook match
-      case hook: PageBeforeInit   => _beforeInits += hook
-      case hook: PageBeforeLocals => _beforeLocals += hook
-      case hook: PageBeforeRender => _beforeRenders += hook
-      case hook: PageAfterRender  => _afterRenders += hook
-      case hook: PageAfterWrite   => _afterWrites += hook
-      case null                   => ()
-
-  def beforeInits(globals: IObj)(configs: IObj) =
-    _beforeInits.toList.sorted
-      .foldLeft(MObj())((o, h) => o update h(globals)(configs))
-
-  def beforeLocals = _beforeLocals.toList.sorted
-  def beforeRenders = _beforeRenders.toList.sorted
-  def afterRenders = _afterRenders.toList.sorted
-  def afterWrites = _afterWrites.toList.sorted
+      case hook: PageBeforeInit =>
+        _beforeInits += hook
+        _bi = false
+      case hook: PageBeforeLocals =>
+        _beforeLocals += hook
+        _bl = false
+      case hook: PageBeforeRender =>
+        _beforeRenders += hook
+        _br = false
+      case hook: PageAfterRender =>
+        _afterRenders += hook
+        _ar = false
+      case hook: PageAfterWrite =>
+        _afterWrites += hook
+        _aw = false

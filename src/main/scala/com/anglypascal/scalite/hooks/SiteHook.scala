@@ -4,12 +4,9 @@ import com.anglypascal.scalite.Site
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.Logger
 
-//////////
-// Site //
-//////////
 sealed trait SiteHook extends Hook:
   override def toString(): String = super.toString() + "-Site"
 
@@ -24,6 +21,19 @@ trait SiteAfterInit extends SiteHook:
   def apply(globals: IObj): MObj
   override def toString(): String = super.toString() + " after init"
 
+trait SiteWithAfterInit:
+  this: HookObject[SiteHook] =>
+
+  protected val _afterInits = ArrayBuffer[SiteAfterInit]()
+  protected var _ai = true
+
+  def afterInits(globals: IObj) =
+    logger.trace(s"running before init hooks")
+    if !_ai then
+      _afterInits.sorted
+      _ai = true
+    _afterInits.foldLeft(MObj())((o, h) => o update h(globals))
+
 /** To be run right after the site is reset for clean build
   *
   * @param globals
@@ -34,6 +44,19 @@ trait SiteAfterInit extends SiteHook:
 trait SiteAfterReset extends SiteHook:
   def apply(globals: IObj): MObj
   override def toString(): String = super.toString() + " after reset"
+
+trait SiteWithAfterReset:
+  this: HookObject[SiteHook] =>
+
+  protected val _afterResets = ArrayBuffer[SiteAfterReset]()
+  protected var _ars = true
+
+  def afterResets(globals: IObj)(filetype: String, config: IObj) =
+    logger.trace(s"running before init hooks for $filetype")
+    if !_ars then
+      _afterResets.sorted
+      _ars = true
+    _afterResets.foldLeft(MObj())((o, h) => o update h(globals))
 
 /** To be run right after the files of this site are all read
   *
@@ -46,6 +69,19 @@ trait SiteAfterRead extends SiteHook:
   def apply(globals: IObj): MObj
   override def toString(): String = super.toString() + " after read"
 
+trait SiteWithAfterRead:
+  this: HookObject[SiteHook] =>
+
+  protected val _afterReads = ArrayBuffer[SiteAfterRead]()
+  protected var _ard = true
+
+  def afterReads(globals: IObj)(filetype: String, config: IObj) =
+    logger.trace(s"running before init hooks for $filetype")
+    if !_ard then
+      _afterReads.sorted
+      _ard = true
+    _afterReads.foldLeft(MObj())((o, h) => o update h(globals))
+
 trait SiteBeforeRender extends SiteHook with BeforeRender:
   override def toString(): String = super.toString() + " before render"
 
@@ -55,27 +91,34 @@ trait SiteAfterRender extends SiteHook with AfterRender:
 trait SiteAfterWrite extends SiteHook with AfterWrite[Site]:
   override def toString(): String = super.toString() + " after write"
 
-object SiteHooks:
+object SiteHooks
+    extends HookObject[SiteHook]
+    with SiteWithAfterInit
+    with SiteWithAfterRead
+    with SiteWithAfterReset
+    with WithBeforeRenders[SiteHook, SiteBeforeRender]
+    with WithAfterRenders[SiteHook, SiteAfterRender]
+    with WithAfterWrites[SiteHook, SiteAfterWrite, Site]:
 
-  private val logger = Logger("SiteHooks")
+  protected val logger = Logger("SiteHooks")
 
-  private val _afterInits = ListBuffer[SiteAfterInit]()
-  private val _afterReads = ListBuffer[SiteAfterRead]()
-  private val _beforeRenders = ListBuffer[SiteBeforeRender]()
-  private val _afterRenders = ListBuffer[SiteAfterRender]()
-  private val _afterWrites = ListBuffer[SiteAfterWrite]()
-
-  def registerHook(hook: SiteHook) =
+  protected[hooks] def registerHook(hook: SiteHook) =
     hook match
-      case hook: SiteAfterInit    => _afterInits += hook
-      case hook: SiteAfterRead    => _afterReads += hook
-      case hook: SiteBeforeRender => _beforeRenders += hook
-      case hook: SiteAfterRender  => _afterRenders += hook
-      case hook: SiteAfterWrite   => _afterWrites += hook
-      case _                      => ()
-
-  def afterInits = _afterInits.toList.sorted
-  def afterReads = _afterReads.toList.sorted
-  def beforeRenders = _beforeRenders.toList.sorted
-  def afterRenders = _afterRenders.toList.sorted
-  def afterWrites = _afterWrites.toList.sorted
+      case hook: SiteAfterInit =>
+        _afterInits += hook
+        _ai = false
+      case hook: SiteAfterReset =>
+        _afterResets += hook
+        _ars = false
+      case hook: SiteAfterRead =>
+        _afterReads += hook
+        _ard = false
+      case hook: SiteBeforeRender =>
+        _beforeRenders += hook
+        _br = false
+      case hook: SiteAfterRender =>
+        _afterRenders += hook
+        _ar = false
+      case hook: SiteAfterWrite =>
+        _afterWrites += hook
+        _aw = false

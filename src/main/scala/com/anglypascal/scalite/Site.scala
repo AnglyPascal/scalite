@@ -124,16 +124,13 @@ class Site(baseDir: String, dryRun: Boolean = false, cache: Boolean = false):
     configs += "assets" -> processAssets(_assetD, _dest, replaceAssets, configs)
     configs += "data" -> collectData(_dataD, configs)
 
-    val updates =
-      val iobj = IObj(configs)
-      SiteHooks.afterInits
-        .map(_.apply(iobj))
-        .foldLeft(MObj())(_ update _)
+    configs update SiteHooks.afterInits(IObj(configs))
 
-    val _globals = IObj(configs update updates)
+    val _globals = IObj(configs)
     initiateConfigurables(configurables, _globals)
 
-    SiteHooks.afterReads foreach { _.apply(_globals) }
+    /** FIXME what to do with this? */
+    SiteHooks.afterReads(IObj(_globals))
 
     _globals
 

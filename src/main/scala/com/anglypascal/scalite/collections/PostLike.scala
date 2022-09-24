@@ -161,16 +161,8 @@ class PostLike(val rType: String)(
       "filename" -> filename,
       "collection" -> collection
     )
-
-    /** TODO: add time filters */
-    val nobj = Hooks
-      .join[BeforeLocals](
-        PostHooks.beforeLocals,
-        PageHooks.beforeLocals
-      )
-      .foldLeft(frontMatter)((o, h) => o update h.apply(globals)(IObj(o)))
-
-    nobj
+    // TODO: add time filters
+    frontMatter update PostHooks.beforeLocals(globals)(IObj(frontMatter))
 
   /** Extract excerpt from the mainMatter */
   private def excerpt: String =
@@ -221,7 +213,7 @@ class PostLike(val rType: String)(
             "trees" -> treeObj
           )
       )
-    PostHooks.beforeRenders foreach { _.apply(globals)(context) }
+    PostHooks.beforeRenders(globals)(context)
 
     val r = layout match
       case Some(l) =>
@@ -231,7 +223,7 @@ class PostLike(val rType: String)(
         logger.debug(s"$this has no specified layout")
         str
 
-    PostHooks.afterRenders.foldLeft(r)((s, h) => h.apply(globals)(context, s))
+    PostHooks.afterRenders(globals)(context, r)
 
   /** Return the global settings for the collection-type treeType */
   def getTreesList(treeType: String): Data =
@@ -240,7 +232,7 @@ class PostLike(val rType: String)(
   /** Write the post and run all the AfterWrite hooks */
   override def write(dryRun: Boolean): Unit =
     super.write(dryRun)
-    PostHooks.afterWrites foreach { _.apply(globals)(this) }
+    PostHooks.afterWrites(globals)(this)
 
   /** Processes the groups in PostCluster this post belongs to. */
   if visible then PostForests.addToForests(this)

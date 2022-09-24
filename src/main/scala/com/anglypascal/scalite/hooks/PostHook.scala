@@ -4,12 +4,9 @@ import com.anglypascal.scalite.collections.PostLike
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.Logger
 
-//////////
-// Post //
-//////////
 sealed trait PostHook extends Hook:
   override def toString(): String = super.toString() + "-Post"
 
@@ -28,31 +25,30 @@ trait PostAfterRender extends PostHook with AfterRender:
 trait PostAfterWrite extends PostHook with AfterWrite[PostLike]:
   override def toString(): String = super.toString() + " after write"
 
-object PostHooks:
+object PostHooks
+    extends HookObject[PostHook]
+    with WithBeforeInit[PostHook, PostBeforeInit]
+    with WithBeforeLocals[PostHook, PostBeforeLocals]
+    with WithBeforeRenders[PostHook, PostBeforeRender]
+    with WithAfterRenders[PostHook, PostAfterRender]
+    with WithAfterWrites[PostHook, PostAfterWrite, PostLike]:
 
-  private val logger = Logger("PostHooks")
+  protected val logger = Logger("PostHooks")
 
-  private val _beforeInits = ListBuffer[PostBeforeInit]()
-  private val _beforeLocals = ListBuffer[PostBeforeLocals]()
-  private val _beforeRenders = ListBuffer[PostBeforeRender]()
-  private val _afterRenders = ListBuffer[PostAfterRender]()
-  private val _afterWrites = ListBuffer[PostAfterWrite]()
-
-  def registerHook(hook: PostHook) =
+  protected[hooks] def registerHook(hook: PostHook) =
     hook match
-      case hook: PostBeforeInit   => _beforeInits += hook
-      case hook: PostBeforeLocals => _beforeLocals += hook
-      case hook: PostBeforeRender => _beforeRenders += hook
-      case hook: PostAfterRender  => _afterRenders += hook
-      case hook: PostAfterWrite   => _afterWrites += hook
-      case null                   => ()
-
-  def beforeInits(globals: IObj)(configs: IObj) =
-    _beforeInits.toList.sorted
-      .foldLeft(MObj())((o, h) => o update h(globals)(configs))
-
-  def beforeLocals = _beforeLocals.toList.sorted
-  def beforeRenders = _beforeRenders.toList.sorted
-  def afterRenders = _afterRenders.toList.sorted
-  def afterWrites = _afterWrites.toList.sorted
-
+      case hook: PostBeforeInit =>
+        _beforeInits += hook
+        _bi = false
+      case hook: PostBeforeLocals =>
+        _beforeLocals += hook
+        _bl = false
+      case hook: PostBeforeRender =>
+        _beforeRenders += hook
+        _br = false
+      case hook: PostAfterRender =>
+        _afterRenders += hook
+        _ar = false
+      case hook: PostAfterWrite =>
+        _afterWrites += hook
+        _aw = false

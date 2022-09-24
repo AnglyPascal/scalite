@@ -90,12 +90,7 @@ class PageLike(val rType: String)(
       "collection" -> collection.getOrElse("name")("statics"),
       "slugTitle" -> slugify(title)
     )
-
-    val nobj = PageHooks.beforeLocals
-      .collect(_.apply(globals)(IObj(mobj)))
-      .foldLeft(MObj())(_ update _)
-
-    mobj update nobj
+    mobj update PageHooks.beforeLocals(globals)(IObj(mobj))
 
   /** Extract excerpt from the mainMatter */
   private lazy val excerpt: String =

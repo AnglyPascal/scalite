@@ -3,20 +3,17 @@ package com.anglypascal.scalite.hooks
 import com.anglypascal.scalite.collections.Collection
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import scala.collection.mutable.ListBuffer
 import com.typesafe.scalalogging.Logger
 
+import scala.collection.mutable.ArrayBuffer
 
-////////////////
-// Collection //
-////////////////
 sealed trait CollectionHook extends Hook:
   override def toString(): String = super.toString() + "-Collection"
 
 trait CollectionBeforeInit extends CollectionHook with BeforeInit:
   override def toString(): String = super.toString() + " before init"
 
-trait CollectionBeforeLocal extends CollectionHook with BeforeLocals:
+trait CollectionBeforeLocals extends CollectionHook with BeforeLocals:
   override def toString(): String = super.toString() + " before locals"
 
 trait CollectionBeforeRender extends CollectionHook with BeforeRender:
@@ -28,31 +25,30 @@ trait CollectionAfterRender extends CollectionHook with AfterRender:
 trait CollectionAfterWrite extends CollectionHook with AfterWrite[Collection]:
   override def toString(): String = super.toString() + " after write"
 
-object CollectionHooks:
+object CollectionHooks
+    extends HookObject[CollectionHook]
+    with WithBeforeInit[CollectionHook, CollectionBeforeInit]
+    with WithBeforeLocals[CollectionHook, CollectionBeforeLocals]
+    with WithBeforeRenders[CollectionHook, CollectionBeforeRender]
+    with WithAfterRenders[CollectionHook, CollectionAfterRender]
+    with WithAfterWrites[CollectionHook, CollectionAfterWrite, Collection]:
 
-  private val logger = Logger("CollectionHooks")
+  protected val logger = Logger("CollectionHooks")
 
-  private val _beforeInits = ListBuffer[CollectionBeforeInit]()
-  private val _beforeLocals = ListBuffer[CollectionBeforeLocal]()
-  private val _beforeRenders = ListBuffer[CollectionBeforeRender]()
-  private val _afterRenders = ListBuffer[CollectionAfterRender]()
-  private val _afterWrites = ListBuffer[CollectionAfterWrite]()
-
-  def registerHook(hook: CollectionHook) =
+  protected[hooks] def registerHook(hook: CollectionHook) =
     hook match
-      case hook: CollectionBeforeInit   => _beforeInits += hook
-      case hook: CollectionBeforeLocal  => _beforeLocals += hook
-      case hook: CollectionBeforeRender => _beforeRenders += hook
-      case hook: CollectionAfterRender  => _afterRenders += hook
-      case hook: CollectionAfterWrite   => _afterWrites += hook
-      case null                         => ()
-
-  def beforeInits(globals: IObj)(configs: IObj) =
-    _beforeInits.toList.sorted
-      .foldLeft(MObj())((o, h) => o update h(globals)(configs))
-
-  def beforeLocals = _beforeLocals.toList.sorted
-  def beforeRenders = _beforeRenders.toList.sorted
-  def afterRenders = _afterRenders.toList.sorted
-  def afterWrites = _afterWrites.toList.sorted
-
+      case hook: CollectionBeforeInit =>
+        _beforeInits += hook
+        _bi = false
+      case hook: CollectionBeforeLocals =>
+        _beforeLocals += hook
+        _bl = false
+      case hook: CollectionBeforeRender =>
+        _beforeRenders += hook
+        _br = false
+      case hook: CollectionAfterRender =>
+        _afterRenders += hook
+        _ar = false
+      case hook: CollectionAfterWrite =>
+        _afterWrites += hook
+        _aw = false

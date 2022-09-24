@@ -2,12 +2,9 @@ package com.anglypascal.scalite.hooks
 
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.Logger
 
-///////////////
-// Converter //
-///////////////
 sealed trait ConverterHook extends Hook:
   override def toString(): String = super.toString() + "-Converter"
 
@@ -24,6 +21,21 @@ trait ConverterBeforeInit extends ConverterHook:
   def apply(globals: IObj)(filetype: String, configs: IObj): MObj
   override def toString(): String = super.toString() + " before init"
 
+trait ConverterWithBeforeInit:
+  this: HookObject[ConverterHook] =>
+
+  protected val _beforeInits = ArrayBuffer[ConverterBeforeInit]()
+  protected var _bi = true
+
+  def beforeInits(globals: IObj)(filetype: String, config: IObj) =
+    logger.trace(s"running before init hooks for $filetype")
+    if !_bi then
+      _beforeInits.sorted
+      _bi = true
+    _beforeInits.foldLeft(MObj())((o, h) =>
+      o update h(globals)(filetype, config)
+    )
+
 /** To be run before the conversion of the string
   *
   * @param str
@@ -36,6 +48,19 @@ trait ConverterBeforeInit extends ConverterHook:
 trait ConverterBeforeConvert extends ConverterHook:
   def apply(str: String, filepath: String): String
   override def toString(): String = super.toString() + " before convert"
+
+trait ConverterWithBeforeRenders:
+  this: HookObject[ConverterHook] =>
+
+  protected val _beforeConverts = ArrayBuffer[ConverterBeforeConvert]()
+  protected var _bc = true
+
+  def beforeConverts(str: String, fp: String) =
+    logger.trace(s"running before convert hooks for file $fp")
+    if !_bc then
+      _beforeConverts.sorted
+      _bc = true
+    _beforeConverts.foldLeft(str)((s, h) => h.apply(s, fp))
 
 /** To be run before the conversion of the string
   *
@@ -50,49 +75,36 @@ trait ConverterAfterConvert extends ConverterHook:
   def apply(str: String, filepath: String): String
   override def toString(): String = super.toString() + " after convert"
 
-object ConverterHooks:
+trait ConverterWithAfterRenders:
+  this: HookObject[ConverterHook] =>
 
-  private val logger = Logger("ConvertHooks")
-
-  private val _beforeInits = ListBuffer[ConverterBeforeInit]()
-  private var _bISorted = false
-  private val _beforeConverts = ListBuffer[ConverterBeforeConvert]()
-  private var _bCSorted = false
-  private val _afterConverts = ListBuffer[ConverterAfterConvert]()
-  private var _aCSorted = false
-
-  def registerHook(hook: ConverterHook): Unit =
-    hook match
-      case hook: ConverterBeforeInit =>
-        _beforeInits += hook
-        _bISorted = false
-      case hook: ConverterBeforeConvert =>
-        _beforeConverts += hook
-        _bCSorted = false
-      case hook: ConverterAfterConvert =>
-        _afterConverts += hook
-        _aCSorted = false
-      case null => ()
-
-  def beforeInits(globals: IObj)(filetype: String, config: IObj) =
-    logger.trace(s"running before init hooks for $filetype")
-    if !_bISorted then
-      _beforeInits.sorted
-      _bISorted = true
-    _beforeInits.foldLeft(MObj())((o, h) =>
-      o update h(globals)(filetype, config)
-    )
-
-  def beforeConverts(str: String, fp: String) =
-    logger.trace(s"running before convert hooks for file $fp")
-    if !_bCSorted then
-      _beforeConverts.sorted
-      _bCSorted = true
-    _beforeConverts.foldLeft(str)((s, h) => h.apply(s, fp))
+  protected val _afterConverts = ArrayBuffer[ConverterAfterConvert]()
+  protected var _ac = true
 
   def afterConverts(str: String, fp: String) =
     logger.trace(s"running after convert hooks for file $fp")
-    if !_aCSorted then
+    if !_ac then
       _afterConverts.sorted
-      _aCSorted = true
+      _ac = true
     _afterConverts.foldLeft(str)((s, h) => h.apply(s, fp))
+
+object ConverterHooks
+    extends HookObject[ConverterHook]
+    with ConverterWithBeforeInit
+    with ConverterWithBeforeRenders
+    with ConverterWithAfterRenders:
+
+  protected val logger = Logger("ConvertHooks")
+
+  protected[hooks] def registerHook(hook: ConverterHook): Unit =
+    hook match
+      case hook: ConverterBeforeInit =>
+        _beforeInits += hook
+        _bi = false
+      case hook: ConverterBeforeConvert =>
+        _beforeConverts += hook
+        _bc = false
+      case hook: ConverterAfterConvert =>
+        _afterConverts += hook
+        _ac = false
+      case null => ()

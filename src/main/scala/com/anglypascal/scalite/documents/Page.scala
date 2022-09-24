@@ -59,13 +59,14 @@ trait Page extends Renderable:
     val path =
       if permalink.endsWith(outputExt) then permalink
       else permalink + outputExt
+
     if !dryRun then
       logger.debug(s"writing $this to $path")
-      PageHooks.beforeRenders foreach { _.apply(globals)(locals) }
-      val r = render
-      PageHooks.afterRenders foreach { _.apply(globals)(locals, r) }
+      /** FIXME useless, think about what to do with this */
+      PageHooks.beforeRenders(globals)(locals)
+      val r = PageHooks.afterRenders(globals)(locals, render)
       writeTo(path, r)
-      PageHooks.afterWrites foreach { _.apply(globals)(this) }
+      PageHooks.afterWrites(globals)(this)
     else logger.debug(s"would write $this to $path")
 
   // Add this page to the pages collection.
@@ -104,5 +105,5 @@ object Pages:
   /** Provide this object with the base source path */
   def setup(_base: String) = base = _base
 
-  def reset(): Unit = 
+  def reset(): Unit =
     pages.clear()

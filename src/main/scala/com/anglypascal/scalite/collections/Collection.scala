@@ -102,7 +102,10 @@ class Collection(
       s"permalink: ${GREEN(permalinkTemplate)}"
   )
 
-  /** Set of posts or other elements for use in context for rendering pages. */
+  /** Set of posts or other elements for use in context for rendering pages.
+    *
+    * FIXME: I don't like it being open
+    */
   lazy val items: Map[String, Element] =
     lazy val constructor: (String, String, IObj, IObj) => Element =
       elemCons(name)
@@ -119,10 +122,9 @@ class Collection(
     configs update scopedDefaults
 
     configs += "title" -> name
-    val conf = CollectionHooks.beforeLocals
-      .foldLeft(configs)((o, h) => o update h(globals)(IObj(o)))
+    configs update CollectionHooks.beforeLocals(globals)(IObj(configs))
 
-    IObj(conf)
+    IObj(configs)
 
   lazy val identifier = s"/collections/$name"
 
@@ -152,10 +154,9 @@ class Collection(
           "page" -> locals,
           "items" -> DArr(sortedItems.map(_.locals))
         )
-        val con = CollectionHooks.beforeRenders
-          .foldLeft(c)((o, h) => o update h(globals)(IObj(o)))
-        p.renderWrap(IObj(con))
-    CollectionHooks.afterRenders.foldLeft(str)((o, h) => h(globals)(locals, o))
+        c update CollectionHooks.beforeRenders(globals)(IObj(c))
+        p.renderWrap(IObj(c))
+    CollectionHooks.afterRenders(globals)(locals, str)
 
   /** This sorts out the items, renders them, and writes them to the disk */
   protected[collections] def process(dryrun: Boolean = false): Unit =
@@ -165,7 +166,7 @@ class Collection(
         case item: Page => item.write(dryrun)
         case _          => ()
     write(dryrun)
-    CollectionHooks.afterWrites foreach { _.apply(globals)(this) }
+    CollectionHooks.afterWrites(globals)(this)
 
   /** TODO: Add caching options */
   protected[collections] def cache(): Unit = ???

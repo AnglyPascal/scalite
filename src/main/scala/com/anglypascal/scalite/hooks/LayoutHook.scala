@@ -4,12 +4,9 @@ import com.anglypascal.scalite.layouts.Layout
 import com.anglypascal.scalite.data.immutable.{DObj => IObj}
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
 
-import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.ArrayBuffer
 import com.typesafe.scalalogging.Logger
 
-////////////
-// Layout //
-////////////
 sealed trait LayoutHook extends Hook:
   override def toString(): String = super.toString() + "-Layout"
 
@@ -26,8 +23,21 @@ sealed trait LayoutHook extends Hook:
   *   layout
   */
 trait LayoutBeforeInit extends LayoutHook:
-  def apply(lang: String, name: String, filepath: String): MObj
+  def apply(lang: String, name: String)(filepath: String): MObj
   override def toString(): String = super.toString() + " before init"
+
+trait LayoutWithBeforeInit:
+  this: HookObject[LayoutHook] =>
+
+  protected val _beforeInits = ArrayBuffer[LayoutBeforeInit]()
+  protected var _bi = true
+
+  def beforeInits(lang: String, name: String)(filepath: String) =
+    logger.trace("running before inits")
+    if !_bi then
+      _beforeInits.sorted
+      _bi = true
+    _beforeInits foreach { _.apply(lang, name)(filepath) }
 
 /** To be run before the layout is rendered.
   *
@@ -40,8 +50,26 @@ trait LayoutBeforeInit extends LayoutHook:
   *   A mutable DObj containing changes to be made to the context
   */
 trait LayoutBeforeRender extends LayoutHook:
-  def apply(context: IObj, content: String = ""): MObj
+  def apply(lang: String, name: String)(context: IObj, content: String): MObj
   override def toString(): String = super.toString() + " before render"
+
+trait LayoutWithBeforeRenders:
+  this: HookObject[LayoutHook] =>
+
+  protected val _beforeRenders = ArrayBuffer[LayoutBeforeRender]()
+  protected var _br = true
+
+  def beforeRenders(lang: String, name: String)(
+      context: IObj,
+      content: String
+  ) =
+    logger.trace("running before renders")
+    if !_br then
+      _beforeRenders.sorted
+      _br = true
+    _beforeRenders.foldLeft(MObj())((o, h) =>
+      o update h(lang, name)(context, content)
+    )
 
 /** To be run after the layout is rendered.
   *
@@ -51,27 +79,38 @@ trait LayoutBeforeRender extends LayoutHook:
   *   A filtered string
   */
 trait LayoutAfterRender extends LayoutHook:
-  def apply(str: String): String
+  def apply(lang: String, name: String)(str: String): String
   override def toString(): String = super.toString() + " after render"
 
-object LayoutHooks:
+trait LayoutWithAfterRenders:
+  this: HookObject[LayoutHook] =>
 
-  private val logger = Logger("LayoutHooks")
+  protected val _afterRenders = ArrayBuffer[LayoutAfterRender]()
+  protected var _ar = true
 
-  private val _beforeInits = ListBuffer[LayoutBeforeInit]()
-  private val _beforeRenders = ListBuffer[LayoutBeforeRender]()
-  private val _afterRenders = ListBuffer[LayoutAfterRender]()
+  def afterRenders(lang: String, name: String)(rendered: String) =
+    logger.trace("running after renders")
+    if !_ar then
+      _afterRenders.sorted
+      _ar = true
+    _afterRenders.foldLeft(rendered)((s, h) => h(lang, name)(s))
 
-  def registerHook(hook: LayoutHook) =
+object LayoutHooks
+    extends HookObject[LayoutHook]
+    with LayoutWithBeforeInit
+    with LayoutWithBeforeRenders
+    with LayoutWithAfterRenders:
+
+  protected val logger = Logger("LayoutHooks")
+
+  protected[hooks] def registerHook(hook: LayoutHook) =
     hook match
-      case hook: LayoutBeforeInit   => _beforeInits += hook
-      case hook: LayoutBeforeRender => _beforeRenders += hook
-      case hook: LayoutAfterRender  => _afterRenders += hook
-      case null                     => ()
-
-  def beforeInits(lang: String, name: String, filepath: String) =
-    _beforeInits.toList.sorted
-      .foreach { _.apply(lang, name, filepath) }
-
-  def beforeRenders = _beforeRenders.toList.sorted
-  def afterRenders = _afterRenders.toList.sorted
+      case hook: LayoutBeforeInit =>
+        _beforeInits += hook
+        _bi = false
+      case hook: LayoutBeforeRender =>
+        _beforeRenders += hook
+        _br = false
+      case hook: LayoutAfterRender =>
+        _afterRenders += hook
+        _ar = false

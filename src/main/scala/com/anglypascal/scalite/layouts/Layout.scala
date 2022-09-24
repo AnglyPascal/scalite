@@ -22,7 +22,7 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
   protected lazy val mainMatter =
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 
-  LayoutHooks.beforeInits(lang, name, filepath)
+  LayoutHooks.beforeInits(lang, name)(filepath)
 
   /** Render the layout with the given Data object as context
     *
@@ -39,9 +39,9 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
     * layout is rendered.
     */
   def renderWrap(context: DObj, content: String = ""): String =
-    LayoutHooks.beforeRenders foreach { _.apply(context, content) }
-    val s = render(context, content)
-    LayoutHooks.afterRenders.foldLeft(s)((str, hook) => hook(str))
+    val c = context update LayoutHooks.beforeRenders(lang, name)(context, content)
+    val s = render(c, content)
+    LayoutHooks.afterRenders(lang, name)(s)
 
   /** Parent of this layout, specified in the front matter */
   def parent: Option[Layout] = _parent

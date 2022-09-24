@@ -81,9 +81,8 @@ class ItemLike(val rType: String)(
 
   lazy val locals =
     _locals += "content" -> render
-    val nl = ItemHooks.beforeLocals
-      .foldLeft(_locals)((o, h) => o update h(globals)(IObj(o)))
-    IObj(nl)
+    _locals update ItemHooks.beforeLocals(globals)(IObj(_locals))
+    IObj(_locals)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(true)
 
@@ -101,12 +100,10 @@ class ItemLike(val rType: String)(
           "site" -> globals,
           "item" -> _locals
         )
-        val con = ItemHooks.beforeRenders
-          .foldLeft(c)((o, h) => h.apply(globals)(IObj(o)))
-        l.renderWrap(IObj(con), str)
+        c update ItemHooks.beforeRenders(globals)(IObj(c))
+        l.renderWrap(IObj(c), str)
       case None => str
-
-    ItemHooks.afterRenders.foldLeft(ren)((s, h) => h.apply(globals)(locals, s))
+    ItemHooks.afterRenders(globals)(locals, ren)
 
   override def toString(): String = CYAN(title)
 
