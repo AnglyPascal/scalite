@@ -28,7 +28,8 @@ class LoggingLayout extends LayoutBase[ILoggingEvent]:
     sbuf.append(" - ")
     sbuf.append(event.getFormattedMessage)
     sbuf.append("\n")
-    return sbuf.toString()
+
+    sbuf.toString()
 
   def prettyThreadName(event: ILoggingEvent): String =
     val thread = event.getThreadName

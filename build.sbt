@@ -25,7 +25,7 @@ lazy val root = project
       "ch.qos.logback" % "logback-classic" % "1.4.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"
     ),
-    libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.1.2.1",
+    libraryDependencies += "com.anglypascal" %% "scala3-mustache" % "0.2",
   )
 
 isSnapshot := true

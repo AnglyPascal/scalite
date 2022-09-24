@@ -17,8 +17,6 @@ import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
 
-import scala.collection.parallel.CollectionConverters._
-
 /** A Collection is a collection of Renderable objects with a SourceFile, that
   * is, a Collection is made up of similar objects that are read from source
   * files residing in the source directory of the site.
@@ -133,7 +131,7 @@ class Collection(
 
   def sortedItems: Array[Element] =
     def compare(fst: Element, snd: Element): Boolean =
-      compareBy(fst, snd, sortBy(0), sortBy.tail: _*) < 0
+      compareBy(fst, snd, sortBy: _*) < 0
 
     items
       .collect(p =>
@@ -162,6 +160,7 @@ class Collection(
 
   /** This sorts out the items, renders them, and writes them to the disk */
   protected[collections] def process(dryrun: Boolean = false): Unit =
+    import scala.collection.parallel.CollectionConverters._
     for item <- items.values.par do
       item match
         case item: Page => item.write(dryrun)
@@ -180,14 +179,11 @@ class Collection(
   private def compareBy(
       fst: Element,
       snd: Element,
-      key1: String,
       keys: String*
   ): Int =
     import com.anglypascal.scalite.utils.cmpOpt
-    val s = cmpOpt(fst.locals.get(key1), snd.locals.get(key1))
-    if s != 0 then s
-    else
-      for key <- keys do
-        val t = cmpOpt(fst.locals.get(key), snd.locals.get(key))
-        if t != 0 then return t
-      cmpOpt(fst.locals.get("title"), snd.locals.get("title"))
+    var s = 0
+    for key <- keys if s == 0 do
+      s += cmpOpt(fst.locals.get(key), snd.locals.get(key))
+    if s == 0 then cmpOpt(fst.locals.get("title"), snd.locals.get("title"))
+    else s

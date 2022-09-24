@@ -37,6 +37,6 @@ class TagTree[A <: Renderable with WithTree[A]](
     dataToPath(post.getTreesList(treeType)).map(_ :: List())
 
 class TagStyle[A <: Renderable with WithTree[A]]
-    extends TreeStyle[A]("category"):
+    extends TreeStyle[A]("tag"):
   def apply(treeType: String)(configs: MObj, globals: IObj): Tree[A] =
     TagTree(treeType, treeType, None)(configs, globals)

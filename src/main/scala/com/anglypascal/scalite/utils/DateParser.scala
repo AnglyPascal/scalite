@@ -15,14 +15,14 @@ object DateParser:
 
   private val logger = Logger("Date parser")
 
-  def dateParseObj(dateString: String, dateFormat: String): DObj =
-    val reg1 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}\.\d{3}).*".r
-    val reg2 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}).*".r
-    val reg3 = raw"(\d{4}-\d{2}-\d{2}).*".r
-    val fmt1 = "yyyy-MM-dd HH:mm:ss.SSS"
-    val fmt2 = "yyyy-MM-dd HH:mm:ss"
-    val fmt3 = "yyyy-MM-dd"
+  private val reg1 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}\.\d{3}).*".r
+  private val reg2 = raw"(\d{4}-\d{2}-\d{2}\s*\d{2}:\d{2}:\d{2}).*".r
+  private val reg3 = raw"(\d{4}-\d{2}-\d{2}).*".r
+  private val fmt1 = "yyyy-MM-dd HH:mm:ss.SSS"
+  private val fmt2 = "yyyy-MM-dd HH:mm:ss"
+  private val fmt3 = "yyyy-MM-dd"
 
+  def dateParseObj(dateString: String, dateFormat: String): DObj =
     try
       val dt: Option[DateTime] =
         dateString match

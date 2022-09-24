@@ -56,8 +56,8 @@ trait Forest[A <: Renderable] extends Configurable with Plugin:
           logger.debug(s"adding new Forest $tType of style $style")
           styles.get(style) match
             case Some(treeStyle) => addTree(treeStyle(tType)(value, globals))
-            case None            => ()
-        case _ => ()
+            case None            => logger.warn(s"TreeStyle $style not found")
+        case _ => logger.warn(s"configuration for Tree $key is empty")
 
   override def toString(): String =
     _trees.map(_._2.toString).mkString("\n")

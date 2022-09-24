@@ -15,6 +15,7 @@ import com.anglypascal.scalite.trees.Forests
 class SiteSpecs extends AsyncFlatSpec:
   val root = "src/test/resources/site_template"
   val globals = Site(root).globals
+  val t0 = System.nanoTime()
 
   it should "read the configs properly" in {
     val future = Future { globals }
@@ -54,5 +55,14 @@ class SiteSpecs extends AsyncFlatSpec:
       println(ERROR("\nTREES"))
       println(Forests)
     }
+    future.map(unit => assert(true))
+  }
+
+  it should "report runtime properly" in {
+    val future = Future{
+      val tn = System.nanoTime()
+      println((tn-t0))
+    }
+
     future.map(unit => assert(true))
   }

@@ -14,7 +14,7 @@ object Reader:
 
   private val yaml_regex = raw"\A---\n?([\s\S\n]*?)---\n?([\s\S\n]*)".r
 
-  def frontMatter(rType: String, filepath: String): DObj = 
+  inline def frontMatter(rType: String, filepath: String): DObj = 
     val scope = ScopedDefaults.getDefaults(filepath, rType)
     val src = readFile(filepath)
     src match
@@ -23,7 +23,7 @@ object Reader:
         scope update frontMatterParser(a)
       case _ => scope += "shouldConvert" -> false
 
-  def mainMatter(filepath: String): String =
+  inline def mainMatter(filepath: String): String =
     val src = readFile(filepath)
     src match
       case yaml_regex(a, b) => b.trim
@@ -36,9 +36,9 @@ trait SourceFile:
 
   val parentDir: String
 
-  def filepath: String = parentDir + relativePath
+  inline def filepath: String = parentDir + relativePath
 
-  def filename: String = getFileName(filepath)
+  inline def filename: String = getFileName(filepath)
 
   protected val frontMatter: DObj
 

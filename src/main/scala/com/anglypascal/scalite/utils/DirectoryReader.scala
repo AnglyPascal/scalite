@@ -20,26 +20,28 @@ object DirectoryReader:
     * TODO: By default will follow symlinks. Should we ask the user if symlinks
     * should be read?
     */
-  def readFile(filepath: String): String =
+  inline def readFile(filepath: String): String =
     try Source.fromFile(filepath).getLines.mkString("\n")
     catch
       case fnf: java.io.FileNotFoundException =>
-        logger.error(s"${RED("\"" + filepath + "\"")} not found")
+        logger.error(s"${RED(s"\"$filepath\"")} not found")
         ""
       case e =>
         logger.error(e.toString)
         ""
 
   /** Recover just the filename without the exteions from a file path */
-  def getFileName(filepath: String): String =
+  inline def getFileName(filepath: String): String =
     if filepath == "" || filepath.endsWith("/") || filepath.endsWith(".") then
-      logger.warn(s"invalid filename: ${RED("\"" + filepath + "\"")}")
-      return ""
-    filepath.split('/').last.split('.').headOption match
-      case Some(s) => s
-      case None =>
-        logger.warn(s"invalid filename: ${RED("\"" + filepath + "\"")}")
-        ""
+      logger.warn("invalid filename: " + RED(s"\"$filepath\""))
+      ""
+    else
+      filepath.split('/').last.split('.').headOption match
+        case Some(s) => s
+        /** FIXME: Doens't work with hidden files like .config.yml */
+        case None =>
+          logger.warn("invalid filename: " + RED(s"\"$filepath\""))
+          ""
 
   /** Get the relative paths to the files inside this directory */
   def getListOfFilepaths(dir: String): Array[String] =
@@ -50,18 +52,18 @@ object DirectoryReader:
     */
   def getListOfFiles(dir: File, exr: Regex): Array[File] =
     if !dir.isDirectory then
-      logger.error(s"invalid directory: ${RED(s"\"${dir.getAbsolutePath}\"")}")
-      return Array()
-
-    val these = dir.listFiles()
-    if these == null then
-      logger.error(
-        "IO error while accessing " + RED(s"\"${dir.getAbsolutePath}\"")
-      )
-      return Array()
-
-    val good = these.filter(f => !exr.matches(f.getPath))
-    good ++ good.filter(_.isDirectory).flatMap(getListOfFiles(_, exr))
+      logger.error("invalid directory:" + RED(s"\"${dir.getAbsolutePath}\""))
+      Array[File]()
+    else
+      val these = dir.listFiles()
+      if these == null then
+        logger.error(
+          "IO error while accessing " + RED(s"\"${dir.getAbsolutePath}\"")
+        )
+        Array[File]()
+      else
+        val good = these.filter(f => !exr.matches(f.getPath))
+        good ++ good.filter(_.isDirectory).flatMap(getListOfFiles(_, exr))
 
   def getListOfFiles(dir: String, exr: Regex): Array[File] =
     getListOfFiles(new File(dir), exr)

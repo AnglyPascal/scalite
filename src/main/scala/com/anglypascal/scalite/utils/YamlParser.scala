@@ -10,10 +10,10 @@ import com.rallyhealth.weejson.v1.Value
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
 
-def yamlFileParser(path: String): Data =
+inline def yamlFileParser(inline path: String): Data =
   val logger = Logger("YAML File Parser")
   val str = DirectoryReader.readFile(path)
-  try 
+  try
     val value = FromYaml(str).transform(Value)
     DataImplicits.fromValue(value)
   catch
@@ -21,7 +21,7 @@ def yamlFileParser(path: String): Data =
       logger.error(s"${e.toString} occurred while parsing yaml file $path")
       DNull
 
-def frontMatterParser(yaml: String): DObj =
+inline def frontMatterParser(inline yaml: String): DObj =
   val logger = Logger("Front Matter Parser")
   try
     FromYaml(yaml).transform(Value) match
@@ -34,7 +34,7 @@ def frontMatterParser(yaml: String): DObj =
         DObj()
   catch
     case e: com.rallyhealth.weepickle.v1.core.TransformException =>
-      logger.error("failed to parse yaml string: " + quote(yaml))
+      logger.error("failed to parse yaml string: \n" + quote(yaml))
       DObj()
     case e =>
       logger.error(e.getMessage())
