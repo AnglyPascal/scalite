@@ -1,11 +1,11 @@
 package com.anglypascal.scalite.data.mutable
 
+import com.anglypascal.scalite.data.immutable
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Null
 import com.rallyhealth.weejson.v1.Num
 import com.rallyhealth.weejson.v1.Obj
-import com.anglypascal.scalite.data.immutable
 import com.rallyhealth.weejson.v1.Str
 import com.rallyhealth.weejson.v1.Value
 import com.typesafe.scalalogging.Logger
@@ -15,77 +15,34 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.mutable.Buffer
 import scala.collection.mutable.Map
 
-/** Immutable wrapper around WeeJson Value AST */
+/** Mutable JSON-like collection */
 sealed trait Data extends Ordered[Data]:
 
   /** If this is a DStr, return the string */
-  final def getStr: Option[String] =
-    this match
-      case data: DStr => Some(data.str)
-      case _          => None
+  def getStr: Option[String] = None
 
   /** If this is a DNum, return the number */
-  final def getNum: Option[BigDecimal] =
-    this match
-      case data: DNum => Some(data.num)
-      case _          => None
+  def getNum: Option[BigDecimal] = None
 
   /** If this is a DBool, return the boolean */
-  final def getBool: Option[Boolean] =
-    this match
-      case data: DBool => Some(data.bool)
-      case _           => None
+  def getBool: Option[Boolean] = None
 
-  /** If this is a DArr, return the list */
-  final def getArr: Option[ArrayBuffer[Data]] =
-    this match
-      case data: DArr => Some(data.arr)
-      case _          => None
+  /** If this is a DArr, return the DArr */
+  def getDArr: Option[DArr] = None
 
-  /** If this is a DObj, return the map */
-  final def getObj: Option[Map[String, Data]] =
-    this match
-      case data: DObj => Some(data.obj)
-      case _          => None
-
-  /** If this is a DStr, return the string */
-  final def extractStr: Option[String] =
-    this match
-      case data: DStr => Some(data.str)
-      case _          => None
-
-  /** If this is a DNum, return the number */
-  final def extractNum: Option[BigDecimal] =
-    this match
-      case data: DNum => Some(data.num)
-      case _          => None
-
-  /** If this is a DBool, return the boolean */
-  final def extractBool: Option[Boolean] =
-    this match
-      case data: DBool => Some(data.bool)
-      case _           => None
-
-  /** If this is a DArr, return the list */
-  final def extractArr: Option[ArrayBuffer[Data]] =
-    this match
-      case data: DArr => Some(data.arr)
-      case _          => None
-
-  /** If this is a DObj, return the map */
-  final def extractObj: Option[Map[String, Data]] =
-    this match
-      case data: DObj => Some(data.obj)
-      case _          => None
+  /** If this is a DObj, return the DObj */
+  def getDObj: Option[DObj] = None
 
   protected[data] def toString(depth: Int): String = toString()
 
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
-final class DObj(val obj: Map[String, Data])
+final class DObj(private val obj: Map[String, Data])
     extends Data
     with Map[String, Data]:
+
+  override def getDObj: Option[DObj] = Some(this)
 
   /** Returns the value stored against key in the underlying Map */
   override def contains(key: String) = obj.contains(key: String)
@@ -122,42 +79,29 @@ final class DObj(val obj: Map[String, Data])
   def getOrElse(key: String)(default: BigDecimal): BigDecimal =
     get(key).flatMap(_.getNum).getOrElse(default)
 
-  def getOrElse(key: String)(default: ArrayBuffer[Data]): ArrayBuffer[Data] =
-    get(key).flatMap(_.getArr).getOrElse(default)
-
   def getOrElse(key: String)(default: DObj): DObj =
-    get(key).flatMap(_.getObj).map(DObj(_)).getOrElse(default)
+    get(key).flatMap(_.getDObj).getOrElse(default)
 
   def getOrElse(key: String)(default: DArr): DArr =
-    get(key).flatMap(_.getArr).map(DArr(_)).getOrElse(default)
+    get(key).flatMap(_.getDArr).getOrElse(default)
 
   def getOrElse(key: String)(default: Data): Data =
     get(key).getOrElse(default)
 
   def extractOrElse(key: String)(default: String): String =
-    remove(key).flatMap(_.extractStr).getOrElse(default)
+    remove(key).flatMap(_.getStr).getOrElse(default)
 
   def extractOrElse(key: String)(default: Boolean): Boolean =
-    remove(key).flatMap(_.extractBool).getOrElse(default)
+    remove(key).flatMap(_.getBool).getOrElse(default)
 
   def extractOrElse(key: String)(default: BigDecimal): BigDecimal =
-    remove(key).flatMap(_.extractNum).getOrElse(default)
-
-  def extractOrElse(key: String)(
-      default: ArrayBuffer[Data]
-  ): ArrayBuffer[Data] =
-    remove(key).flatMap(_.extractArr).getOrElse(default)
-
-  def extractOrElse(key: String)(
-      default: Map[String, Data]
-  ): Map[String, Data] =
-    remove(key).flatMap(_.extractObj).getOrElse(default)
+    remove(key).flatMap(_.getNum).getOrElse(default)
 
   def extractOrElse(key: String)(default: DObj): DObj =
-    remove(key).flatMap(_.extractObj).map(DObj(_)).getOrElse(default)
+    remove(key).flatMap(_.getDObj).getOrElse(default)
 
   def extractOrElse(key: String)(default: DArr): DArr =
-    remove(key).flatMap(_.extractArr).map(DArr(_)).getOrElse(default)
+    remove(key).flatMap(_.getDArr).getOrElse(default)
 
   def extractOrElse(key: String)(default: Data): Data =
     remove(key).getOrElse(default)
@@ -222,8 +166,7 @@ final class DObj(val obj: Map[String, Data])
   def update(that: immutable.DObj): this.type =
     DataImplicits.fromIObj(that) match
       case v: DObj => this update v
-      case _ => this
-    
+      case _       => this
 
   def copy: DObj =
     val nObj = DObj()
@@ -264,7 +207,11 @@ object DObj:
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))))
 
 /** Mutable wrapper around Arr */
-final class DArr(val arr: ArrayBuffer[Data]) extends Data with Buffer[Data]:
+final class DArr(private val arr: ArrayBuffer[Data])
+    extends Data
+    with Buffer[Data]:
+
+  override def getDArr: Option[DArr] = Some(this)
 
   /** Return the index entry of the List[Data], inefficient TODO */
   def apply(ind: Int): Data = arr(ind)
@@ -272,6 +219,10 @@ final class DArr(val arr: ArrayBuffer[Data]) extends Data with Buffer[Data]:
   /** Add a data entry to the front of the list, returning a new DArr */
   def addOne(entry: Data): this.type =
     arr += entry
+    this
+
+  def addOne(entry: Any): this.type =
+    arr += DataImplicits.fromAny(entry)
     this
 
   def clear() = arr.clear
@@ -334,6 +285,8 @@ object DArr:
 /** Wrapper for Str */
 final class DStr(private var _str: String) extends Data:
 
+  override def getStr: Option[String] = Some(_str)
+
   def str = _str
   def str_=(s: String) = _str = s
 
@@ -370,6 +323,8 @@ object DStr:
 /** Wrapper for Num */
 final class DNum(private var _num: BigDecimal) extends Data:
 
+  override def getNum: Option[BigDecimal] = Some(_num)
+
   def num = _num
   def num_=(n: BigDecimal) = _num = n
 
@@ -395,6 +350,8 @@ object DNum:
 
 /** Wrapper for Bool */
 final class DBool(private var _bool: Boolean) extends Data:
+
+  override def getBool: Option[Boolean] = Some(_bool)
 
   def bool = _bool
   def bool_(b: Boolean) = _bool = b
@@ -465,7 +422,7 @@ object DataImplicits:
       case v: immutable.DStr  => DStr(v.str)
       case v: immutable.DNum  => DNum(v.num)
       case v: immutable.DBool => DBool(v.bool)
-      case immutable.DNull => DNull
+      case immutable.DNull    => DNull
 
 /** FEATURE: Add wrappers for lambda functions. Text lambda AST with
   * mustache.Then define the predefined filter functions in terms of these

@@ -90,13 +90,13 @@ object StringProcessors:
     else s.toLowerCase
 
   /** Turns a slug into a simple title */
-  inline def titlify(slug: String, allCaps: Boolean = false): String =
+  def titlify(slug: String, allCaps: Boolean = false): String =
     if allCaps then slug.split('-').map(_.capitalize).mkString(" ")
     else slug.split('-').mkString(" ").capitalize
 
   /** Parses title from the filenames with the pattern "yyyy-MM-dd-title" */
   inline def titleParser(fn: String): Option[String] =
-    inline fn match
+    fn match
       case title(t) => Some(titlify(t))
       case _        => None
 

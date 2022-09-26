@@ -195,7 +195,7 @@ class PostLike(val rType: String)(
       p._2 match
         case str: DStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
         case _         => None
-    frontMatter.extractOrElse("hyperlinks")(MObj()).obj.flatMap(f).toMap
+    frontMatter.extractOrElse("hyperlinks")(MObj()).flatMap(f).toMap
 
   /** Convert the contents of the post to HTML */
   protected lazy val render: String =

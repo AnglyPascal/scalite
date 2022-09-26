@@ -133,7 +133,7 @@ object DObj:
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))).toMap)
 
   def apply(dobj: mutable.DObj) = new DObj(
-    dobj.obj.map(p => (p._1, DataImplicits.fromMutData(p._2))).toMap
+    dobj.map(p => (p._1, DataImplicits.fromMutData(p._2))).toMap
   )
 
 /** Immutable wrapper around Arr */
@@ -161,10 +161,11 @@ object DArr:
   def apply(_arr: Any*) =
     new DArr(List(_arr.map(DataImplicits.fromAny): _*))
 
-  def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
+  def apply(_arr: Arr) =
+    new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
 
   def apply(dobj: mutable.DArr) =
-    new DArr(dobj.arr.toList.map(DataImplicits.fromMutData))
+    new DArr(dobj.map(DataImplicits.fromMutData).toList)
 
 /** Wrapper for Str */
 final class DStr(val str: String) extends Data:

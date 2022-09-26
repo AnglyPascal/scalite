@@ -32,9 +32,9 @@ trait Page extends Renderable:
   protected val globals: IObj
 
   protected val configs: MObj
-
+  
   /** FIXME wth? why is it here doing nothing? */
-  PageHooks.beforeInits(globals)(IObj(configs))
+  // FIXME PageHooks.beforeInits(globals)(IObj(configs))
 
   /** Unique identifier to map this page to, in order for the cross reference to
     * work.
@@ -73,6 +73,7 @@ trait Page extends Renderable:
   if visible then Pages.addPage(this)
 
   // protected def cache(): Unit
+
 
 /** Holds reference to all the pages of this website.
   *

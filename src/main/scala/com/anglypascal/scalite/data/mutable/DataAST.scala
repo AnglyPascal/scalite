@@ -19,8 +19,8 @@ final class DataAST(v: Data) extends AST:
 
   def value: Any =
     v match
-      case obj: DObj  => obj.obj.toMap.map(p => (p._1, dataToAST(p._2)))
-      case arr: DArr  => arr.arr.toSeq.map(dataToAST)
+      case obj: DObj  => obj.toMap.map(p => (p._1, dataToAST(p._2)))
+      case arr: DArr  => arr.toSeq.map(dataToAST)
       case str: DStr  => str.str
       case num: DNum  => num.num
       case boo: DBool => boo.bool

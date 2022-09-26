@@ -9,7 +9,7 @@ import com.anglypascal.scalite.layouts.Layouts
 trait Renderable:
 
   /** The parent layout, might be None */
-  protected lazy val layout =
+  protected inline def layout =
     Layouts.get(layoutName) orElse Layouts.get("empty")
 
   /** Name of the parent layout */

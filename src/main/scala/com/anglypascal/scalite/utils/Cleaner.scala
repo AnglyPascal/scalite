@@ -2,6 +2,7 @@ package com.anglypascal.scalite.utils
 
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.mutable.{DObj => MObj}
+import com.anglypascal.scalite.data.mutable.{DArr => MArr}
 import com.anglypascal.scalite.data.immutable.Data
 import com.anglypascal.scalite.data.mutable.{Data => MData}
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFiles
@@ -66,9 +67,7 @@ object Cleaner extends Configurable:
         d.getStr match
           case Some(s) => s :: l
           case _       => l
-      configs
-        .extractOrElse("keepFiles")(ArrayBuffer[MData]())
-        .toList
+      configs.extractOrElse("keepFiles")(MArr())
         .foldLeft(List[String]())(f)
 
     clean(cleanSite, excludes)

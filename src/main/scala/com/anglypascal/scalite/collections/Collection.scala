@@ -82,7 +82,7 @@ class Collection(
           case v: com.anglypascal.scalite.data.mutable.DStr =>
             v.str.trim.split(",").map(_.trim)
           case v: com.anglypascal.scalite.data.mutable.DArr =>
-            v.arr.flatMap(_.getStr).toArray
+            v.flatMap(_.getStr).toArray
           case _ => Array[String]()
         if arr.length == 0 then Array("title")
         else arr
@@ -132,7 +132,9 @@ class Collection(
 
   def sortedItems: Array[Element] =
     def compare(fst: Element, snd: Element): Boolean =
-      compareBy(fst, snd, sortBy: _*) < 0
+      false
+      // FIXME Issue with compareBy
+      // compareBy(fst, snd, sortBy: _*) < 0
 
     items
       .collect(p =>

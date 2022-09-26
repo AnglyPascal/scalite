@@ -30,8 +30,8 @@ class YamlParserSpecs extends AnyFlatSpec:
         obj.getOrElse("array")(DArr())(0) === DStr("1") &&
         obj.getOrElse("array")(DArr())(1) === DNum(2) &&
         obj.getOrElse("array")(DArr())(2) === DStr("item") &&
-        obj.getOrElse("array")(DArr())(3).getArr.get(0) === DNum(1) &&
-        obj.getOrElse("array")(DArr())(3).getArr.get(0) === DNum(1) &&
+        obj.getOrElse("array")(DArr())(3).getDArr.get(0) === DNum(1) &&
+        obj.getOrElse("array")(DArr())(3).getDArr.get(0) === DNum(1) &&
         subObj.getOrElse("subObj")(DObj()).getOrElse("b")(1) === 2
     )
   }

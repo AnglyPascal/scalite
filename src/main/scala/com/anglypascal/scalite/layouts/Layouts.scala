@@ -48,7 +48,7 @@ object Layouts extends Configurable:
   )
 
   /** Add a new layout constructor to this set */
-  def addEngine(engine: LayoutGroupConstructor) =
+  def addEngine(engine: LayoutGroupConstructor): Unit =
     constructors += engine.lang -> engine
 
   def apply(configs: MObj, globals: IObj): Unit =

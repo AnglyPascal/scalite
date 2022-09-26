@@ -22,7 +22,7 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
   protected lazy val mainMatter =
     com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
 
-  LayoutHooks.beforeInits(lang, name)(filepath)
+  // FIXME LayoutHooks.beforeInits(lang, name)(filepath)
 
   /** Render the layout with the given Data object as context
     *
