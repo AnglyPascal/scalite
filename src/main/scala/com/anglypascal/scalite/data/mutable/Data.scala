@@ -398,12 +398,13 @@ object DataImplicits:
   given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
   given fromAny: Conversion[Any, Data] = any =>
     any match
-      case any: String     => DStr(any)
-      case any: Int        => DNum(any)
-      case any: BigDecimal => DNum(any)
-      case any: Boolean    => DBool(any)
-      case any: Data       => any
-      case _               => DNull
+      case any: String         => DStr(any)
+      case any: Int            => DNum(any)
+      case any: BigDecimal     => DNum(any)
+      case any: Boolean        => DBool(any)
+      case any: Data           => any
+      case any: immutable.Data => fromIObj(any)
+      case _                   => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match

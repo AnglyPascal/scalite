@@ -29,7 +29,7 @@ trait LayoutBeforeInit extends LayoutHook:
 trait LayoutWithBeforeInit:
   this: HookObject[LayoutHook] =>
 
-  private val sh = SortedHooks[LayoutHook, LayoutBeforeInit]
+  private val sh = SortedHooks[LayoutBeforeInit]
   protected def add(h: LayoutBeforeInit): Unit = sh.add(h)
 
   def beforeInits(lang: String, name: String)(filepath: String) =
@@ -53,7 +53,7 @@ trait LayoutBeforeRender extends LayoutHook:
 trait LayoutWithBeforeRenders:
   this: HookObject[LayoutHook] =>
 
-  private val sh = SortedHooks[LayoutHook, LayoutBeforeRender]
+  private val sh = SortedHooks[LayoutBeforeRender]
   protected def add(h: LayoutBeforeRender): Unit = sh.add(h)
 
   def beforeRenders(lang: String, name: String)(
@@ -79,7 +79,7 @@ trait LayoutAfterRender extends LayoutHook:
 trait LayoutWithAfterRenders:
   this: HookObject[LayoutHook] =>
 
-  private val sh = SortedHooks[LayoutHook, LayoutAfterRender]
+  private val sh = SortedHooks[LayoutAfterRender]
   protected def add(h: LayoutAfterRender): Unit = sh.add(h)
 
   def afterRenders(lang: String, name: String)(rendered: String) =

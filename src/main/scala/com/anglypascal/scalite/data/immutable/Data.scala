@@ -65,7 +65,8 @@ final class DObj(val obj: Map[String, Data])
   def get(key: String): Option[Data] = obj.get(key)
 
   /** Return a new DObj object with the given pair added */
-  def add(pairs: (String, Data)*): DObj = DObj(obj ++ pairs)
+  def add(pairs: (String, Any)*): DObj =
+    DObj(obj ++ pairs.map((k, v) => (k, DataImplicits.fromAny(v))))
 
   /** Get an iterable for the list of keys in the map */
   override def keys = obj.keys

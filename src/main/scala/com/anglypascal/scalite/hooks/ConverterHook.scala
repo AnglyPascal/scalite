@@ -24,7 +24,7 @@ trait ConverterBeforeInit extends ConverterHook:
 trait ConverterWithBeforeInit:
   this: HookObject[ConverterHook] =>
 
-  private val sh = SortedHooks[LayoutHook, ConverterBeforeInit]
+  private val sh = SortedHooks[ConverterBeforeInit]
   protected def add(h: ConverterBeforeInit): Unit = sh.add(h)
 
   def beforeInits(globals: IObj)(filetype: String, config: IObj) =
@@ -49,7 +49,7 @@ trait ConverterBeforeConvert extends ConverterHook:
 trait ConverterWithBeforeRenders:
   this: HookObject[ConverterHook] =>
 
-  private val sh = SortedHooks[LayoutHook, ConverterBeforeConvert]
+  private val sh = SortedHooks[ConverterBeforeConvert]
   protected def add(h: ConverterBeforeConvert): Unit = sh.add(h)
 
   def beforeConverts(str: String, fp: String) =
@@ -72,7 +72,7 @@ trait ConverterAfterConvert extends ConverterHook:
 trait ConverterWithAfterRenders:
   this: HookObject[ConverterHook] =>
 
-  private val sh = SortedHooks[LayoutHook, ConverterAfterConvert]
+  private val sh = SortedHooks[ConverterAfterConvert]
   protected def add(h: ConverterAfterConvert): Unit = sh.add(h)
 
   def afterConverts(str: String, fp: String) =

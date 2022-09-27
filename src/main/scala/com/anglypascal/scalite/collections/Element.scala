@@ -12,13 +12,11 @@ import com.anglypascal.scalite.documents.SourceFile
   * An Element is also a Renderable, so it can have a parent layout and it can
   * be rendered into some HTML string.
   */
-trait Element extends Renderable with SourceFile:
+trait Element(rType: String) extends Renderable with SourceFile:
 
   import com.anglypascal.scalite.documents.Reader
 
   lazy val identifier = filepath
-
-  val rType: String
 
   protected val frontMatter = Reader.frontMatter(rType, filepath)
 

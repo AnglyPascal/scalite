@@ -20,14 +20,14 @@ trait HookObject[H <: Hook]:
   protected val logger: Logger
   protected[hooks] def registerHook(hook: H): Unit
 
-final class SortedHooks[H <: Hook, B <: Hook]:
+final class SortedHooks[H <: Hook]:
 
-  protected val array = ArrayBuffer[B]()
+  protected val array = ArrayBuffer[H]()
   private var sorted = true
-  protected[hooks] def add(h: B): Unit =
+  protected[hooks] def add(h: H): Unit =
     array += h
     sorted = false
-  protected[hooks] def sortedArray: ArrayBuffer[B] =
+  protected[hooks] def sortedArray: ArrayBuffer[H] =
     if sorted then array else array.sorted
 
 /** To be run before an object is initiated.
@@ -45,7 +45,7 @@ trait BeforeInit extends Hook:
 trait WithBeforeInit[H <: Hook, B <: BeforeInit]:
   this: HookObject[H] =>
 
-  private val sh = SortedHooks[H, B]
+  private val sh = SortedHooks[B]
   protected def add(h: B): Unit = sh.add(h)
 
   def beforeInits(globals: IObj)(configs: IObj) =
@@ -67,7 +67,7 @@ trait BeforeLocals extends Hook:
 trait WithBeforeLocals[H <: Hook, B <: BeforeLocals]:
   this: HookObject[H] =>
 
-  private val sh = SortedHooks[H, B]
+  private val sh = SortedHooks[B]
   protected def add(h: B): Unit = sh.add(h)
 
   def beforeLocals(globals: IObj)(locals: IObj) =
@@ -89,7 +89,7 @@ trait BeforeRender extends Hook:
 trait WithBeforeRenders[H <: Hook, B <: BeforeRender]:
   this: HookObject[H] =>
 
-  private val sh = SortedHooks[H, B]
+  private val sh = SortedHooks[B]
   protected def add(h: B): Unit = sh.add(h)
 
   def beforeRenders(globals: IObj)(context: IObj) =
@@ -113,7 +113,7 @@ trait AfterRender extends Hook:
 trait WithAfterRenders[H <: Hook, A <: AfterRender]:
   this: HookObject[H] =>
 
-  private val sh = SortedHooks[H, A]
+  private val sh = SortedHooks[A]
   protected def add(h: A): Unit = sh.add(h)
 
   def afterRenders(globals: IObj)(locals: IObj, rendered: String) =
@@ -135,7 +135,7 @@ trait AfterWrite[A] extends Hook:
 trait WithAfterWrites[H <: Hook, T <: AfterWrite[A], A]:
   this: HookObject[H] =>
 
-  private val sh = SortedHooks[H, T]
+  private val sh = SortedHooks[T]
   protected def add(h: T): Unit = sh.add(h)
 
   def afterWrites(globals: IObj)(obj: A) =

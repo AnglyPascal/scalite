@@ -36,49 +36,48 @@ import com.anglypascal.scalite.documents.Convertible
   * @param collection
   *   The configuration variables for this Element's Collection
   */
-class PageLike(val rType: String)(
+class PageLike(rType: String)(
     val parentDir: String,
     val relativePath: String,
     protected val globals: IObj,
     private val collection: IObj
-) extends Element
+) extends Element(rType)
     with Convertible(parentDir + relativePath)
     with Page:
 
   private val logger = Logger(s"PageLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
 
-  protected val configs = MObj(
-    "rType" -> rType,
-    "parentDir" -> parentDir,
-    "relativePath" -> relativePath
-  )
+  protected val configs =
+    val c = MObj() update collection update frontMatter update MObj(
+      "rType" -> rType,
+      "parentDir" -> parentDir,
+      "relativePath" -> relativePath
+    )
+    c update PageHooks.beforeInits(globals)(IObj(c))
 
-  /** Name of the parent layout. Can be set in either the frontMatter, in the
-    * scoped defaults, in collection configurations, or the "page" layout, in
-    * order of precedence.
+  /** Name of the parent layout. Can be set in either the configs, in the scoped
+    * defaults, in collection configurations, or the "page" layout, in order of
+    * precedence.
     */
   protected lazy val layoutName: String =
-    extractChain(frontMatter, collection)("layout")(rType)
+    extractChain(configs, collection)("layout")(rType)
 
-  /** Title of this page, can be specified in the frontMatter under key "title",
+  /** Title of this page, can be specified in the configs under key "title",
     * "name" or will simply be the filename
     */
   lazy val title: String =
-    frontMatter.extractOrElse("title")(
-      frontMatter.extractOrElse("name")(filename)
-    )
+    configs.extractOrElse("title")(configs.extractOrElse("name")(filename))
 
   /** Local variables publicly visible, used to render the parent template */
   lazy val locals: IObj =
     val l = _locals
-    if frontMatter.getOrElse("showExcerpt")(false) then
-      l += "excerpt" -> excerpt
-    IObj(l)
+    if configs.getOrElse("showExcerpt")(false) then l.add("excerpt" -> excerpt)
+    else l
 
   private def _locals =
     val dateFormat =
-      extractChain(frontMatter, collection, globals)("dateFormat")(
+      extractChain(configs, collection, globals)("dateFormat")(
         Defaults.dateFormat
       )
     val mobj = MObj(
@@ -93,29 +92,30 @@ class PageLike(val rType: String)(
       "slugTitle" -> slugify(title)
     )
     mobj update PageHooks.beforeLocals(globals)(IObj(mobj))
+    IObj(mobj)
 
   /** Extract excerpt from the mainMatter */
-  private lazy val excerpt: String =
+  private def excerpt: String =
     val separator =
-      extractChain(frontMatter, globals)("separator")(Defaults.separator)
+      extractChain(configs, globals)("separator")(Defaults.separator)
     Excerpt(
       mainMatter,
       filepath,
       shouldConvert,
       separator
-    )(IObj(_locals), globals).content
+    )(_locals, globals).content
 
   /** Relative permanent link to this page in the website */
   lazy val permalink =
     val permalinkTemplate =
-      extractChain(frontMatter, collection, globals)(
+      extractChain(configs, collection, globals)(
         "permalink"
       )(Defaults.Statics.permalink)
     purifyUrl(URL(permalinkTemplate)(locals))
 
   /** The output extension of this page */
   protected lazy val outputExt =
-    frontMatter.getOrElse("outputExt")(Converters.findOutputExt(filepath))
+    configs.getOrElse("outputExt")(Converters.findOutputExt(filepath))
 
   private inline def convert: String =
     if shouldConvert then convert(mainMatter)
@@ -142,7 +142,7 @@ class PageLike(val rType: String)(
     render(str, IObj(context))
 
   /** Should this page be visible to the site? */
-  val visible: Boolean = frontMatter.getOrElse("visible")(true)
+  val visible: Boolean = configs.getOrElse("visible")(true)
 
   override def toString(): String =
     Console.CYAN + title + Console.RESET

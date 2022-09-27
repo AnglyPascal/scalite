@@ -24,7 +24,7 @@ trait SiteAfterInit extends SiteHook:
 trait SiteWithAfterInit:
   this: HookObject[SiteHook] =>
 
-  private val sh = SortedHooks[LayoutHook, SiteAfterInit]
+  private val sh = SortedHooks[SiteAfterInit]
   protected def add(h: SiteAfterInit): Unit = sh.add(h)
 
   def afterInits(globals: IObj) =
@@ -45,7 +45,7 @@ trait SiteAfterReset extends SiteHook:
 trait SiteWithAfterReset:
   this: HookObject[SiteHook] =>
 
-  private val sh = SortedHooks[LayoutHook, SiteAfterReset]
+  private val sh = SortedHooks[SiteAfterReset]
   protected def add(h: SiteAfterReset): Unit = sh.add(h)
 
   def afterResets(globals: IObj)(filetype: String, config: IObj) =
@@ -66,7 +66,7 @@ trait SiteAfterRead extends SiteHook:
 trait SiteWithAfterRead:
   this: HookObject[SiteHook] =>
 
-  private val sh = SortedHooks[LayoutHook, SiteAfterRead]
+  private val sh = SortedHooks[SiteAfterRead]
   protected def add(h: SiteAfterRead): Unit = sh.add(h)
 
   def afterReads(globals: IObj)(filetype: String, config: IObj) =
