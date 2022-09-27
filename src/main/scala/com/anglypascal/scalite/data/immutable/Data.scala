@@ -1,7 +1,6 @@
 package com.anglypascal.scalite.data.immutable
 
 import com.anglypascal.scalite.data.mutable
-
 import com.rallyhealth.weejson.v1.Arr
 import com.rallyhealth.weejson.v1.Bool
 import com.rallyhealth.weejson.v1.Null
@@ -35,25 +34,29 @@ sealed trait Data extends Ordered[Data]:
       case _           => None
 
   /** If this is a DArr, return the list */
-  final def getArr: Option[List[Data]] =
+  final def getArr: Option[DArr] =
     this match
-      case data: DArr => Some(data.arr)
+      case data: DArr => Some(data)
       case _          => None
 
   /** If this is a DObj, return the map */
-  final def getObj: Option[Map[String, Data]] =
+  final def getObj: Option[DObj] =
     this match
-      case data: DObj => Some(data.obj)
+      case data: DObj => Some(data)
       case _          => None
 
   protected[data] def toString(depth: Int): String = toString()
 
+  def mut: mutable.Data
+
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
-final class DObj(val obj: Map[String, Data])
+final class DObj(private val obj: Map[String, Data])
     extends Data
     with Map[String, Data]:
+
+  def mut: mutable.DObj = mutable.DObj(obj.map((k, v) => (k, v.mut)).toSeq: _*)
 
   /** Returns the value stored against key in the underlying Map */
   override def contains(key: String) = obj.contains(key: String)
@@ -94,9 +97,6 @@ final class DObj(val obj: Map[String, Data])
   def getOrElse(key: String)(default: BigDecimal): BigDecimal =
     get(key).flatMap(_.getNum).getOrElse(default)
 
-  def getOrElse(key: String)(default: List[Data]): List[Data] =
-    get(key).flatMap(_.getArr).getOrElse(default)
-
   def getOrElse(key: String)(default: DObj): DObj =
     get(key).flatMap(_.getObj).map(DObj(_)).getOrElse(default)
 
@@ -106,7 +106,7 @@ final class DObj(val obj: Map[String, Data])
   def compare(that: Data): Int = 0
 
   def update(that: mutable.DObj): DObj =
-    val o = obj ++ DObj(that)
+    val o = obj ++ that.immut
     DObj(o)
 
   override def toString(): String = toString(0)
@@ -127,18 +127,21 @@ object DObj:
 
   def apply(_obj: Map[String, Data]) = new DObj(_obj)
 
+  def apply(_obj: scala.collection.mutable.Map[String, Data]) =
+    new DObj(_obj.toMap)
+
   def apply(pairs: (String, Any)*) =
-    new DObj(Map(pairs.map(p => (p._1, DataImplicits.fromAny(p._2))): _*))
+    new DObj(pairs.map(p => (p._1, DataImplicits.fromAny(p._2))).toMap)
 
-  def apply(_obj: Obj) =
-    new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))).toMap)
+  def apply(_obj: Obj): DObj =
+    DataImplicits.fromValue(_obj).getObj.get
 
-  def apply(dobj: mutable.DObj) = new DObj(
-    dobj.map(p => (p._1, DataImplicits.fromMutData(p._2))).toMap
-  )
+  def apply(_obj: mutable.DObj): DObj = _obj.immut
 
 /** Immutable wrapper around Arr */
-final class DArr(val arr: List[Data]) extends Data with Iterable[Data]:
+final class DArr(private val arr: List[Data]) extends Data with Iterable[Data]:
+
+  def mut: mutable.DArr = mutable.DArr(arr.map(_.mut): _*)
 
   /** Return the index entry of the List[Data], inefficient TODO */
   def apply(ind: Int): Data = arr(ind)
@@ -165,11 +168,12 @@ object DArr:
   def apply(_arr: Arr) =
     new DArr(_arr.arr.map(DataImplicits.fromValue).toList)
 
-  def apply(dobj: mutable.DArr) =
-    new DArr(dobj.map(DataImplicits.fromMutData).toList)
+  def apply(dobj: mutable.DArr) = dobj.immut
 
 /** Wrapper for Str */
 final class DStr(val str: String) extends Data:
+
+  def mut: mutable.DStr = mutable.DStr(str)
 
   /** Add a string to this DStr */
   def +(nstr: String) = DStr(str + nstr)
@@ -200,6 +204,8 @@ object DStr:
 /** Wrapper for Num */
 final class DNum(val num: BigDecimal) extends Data:
 
+  def mut: mutable.DNum = mutable.DNum(num)
+
   override def toString(): String =
     Console.GREEN + num.toString + Console.RESET
 
@@ -223,6 +229,8 @@ object DNum:
 /** Wrapper for Bool */
 final class DBool(val bool: Boolean) extends Data:
 
+  def mut: mutable.DBool = mutable.DBool(bool)
+
   override def toString(): String =
     Console.YELLOW + bool.toString + Console.RESET
 
@@ -245,6 +253,9 @@ object DBool:
 
 /** Wrapper for Null */
 object DNull extends Data:
+
+  def mut: mutable.DNull.type = mutable.DNull
+
   override def toString(): String = "null"
 
   def compare(that: Data): Int =
@@ -256,41 +267,22 @@ object DNull extends Data:
   */
 object DataImplicits:
 
-  given fromDStr: Conversion[DStr, String] = _.str
-  given fromDNum: Conversion[DNum, BigDecimal] = _.num
-  given fromDBool: Conversion[DBool, Boolean] = _.bool
-
-  given fromString: Conversion[String, DStr] = DStr(_)
-  given fronBigDecima: Conversion[BigDecimal, DNum] = DNum(_)
-  given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
-  given fromAny: Conversion[Any, Data] = any =>
-    any match
+  given fromAny: Conversion[Any, Data] =
+    _ match
       case any: String       => DStr(any)
+      case any: Int          => DNum(any)
       case any: BigDecimal   => DNum(any)
       case any: Boolean      => DBool(any)
       case any: Data         => any
-      case any: mutable.Data => fromMutData(any)
+      case any: mutable.Data => any.immut
+      case any: Value        => fromValue(any)
       case _                 => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match
-      case v: Obj  => DObj(v)
-      case v: Arr  => DArr(v)
-      case v: Str  => DStr(v)
-      case v: Num  => DNum(v)
-      case v: Bool => DBool(v)
+      case v: Obj  => DObj(v.obj)
+      case v: Arr  => DArr(v.arr)
+      case v: Str  => DStr(v.str)
+      case v: Num  => DNum(v.num)
+      case v: Bool => DBool(v.bool)
       case Null    => DNull
-
-  given fromMutData: Conversion[mutable.Data, Data] =
-    _ match
-      case v: mutable.DObj => DObj(v.toMap.map((k, vv) => (k, fromMutData(vv))))
-      case v: mutable.DArr => DArr(v.toList.map(fromMutData))
-      case v: mutable.DStr => DStr(v.str)
-      case v: mutable.DNum => DNum(v.num)
-      case v: mutable.DBool => DBool(v.bool)
-      case mutable.DNull    => DNull
-
-/** FEATURE: Add wrappers for lambda functions. Text lambda AST with
-  * mustache.Then define the predefined filter functions in terms of these
-  * lambda
-  */

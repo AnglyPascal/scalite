@@ -35,12 +35,17 @@ sealed trait Data extends Ordered[Data]:
 
   protected[data] def toString(depth: Int): String = toString()
 
+  def immut: immutable.Data
+
 /** Immutable wrapper around Obj. Provides only one mutable entry for content
   * for performance reasons.
   */
 final class DObj(private val obj: Map[String, Data])
     extends Data
     with Map[String, Data]:
+
+  def immut: immutable.DObj =
+    immutable.DObj(obj.map((k, v) => (k, v.immut)).toMap)
 
   override def getDObj: Option[DObj] = Some(this)
 
@@ -164,9 +169,32 @@ final class DObj(private val obj: Map[String, Data])
     this
 
   def update(that: immutable.DObj): this.type =
-    DataImplicits.fromIObj(that) match
-      case v: DObj => this update v
-      case _       => this
+    for key <- that.keys do
+      if !contains(key) then this(key) = that(key).mut
+      else
+        this(key) match
+          case s: DStr =>
+            that(key) match
+              case st: immutable.DStr => this += key -> st
+              case _                  => ()
+          case n: DNum =>
+            that(key) match
+              case nm: immutable.DNum => this += key -> nm
+              case _                  => ()
+          case b: DBool =>
+            that(key) match
+              case bl: immutable.DBool => this += key -> bl
+              case _                   => ()
+          case a: DArr =>
+            that(key) match
+              case ar: immutable.DArr => this += key -> ar
+              case _                  => ()
+          case o: DObj =>
+            that(key) match
+              case ob: immutable.DObj => o.update(ob)
+              case _                  => ()
+          case _ => ()
+    this
 
   def copy: DObj =
     val nObj = DObj()
@@ -207,9 +235,11 @@ object DObj:
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))))
 
 /** Mutable wrapper around Arr */
-final class DArr(private val arr: ArrayBuffer[Data])
+final class DArr(private val arr: Buffer[Data])
     extends Data
     with Buffer[Data]:
+
+  def immut: immutable.DArr = immutable.DArr(arr.map(_.immut))
 
   override def getDArr: Option[DArr] = Some(this)
 
@@ -285,6 +315,8 @@ object DArr:
 /** Wrapper for Str */
 final class DStr(private var _str: String) extends Data:
 
+  def immut: immutable.DStr = immutable.DStr(_str)
+
   override def getStr: Option[String] = Some(_str)
 
   def str = _str
@@ -323,6 +355,8 @@ object DStr:
 /** Wrapper for Num */
 final class DNum(private var _num: BigDecimal) extends Data:
 
+  def immut: immutable.DNum = immutable.DNum(_num)
+
   override def getNum: Option[BigDecimal] = Some(_num)
 
   def num = _num
@@ -351,6 +385,8 @@ object DNum:
 /** Wrapper for Bool */
 final class DBool(private var _bool: Boolean) extends Data:
 
+  def immut: immutable.DBool = immutable.DBool(_bool)
+
   override def getBool: Option[Boolean] = Some(_bool)
 
   def bool = _bool
@@ -374,10 +410,13 @@ final class DBool(private var _bool: Boolean) extends Data:
 /** Factory methods for constructing a DBool */
 object DBool:
   def apply(_bool: Boolean) = new DBool(_bool)
-  def apply(_bool: Bool) = new DBool(_bool.bool)
+  def apply(_bool: Bool) = DataImplicits.fromValue(_bool)
 
 /** Wrapper for Null */
 object DNull extends Data:
+
+  def immut: immutable.DNull.type = immutable.DNull
+
   override def toString(): String = "null"
 
   def compare(that: Data): Int =
@@ -389,43 +428,22 @@ object DNull extends Data:
   */
 object DataImplicits:
 
-  given fromDStr: Conversion[DStr, String] = _.str
-  given fromDNum: Conversion[DNum, BigDecimal] = _.num
-  given fromDBool: Conversion[DBool, Boolean] = _.bool
-
-  given fromString: Conversion[String, DStr] = DStr(_)
-  given fronBigDecima: Conversion[BigDecimal, DNum] = DNum(_)
-  given fromBoolean: Conversion[Boolean, DBool] = DBool(_)
-  given fromAny: Conversion[Any, Data] = any =>
-    any match
+  given fromAny: Conversion[Any, Data] =
+    _ match
       case any: String         => DStr(any)
       case any: Int            => DNum(any)
       case any: BigDecimal     => DNum(any)
       case any: Boolean        => DBool(any)
       case any: Data           => any
-      case any: immutable.Data => fromIObj(any)
+      case any: immutable.Data => any.mut
+      case any: Value          => fromValue(any)
       case _                   => DNull
 
   given fromValue: Conversion[Value, Data] =
     _ match
-      case v: Obj  => DObj(v)
-      case v: Arr  => DArr(v)
-      case v: Str  => DStr(v)
-      case v: Num  => DNum(v)
-      case v: Bool => DBool(v)
+      case v: Obj  => DObj(v.obj)
+      case v: Arr  => DArr(v.arr)
+      case v: Str  => DStr(v.str)
+      case v: Num  => DNum(v.num)
+      case v: Bool => DBool(v.bool)
       case Null    => DNull
-
-  given fromIObj: Conversion[immutable.Data, Data] =
-    _ match
-      case v: immutable.DObj =>
-        DObj(v.map(p => (p._1, fromIObj(p._2))).toSeq: _*)
-      case v: immutable.DArr  => DArr(v.map(d => fromIObj(d)).toSeq: _*)
-      case v: immutable.DStr  => DStr(v.str)
-      case v: immutable.DNum  => DNum(v.num)
-      case v: immutable.DBool => DBool(v.bool)
-      case immutable.DNull    => DNull
-
-/** FEATURE: Add wrappers for lambda functions. Text lambda AST with
-  * mustache.Then define the predefined filter functions in terms of these
-  * lambda
-  */
