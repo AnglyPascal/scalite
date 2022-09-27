@@ -24,15 +24,12 @@ trait SiteAfterInit extends SiteHook:
 trait SiteWithAfterInit:
   this: HookObject[SiteHook] =>
 
-  protected val _afterInits = ArrayBuffer[SiteAfterInit]()
-  protected var _ai = true
+  private val sh = SortedHooks[LayoutHook, SiteAfterInit]
+  protected def add(h: SiteAfterInit): Unit = sh.add(h)
 
   def afterInits(globals: IObj) =
     logger.trace(s"running before init hooks")
-    if !_ai then
-      _afterInits.sorted
-      _ai = true
-    _afterInits.foldLeft(MObj())((o, h) => o update h(globals))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals))
 
 /** To be run right after the site is reset for clean build
   *
@@ -48,15 +45,12 @@ trait SiteAfterReset extends SiteHook:
 trait SiteWithAfterReset:
   this: HookObject[SiteHook] =>
 
-  protected val _afterResets = ArrayBuffer[SiteAfterReset]()
-  protected var _ars = true
+  private val sh = SortedHooks[LayoutHook, SiteAfterReset]
+  protected def add(h: SiteAfterReset): Unit = sh.add(h)
 
   def afterResets(globals: IObj)(filetype: String, config: IObj) =
     logger.trace(s"running before init hooks for $filetype")
-    if !_ars then
-      _afterResets.sorted
-      _ars = true
-    _afterResets.foldLeft(MObj())((o, h) => o update h(globals))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals))
 
 /** To be run right after the files of this site are all read
   *
@@ -72,15 +66,12 @@ trait SiteAfterRead extends SiteHook:
 trait SiteWithAfterRead:
   this: HookObject[SiteHook] =>
 
-  protected val _afterReads = ArrayBuffer[SiteAfterRead]()
-  protected var _ard = true
+  private val sh = SortedHooks[LayoutHook, SiteAfterRead]
+  protected def add(h: SiteAfterRead): Unit = sh.add(h)
 
   def afterReads(globals: IObj)(filetype: String, config: IObj) =
     logger.trace(s"running before init hooks for $filetype")
-    if !_ard then
-      _afterReads.sorted
-      _ard = true
-    _afterReads.foldLeft(MObj())((o, h) => o update h(globals))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals))
 
 trait SiteBeforeRender extends SiteHook with BeforeRender:
   override def toString(): String = super.toString() + " before render"
@@ -104,21 +95,9 @@ object SiteHooks
 
   protected[hooks] def registerHook(hook: SiteHook) =
     hook match
-      case hook: SiteAfterInit =>
-        _afterInits += hook
-        _ai = false
-      case hook: SiteAfterReset =>
-        _afterResets += hook
-        _ars = false
-      case hook: SiteAfterRead =>
-        _afterReads += hook
-        _ard = false
-      case hook: SiteBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: SiteAfterRender =>
-        _afterRenders += hook
-        _ar = false
-      case hook: SiteAfterWrite =>
-        _afterWrites += hook
-        _aw = false
+      case hook: SiteAfterInit    => add(hook)
+      case hook: SiteAfterReset   => add(hook)
+      case hook: SiteAfterRead    => add(hook)
+      case hook: SiteBeforeRender => add(hook)
+      case hook: SiteAfterRender  => add(hook)
+      case hook: SiteAfterWrite   => add(hook)

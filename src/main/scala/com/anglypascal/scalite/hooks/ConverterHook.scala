@@ -24,15 +24,12 @@ trait ConverterBeforeInit extends ConverterHook:
 trait ConverterWithBeforeInit:
   this: HookObject[ConverterHook] =>
 
-  protected val _beforeInits = ArrayBuffer[ConverterBeforeInit]()
-  protected var _bi = true
+  private val sh = SortedHooks[LayoutHook, ConverterBeforeInit]
+  protected def add(h: ConverterBeforeInit): Unit = sh.add(h)
 
   def beforeInits(globals: IObj)(filetype: String, config: IObj) =
     logger.trace(s"running before init hooks for $filetype")
-    if !_bi then
-      _beforeInits.sorted
-      _bi = true
-    _beforeInits.foldLeft(MObj())((o, h) =>
+    sh.sortedArray.foldLeft(MObj())((o, h) =>
       o update h(globals)(filetype, config)
     )
 
@@ -52,15 +49,12 @@ trait ConverterBeforeConvert extends ConverterHook:
 trait ConverterWithBeforeRenders:
   this: HookObject[ConverterHook] =>
 
-  protected val _beforeConverts = ArrayBuffer[ConverterBeforeConvert]()
-  protected var _bc = true
+  private val sh = SortedHooks[LayoutHook, ConverterBeforeConvert]
+  protected def add(h: ConverterBeforeConvert): Unit = sh.add(h)
 
   def beforeConverts(str: String, fp: String) =
     logger.trace(s"running before convert hooks for file $fp")
-    if !_bc then
-      _beforeConverts.sorted
-      _bc = true
-    _beforeConverts.foldLeft(str)((s, h) => h.apply(s, fp))
+    sh.sortedArray.foldLeft(str)((s, h) => h.apply(s, fp))
 
 /** To be run before the conversion of the string
   *
@@ -78,15 +72,11 @@ trait ConverterAfterConvert extends ConverterHook:
 trait ConverterWithAfterRenders:
   this: HookObject[ConverterHook] =>
 
-  protected val _afterConverts = ArrayBuffer[ConverterAfterConvert]()
-  protected var _ac = true
+  private val sh = SortedHooks[LayoutHook, ConverterAfterConvert]
+  protected def add(h: ConverterAfterConvert): Unit = sh.add(h)
 
   def afterConverts(str: String, fp: String) =
-    logger.trace(s"running after convert hooks for file $fp")
-    if !_ac then
-      _afterConverts.sorted
-      _ac = true
-    _afterConverts.foldLeft(str)((s, h) => h.apply(s, fp))
+    sh.sortedArray.foldLeft(str)((s, h) => h.apply(s, fp))
 
 object ConverterHooks
     extends HookObject[ConverterHook]
@@ -98,13 +88,6 @@ object ConverterHooks
 
   protected[hooks] def registerHook(hook: ConverterHook): Unit =
     hook match
-      case hook: ConverterBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: ConverterBeforeConvert =>
-        _beforeConverts += hook
-        _bc = false
-      case hook: ConverterAfterConvert =>
-        _afterConverts += hook
-        _ac = false
-      case null => ()
+      case hook: ConverterBeforeInit    => add(hook)
+      case hook: ConverterBeforeConvert => add(hook)
+      case hook: ConverterAfterConvert  => add(hook)

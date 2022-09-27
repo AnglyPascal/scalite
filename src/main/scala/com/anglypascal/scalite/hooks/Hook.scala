@@ -20,6 +20,16 @@ trait HookObject[H <: Hook]:
   protected val logger: Logger
   protected[hooks] def registerHook(hook: H): Unit
 
+final class SortedHooks[H <: Hook, B <: Hook]:
+
+  protected val array = ArrayBuffer[B]()
+  private var sorted = true
+  protected[hooks] def add(h: B): Unit =
+    array += h
+    sorted = false
+  protected[hooks] def sortedArray: ArrayBuffer[B] =
+    if sorted then array else array.sorted
+
 /** To be run before an object is initiated.
   *
   * @param globals
@@ -35,15 +45,12 @@ trait BeforeInit extends Hook:
 trait WithBeforeInit[H <: Hook, B <: BeforeInit]:
   this: HookObject[H] =>
 
-  protected val _beforeInits = ArrayBuffer[B]()
-  protected var _bi = true
+  private val sh = SortedHooks[H, B]
+  protected def add(h: B): Unit = sh.add(h)
 
   def beforeInits(globals: IObj)(configs: IObj) =
     logger.trace("running before inits")
-    if !_bi then
-      _beforeInits.sorted
-      _bi = true
-    _beforeInits.foldLeft(MObj())((o, h) => o update h(globals)(configs))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals)(configs))
 
 /** To be run before the local variables of an object are initiated.
   *
@@ -60,15 +67,12 @@ trait BeforeLocals extends Hook:
 trait WithBeforeLocals[H <: Hook, B <: BeforeLocals]:
   this: HookObject[H] =>
 
-  protected val _beforeLocals = ArrayBuffer[B]()
-  protected var _bl = true
+  private val sh = SortedHooks[H, B]
+  protected def add(h: B): Unit = sh.add(h)
 
   def beforeLocals(globals: IObj)(locals: IObj) =
     logger.trace("running before locals")
-    if !_bl then
-      _beforeLocals.sorted
-      _bl = true
-    _beforeLocals.foldLeft(MObj())((o, h) => o update h(globals)(locals))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals)(locals))
 
 /** To be run before the contents of an object are rendered.
   *
@@ -85,15 +89,12 @@ trait BeforeRender extends Hook:
 trait WithBeforeRenders[H <: Hook, B <: BeforeRender]:
   this: HookObject[H] =>
 
-  protected val _beforeRenders = ArrayBuffer[B]()
-  protected var _br = true
+  private val sh = SortedHooks[H, B]
+  protected def add(h: B): Unit = sh.add(h)
 
   def beforeRenders(globals: IObj)(context: IObj) =
     logger.trace("running before renders")
-    if !_br then
-      _beforeRenders.sorted
-      _br = true
-    _beforeRenders.foldLeft(MObj())((o, h) => o update h(globals)(context))
+    sh.sortedArray.foldLeft(MObj())((o, h) => o update h(globals)(context))
 
 /** To be run after the contents of an object are rendered.
   *
@@ -112,15 +113,12 @@ trait AfterRender extends Hook:
 trait WithAfterRenders[H <: Hook, A <: AfterRender]:
   this: HookObject[H] =>
 
-  protected val _afterRenders = ArrayBuffer[A]()
-  protected var _ar = true
+  private val sh = SortedHooks[H, A]
+  protected def add(h: A): Unit = sh.add(h)
 
   def afterRenders(globals: IObj)(locals: IObj, rendered: String) =
     logger.trace("running after renders")
-    if !_ar then
-      _afterRenders.sorted
-      _ar = true
-    _afterRenders.foldLeft(rendered)((s, h) => h(globals)(locals, s))
+    sh.sortedArray.foldLeft(rendered)((s, h) => h(globals)(locals, s))
 
 /** To be run after the contents of an object of type A are written to disk.
   *
@@ -137,15 +135,12 @@ trait AfterWrite[A] extends Hook:
 trait WithAfterWrites[H <: Hook, T <: AfterWrite[A], A]:
   this: HookObject[H] =>
 
-  protected val _afterWrites = ArrayBuffer[T]()
-  protected var _aw = true
+  private val sh = SortedHooks[H, T]
+  protected def add(h: T): Unit = sh.add(h)
 
   def afterWrites(globals: IObj)(obj: A) =
     logger.trace("running after writes")
-    if !_aw then
-      _afterWrites.sorted
-      _aw = true
-    _afterWrites foreach { _(globals)(obj) }
+    sh.sortedArray foreach { _(globals)(obj) }
 
 /** Object containing all defined Hooks and provides methods to join Hooks from
   * multiple lists of Hooks
@@ -165,7 +160,7 @@ object Hooks:
       case hook: LayoutHook     => LayoutHooks.registerHook(hook)
       case hook: TreeHook       => TreeHooks.registerHook(hook)
       case hook: SiteHook       => SiteHooks.registerHook(hook)
-      case _                    => ()
+      case sorted               => ()
 
   /** Register many Hooks */
   def registerHooks(hooks: Hook*) =

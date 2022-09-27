@@ -38,18 +38,8 @@ object PageHooks
 
   protected[hooks] def registerHook(hook: PageHook) =
     hook match
-      case hook: PageBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: PageBeforeLocals =>
-        _beforeLocals += hook
-        _bl = false
-      case hook: PageBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: PageAfterRender =>
-        _afterRenders += hook
-        _ar = false
-      case hook: PageAfterWrite =>
-        _afterWrites += hook
-        _aw = false
+      case hook: PageBeforeInit => add(hook)
+      case hook: PageBeforeLocals => add(hook)
+      case hook: PageBeforeRender => add(hook)
+      case hook: PageAfterRender => add(hook)
+      case hook: PageAfterWrite => add(hook)

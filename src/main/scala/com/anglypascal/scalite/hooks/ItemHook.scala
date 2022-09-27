@@ -33,15 +33,7 @@ object ItemHooks
 
   protected[hooks] def registerHook(hook: ItemHook) =
     hook match
-      case hook: ItemBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: ItemBeforeLocals =>
-        _beforeLocals += hook
-        _bl = false
-      case hook: ItemBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: ItemAfterRender =>
-        _afterRenders += hook
-        _ar = false
+      case hook: ItemBeforeInit => add(hook)
+      case hook: ItemBeforeLocals => add(hook)
+      case hook: ItemBeforeRender => add(hook)
+      case hook: ItemAfterRender => add(hook)

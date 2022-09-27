@@ -38,18 +38,8 @@ object TreeHooks
 
   protected[hooks] def registerHook(hook: TreeHook) =
     hook match
-      case hook: TreeBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: TreeBeforeLocals =>
-        _beforeLocals += hook
-        _bl = false
-      case hook: TreeBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: TreeAfterRender =>
-        _afterRenders += hook
-        _ar = false
-      case hook: TreeAfterWrite =>
-        _afterWrites += hook
-        _aw = false
+      case hook: TreeBeforeInit => add(hook)
+      case hook: TreeBeforeLocals => add(hook)
+      case hook: TreeBeforeRender => add(hook)
+      case hook: TreeAfterRender => add(hook)
+      case hook: TreeAfterWrite => add(hook)

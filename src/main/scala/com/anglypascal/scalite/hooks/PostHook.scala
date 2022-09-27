@@ -37,18 +37,8 @@ object PostHooks
 
   protected[hooks] def registerHook(hook: PostHook) =
     hook match
-      case hook: PostBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: PostBeforeLocals =>
-        _beforeLocals += hook
-        _bl = false
-      case hook: PostBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: PostAfterRender =>
-        _afterRenders += hook
-        _ar = false
-      case hook: PostAfterWrite =>
-        _afterWrites += hook
-        _aw = false
+      case hook: PostBeforeInit => add(hook)
+      case hook: PostBeforeLocals => add(hook)
+      case hook: PostBeforeRender => add(hook)
+      case hook: PostAfterRender => add(hook)
+      case hook: PostAfterWrite => add(hook)

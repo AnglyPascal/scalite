@@ -29,15 +29,12 @@ trait LayoutBeforeInit extends LayoutHook:
 trait LayoutWithBeforeInit:
   this: HookObject[LayoutHook] =>
 
-  protected val _beforeInits = ArrayBuffer[LayoutBeforeInit]()
-  protected var _bi = true
+  private val sh = SortedHooks[LayoutHook, LayoutBeforeInit]
+  protected def add(h: LayoutBeforeInit): Unit = sh.add(h)
 
   def beforeInits(lang: String, name: String)(filepath: String) =
     logger.trace("running before inits")
-    if !_bi then
-      _beforeInits.sorted
-      _bi = true
-    _beforeInits foreach { _.apply(lang, name)(filepath) }
+    sh.sortedArray foreach { _.apply(lang, name)(filepath) }
 
 /** To be run before the layout is rendered.
   *
@@ -56,18 +53,15 @@ trait LayoutBeforeRender extends LayoutHook:
 trait LayoutWithBeforeRenders:
   this: HookObject[LayoutHook] =>
 
-  protected val _beforeRenders = ArrayBuffer[LayoutBeforeRender]()
-  protected var _br = true
+  private val sh = SortedHooks[LayoutHook, LayoutBeforeRender]
+  protected def add(h: LayoutBeforeRender): Unit = sh.add(h)
 
   def beforeRenders(lang: String, name: String)(
       context: IObj,
       content: String
   ) =
     logger.trace("running before renders")
-    if !_br then
-      _beforeRenders.sorted
-      _br = true
-    _beforeRenders.foldLeft(MObj())((o, h) =>
+    sh.sortedArray.foldLeft(MObj())((o, h) =>
       o update h(lang, name)(context, content)
     )
 
@@ -85,15 +79,12 @@ trait LayoutAfterRender extends LayoutHook:
 trait LayoutWithAfterRenders:
   this: HookObject[LayoutHook] =>
 
-  protected val _afterRenders = ArrayBuffer[LayoutAfterRender]()
-  protected var _ar = true
+  private val sh = SortedHooks[LayoutHook, LayoutAfterRender]
+  protected def add(h: LayoutAfterRender): Unit = sh.add(h)
 
   def afterRenders(lang: String, name: String)(rendered: String) =
     logger.trace("running after renders")
-    if !_ar then
-      _afterRenders.sorted
-      _ar = true
-    _afterRenders.foldLeft(rendered)((s, h) => h(lang, name)(s))
+    sh.sortedArray.foldLeft(rendered)((s, h) => h(lang, name)(s))
 
 object LayoutHooks
     extends HookObject[LayoutHook]
@@ -105,12 +96,6 @@ object LayoutHooks
 
   protected[hooks] def registerHook(hook: LayoutHook) =
     hook match
-      case hook: LayoutBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: LayoutBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: LayoutAfterRender =>
-        _afterRenders += hook
-        _ar = false
+      case hook: LayoutBeforeInit   => add(hook)
+      case hook: LayoutBeforeRender => add(hook)
+      case hook: LayoutAfterRender  => add(hook)

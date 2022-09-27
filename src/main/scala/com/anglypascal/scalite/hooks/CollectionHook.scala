@@ -37,18 +37,8 @@ object CollectionHooks
 
   protected[hooks] def registerHook(hook: CollectionHook) =
     hook match
-      case hook: CollectionBeforeInit =>
-        _beforeInits += hook
-        _bi = false
-      case hook: CollectionBeforeLocals =>
-        _beforeLocals += hook
-        _bl = false
-      case hook: CollectionBeforeRender =>
-        _beforeRenders += hook
-        _br = false
-      case hook: CollectionAfterRender =>
-        _afterRenders += hook
-        _ar = false
-      case hook: CollectionAfterWrite =>
-        _afterWrites += hook
-        _aw = false
+      case hook: CollectionBeforeInit => add(hook)
+      case hook: CollectionBeforeLocals => add(hook)
+      case hook: CollectionBeforeRender => add(hook)
+      case hook: CollectionAfterRender => add(hook)
+      case hook: CollectionAfterWrite => add(hook)
