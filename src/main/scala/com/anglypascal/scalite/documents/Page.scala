@@ -25,16 +25,13 @@ import scala.collection.mutable.LinkedHashMap
   * Pages are mapped against their filepath, which be used to cross refer other
   * pages of this website.
   */
-trait Page extends Renderable:
+trait Page:
+  this: Renderable =>
 
   private val logger = Logger("Page writer")
 
-  protected val globals: IObj
-
-  protected val configs: MObj
-  
   /** FIXME wth? why is it here doing nothing? */
-  // FIXME PageHooks.beforeInits(globals)(IObj(configs))
+  // PageHooks.beforeInits(globals)(IObj(configs))
 
   /** Unique identifier to map this page to, in order for the cross reference to
     * work.
@@ -62,9 +59,8 @@ trait Page extends Renderable:
 
     if !dryRun then
       logger.debug(s"writing $this to $path")
-      /** FIXME useless, think about what to do with this */
-      PageHooks.beforeRenders(globals)(locals)
-      val r = PageHooks.afterRenders(globals)(locals, render)
+      val up = PageHooks.beforeRenders(globals)(locals)
+      val r = PageHooks.afterRenders(globals)(locals, render(IObj(up)))
       writeTo(path, r)
       PageHooks.afterWrites(globals)(this)
     else logger.debug(s"would write $this to $path")
@@ -73,7 +69,6 @@ trait Page extends Renderable:
   if visible then Pages.addPage(this)
 
   // protected def cache(): Unit
-
 
 /** Holds reference to all the pages of this website.
   *

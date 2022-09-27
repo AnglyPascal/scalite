@@ -16,6 +16,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.anglypascal.scalite.utils.StringProcessors.slugify
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.documents.Convertible
 
 /** Elements that may be rendered into pages of the website, such as static
   * pages.
@@ -41,6 +42,7 @@ class PageLike(val rType: String)(
     protected val globals: IObj,
     private val collection: IObj
 ) extends Element
+    with Convertible(parentDir + relativePath)
     with Page:
 
   private val logger = Logger(s"PageLike \"${CYAN(rType)}\"")
@@ -115,6 +117,10 @@ class PageLike(val rType: String)(
   protected lazy val outputExt =
     frontMatter.getOrElse("outputExt")(Converters.findOutputExt(filepath))
 
+  private inline def convert: String =
+    if shouldConvert then convert(mainMatter)
+    else mainMatter
+
   /** Render the contents of this page to a HTML string
     *
     * TODO: What if the page is a plain HTML file, which need not be converted,
@@ -126,19 +132,14 @@ class PageLike(val rType: String)(
     * One solution is to make sure that truly static pages have the .html
     * extension. That way, the Identity converter will be used.
     */
-  protected lazy val render: String =
-    val str =
-      if shouldConvert then Converters.convert(mainMatter, filepath)
-      else mainMatter
-    layout match
-      case Some(l) =>
-        val context = IObj(
-          "site" -> globals,
-          "page" -> locals,
-          "collectionItems" -> CollectionItems.collectionItems
-        )
-        l.renderWrap(context, str)
-      case None => str
+  protected def render(up: IObj): String =
+    val str = convert
+    val context = MObj(
+      "site" -> globals,
+      "page" -> locals,
+      "collectionItems" -> CollectionItems.collectionItems
+    ) update up
+    render(str, IObj(context))
 
   /** Should this page be visible to the site? */
   val visible: Boolean = frontMatter.getOrElse("visible")(true)

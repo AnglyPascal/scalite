@@ -95,7 +95,7 @@ object StringProcessors:
     else slug.split('-').mkString(" ").capitalize
 
   /** Parses title from the filenames with the pattern "yyyy-MM-dd-title" */
-  inline def titleParser(fn: String): Option[String] =
+  def titleParser(fn: String): Option[String] =
     fn match
       case title(t) => Some(titlify(t))
       case _        => None

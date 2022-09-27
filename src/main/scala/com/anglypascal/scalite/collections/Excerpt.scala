@@ -4,6 +4,7 @@ import com.anglypascal.scalite.converters.Converters
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.documents.Renderable
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.documents.Convertible
 
 /** Excerpts from the given mainMatter
   *
@@ -44,7 +45,7 @@ import com.typesafe.scalalogging.Logger
   *
   * Excerpts are rendered as the time of the creation of locals
   *
-  * FIXME: What if the source file in the element is not in Markdown? How do we
+  * TODO: What if the source file in the element is not in Markdown? How do we
   * get the link references?
   */
 class Excerpt(
@@ -54,8 +55,9 @@ class Excerpt(
     private val separator: String
 )(
     private val _locals: DObj,
-    private val globals: DObj
-) extends Renderable:
+    protected val globals: DObj
+) extends Renderable
+    with Convertible(filepath):
 
   private val logger = Logger("Excerpt")
 
@@ -70,26 +72,23 @@ class Excerpt(
 
   protected lazy val layoutName: String = "empty"
 
-  protected lazy val render: String =
-    val str =
-      if shouldConvert then Converters.convert(rawContent, filepath)
-      else rawContent
+  private inline def convert: String =
+    if shouldConvert then convert(rawContent)
+    else mainMatter
+
+  protected def render(up: DObj = DObj()): String =
+    /** FIXME up?
+     */
+    val str = convert
     val context =
       DObj(
         "site" -> globals,
         "page" -> locals,
         "collectionItems" -> CollectionItems.collectionItems
-      )
-    val rendered = layout match
-      case Some(l) =>
-        logger.debug(s"$this has layout ${l.name}")
-        l.renderWrap(context, str)
-      case None =>
-        logger.debug(s"$this has no specified layout")
-        str
-    rendered
+      ) 
+    render(str, context)
 
-  def content = render
+  def content = render()
 
   override def toString(): String =
     "Excerpt: " + shouldConvert // + " and string: " + render

@@ -12,6 +12,7 @@ import org.scalatest.flatspec.AnyFlatSpec
 
 import java.nio.file.Files
 import java.nio.file.Paths
+import com.anglypascal.scalite.trees.Forests
 
 class PostSpecs extends AnyFlatSpec:
 
@@ -28,6 +29,11 @@ class PostSpecs extends AnyFlatSpec:
   val clcs = IObj()
 
   it should "read valid file properly" in {
+    Collections.reset()
+    Converters.reset()
+    Layouts.reset()
+    Forests.reset()
+
     val pst = new PostLike("posts")(pDir, rPth, glb1, clcs)
     assert(
       pst.title === "Super Short Article" &&
@@ -56,7 +62,11 @@ class PostSpecs extends AnyFlatSpec:
   }
 
   it should "handle rendering and file creation properly" in {
+    Collections.reset()
+    Converters.reset()
     Layouts.reset()
+    Forests.reset()
+
     DirectoryReader("src/test/resources/site_template/_site")
     Layouts(MObj(), glb1)
 
@@ -74,8 +84,10 @@ class PostSpecs extends AnyFlatSpec:
   }
 
   it should "handle excerpts properly" in {
+    Collections.reset()
     Converters.reset()
     Layouts.reset()
+    Forests.reset()
 
     val pDir = "src/test/resources/site_template/_posts"
     val pPth = "/2022-09-12-post-with-links.md"

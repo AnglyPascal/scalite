@@ -10,8 +10,9 @@ class TreeSpecs extends AnyFlatSpec:
   class Item(val getPaths: Iterable[List[String]]) extends Renderable:
     protected lazy val layoutName: String = "empty"
     lazy val locals: IObj = IObj()
+    protected val globals = IObj()
     val visible: Boolean = true
-    protected lazy val render: String = ""
+    protected def render(up: IObj = IObj()): String = ""
 
   class AnyTree(
       val treeName: String,
@@ -29,7 +30,7 @@ class TreeSpecs extends AnyFlatSpec:
     protected lazy val layoutName: String = "empty"
     lazy val locals: IObj = IObj()
     val visible: Boolean = true
-    protected lazy val render: String = ""
+    protected def render(up: IObj = IObj()): String = ""
 
     protected[trees] def process(dryRun: Boolean): Unit = ()
 

@@ -30,7 +30,10 @@ object Layouts extends Configurable:
 
       /** The mustache object for this layout */
       private lazy val mustache = ScaliteMustache("{{> content }}")
-      def render(context: IObj, content: String): String =
+      protected[layouts] def justRender(
+          context: IObj,
+          content: String
+      ): String =
         mustache.render(context, Map("content" -> ScaliteMustache(content)))
     }
 

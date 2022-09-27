@@ -49,7 +49,10 @@ class MustacheLayout(
     * @return
     *   the string returned by the mustache after rendering
     */
-  def render(context: DObj, contentPartial: String = ""): String =
+  protected[layouts] def justRender(
+      context: DObj,
+      contentPartial: String = ""
+  ): String =
     val str = mustache.render(
       context,
       partials + ("content" -> ScaliteMustache(contentPartial))
@@ -57,7 +60,7 @@ class MustacheLayout(
     parent match
       case Some(p) =>
         logger.debug("Rendering the parent layout now.")
-        p.renderWrap(context, str)
+        p.justRender(context, str)
       case _ => str
 
 /** Defines methods to process all the layouts from the "/\_layouts" directory

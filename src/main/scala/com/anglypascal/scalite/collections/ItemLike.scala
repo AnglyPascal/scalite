@@ -13,6 +13,7 @@ import com.anglypascal.scalite.utils.DateParser.lastModifiedTime
 import com.anglypascal.scalite.utils.StringProcessors.titleParser
 import com.typesafe.scalalogging.Logger
 import com.anglypascal.scalite.hooks.ItemHooks
+import com.anglypascal.scalite.documents.Convertible
 
 /** Elements that don't have a separate Page, but may be rendered as part of a
   * different Page.
@@ -33,7 +34,8 @@ class ItemLike(val rType: String)(
     val relativePath: String,
     protected val globals: IObj,
     private val collection: IObj
-) extends Element:
+) extends Element
+    with Convertible(parentDir + relativePath):
 
   private val logger = Logger(s"ItemLike \"${CYAN(rType)}\"")
   logger.debug("source: " + GREEN(filepath))
@@ -80,29 +82,32 @@ class ItemLike(val rType: String)(
     obj update mobj
 
   lazy val locals =
-    _locals += "content" -> render
+    _locals += "content" -> render()
     _locals update ItemHooks.beforeLocals(globals)(IObj(_locals))
     IObj(_locals)
 
   val visible: Boolean = frontMatter.extractOrElse("visible")(true)
 
+  private inline def convert: String =
+    if shouldConvert then convert(mainMatter)
+    else mainMatter
+
   /** If there's some frontMatter, then the mainMatter will be conerted with
     * appropriate converter. Then the converted string will be processed with
     * the layout if it exists. Otherwise the unprocessed string will be returned
     */
-  protected lazy val render: String =
-    val str =
-      if shouldConvert then Converters.convert(mainMatter, filepath)
-      else mainMatter
-    val ren = layout match
-      case Some(l) =>
-        val c = MObj(
-          "site" -> globals,
-          "item" -> _locals
-        )
-        c update ItemHooks.beforeRenders(globals)(IObj(c))
-        l.renderWrap(IObj(c), str)
-      case None => str
+  protected def render(up: IObj = IObj()): String =
+    val str = convert
+    val context =
+      val c = MObj(
+        "site" -> globals,
+        "item" -> _locals
+      )
+      c update ItemHooks.beforeRenders(globals)(IObj(c))
+      c update up
+      IObj(c)
+
+    val ren = render(str, context)
     ItemHooks.afterRenders(globals)(locals, ren)
 
   override def toString(): String = CYAN(title)

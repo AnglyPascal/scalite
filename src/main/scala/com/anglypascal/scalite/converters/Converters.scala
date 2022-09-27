@@ -85,7 +85,7 @@ object Converters extends Configurable:
     *   Some(c) if c accepts filetypes matching ext None if no such converter is
     *   available
     */
-  private def findByExt(ext: String): Option[Converter] =
+  def findByExt(ext: String): Option[Converter] =
     converters.filter(_._2.matches(ext)).headOption.map(_._2)
 
   def findOutputExt(ext: String): String =

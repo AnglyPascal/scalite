@@ -31,6 +31,7 @@ import scala.collection.mutable.LinkedHashMap
 import scala.collection.mutable.ListBuffer
 import com.anglypascal.scalite.trees.WithTree
 import com.anglypascal.scalite.trees.Tree
+import com.anglypascal.scalite.documents.Convertible
 
 /** Reads the content of a post file and prepares a Post object.
   *
@@ -54,6 +55,7 @@ class PostLike(val rType: String)(
     protected val globals: IObj,
     private val collection: IObj
 ) extends Element
+    with Convertible(parentDir + relativePath)
     with Page
     with WithTree[PostLike]:
 
@@ -197,32 +199,23 @@ class PostLike(val rType: String)(
         case _         => None
     frontMatter.extractOrElse("hyperlinks")(MObj()).flatMap(f).toMap
 
+  private inline def convert: String =
+    if shouldConvert then convert(mainMatter)
+    else mainMatter
+
   /** Convert the contents of the post to HTML */
-  protected lazy val render: String =
-    val str =
-      if shouldConvert then Converters.convert(mainMatter, filepath)
-      else mainMatter
+  protected def render(up: IObj): String =
+    val str = convert
 
-    val context =
-      IObj(
-        MObj(postUrls.toList: _*) update
-          MObj(
-            "site" -> globals,
-            "page" -> locals,
-            "collectionItems" -> CollectionItems.collectionItems,
-            "trees" -> treeObj
-          )
+    val c = MObj(postUrls.toList: _*) update
+      MObj(
+        "site" -> globals,
+        "page" -> locals,
+        "collectionItems" -> CollectionItems.collectionItems,
+        "trees" -> treeObj
       )
-    PostHooks.beforeRenders(globals)(context)
-
-    val r = layout match
-      case Some(l) =>
-        logger.debug(s"$this has layout ${l.name}")
-        l.renderWrap(context, str)
-      case None =>
-        logger.debug(s"$this has no specified layout")
-        str
-
+    val context = IObj(PostHooks.beforeRenders(globals)(IObj(c)) update up)
+    val r = render(str, context)
     PostHooks.afterRenders(globals)(context, r)
 
   /** Return the global settings for the collection-type treeType */

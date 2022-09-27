@@ -128,14 +128,14 @@ trait Tree[A <: Renderable] extends Renderable:
 
   protected def toString(ctab: String, itab: String): String =
     val iStr =
-      if _items.isEmpty then itab + "| \n"
+      if _items.isEmpty then itab + "↳ \n"
       else
-        itab + _items
-          .map(i => "[" + BLUE(i._1.toString) + "]")
-          .mkString(", ") + "\n"
+        itab + "↳ " + "[" + _items
+          .map(i => BLUE(i._1.toString))
+          .mkString(", ") + "]\n"
 
     ctab + s"${GREEN(treeName)} \n" + iStr +
-      _children.map(_._2.toString(itab + "+-", itab + "| ")).mkString("")
+      _children.map(_._2.toString(itab + "--", itab + "  ")).mkString("")
 
 /** Plugin that defines a new Tree from the given treeType, configurations and
   * global variables, returnin a RootNode instance

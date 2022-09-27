@@ -16,6 +16,7 @@ import com.anglypascal.scalite.utils.DirectoryReader.getFileName
 import com.anglypascal.scalite.utils.DirectoryReader.getListOfFilepaths
 import com.anglypascal.scalite.utils.StringProcessors.purifyUrl
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.documents.Renderable
 
 /** A Collection is a collection of Renderable objects with a SourceFile, that
   * is, a Collection is made up of similar objects that are read from source
@@ -67,7 +68,8 @@ class Collection(
     private val directory: String,
     _configs: MObj,
     protected val globals: IObj
-) extends Page:
+) extends Renderable
+    with Page:
 
   private val logger = Logger(s"${BLUE(name.capitalize)}")
 
@@ -147,17 +149,17 @@ class Collection(
   /** The toc will have default output extension html */
   protected lazy val outputExt = locals.getOrElse("outputExt")(".html")
 
-  protected lazy val render: String =
-    val str = layout match
-      case None => ""
-      case Some(p) =>
-        val c = MObj(
-          "site" -> globals,
-          "page" -> locals,
-          "items" -> DArr(sortedItems.map(_.locals))
-        )
-        c update CollectionHooks.beforeRenders(globals)(IObj(c))
-        p.renderWrap(IObj(c))
+  protected def render(up: IObj): String =
+    val context =
+      val c = MObj(
+        "site" -> globals,
+        "page" -> locals,
+        "items" -> DArr(sortedItems.map(_.locals))
+      )
+      c update CollectionHooks.beforeRenders(globals)(IObj(c))
+      c update up
+      IObj(c)
+    val str = render("", context)
     CollectionHooks.afterRenders(globals)(locals, str)
 
   /** This sorts out the items, renders them, and writes them to the disk */

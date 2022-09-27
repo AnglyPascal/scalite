@@ -8,15 +8,13 @@ import com.anglypascal.scalite.layouts.Layouts
   */
 trait Renderable:
 
-  /** The parent layout, might be None */
-  protected inline def layout =
-    Layouts.get(layoutName) orElse Layouts.get("empty")
-
   /** Name of the parent layout */
   protected lazy val layoutName: String
 
   /** An Element also has some internal variables that are publicly visible */
   lazy val locals: DObj
+
+  protected val globals: DObj
 
   /** Should this object be visible to the reset of the site? */
   val visible: Boolean
@@ -24,4 +22,9 @@ trait Renderable:
   /** Renders the contents of this page, using the template in the parent
     * layout, if it exists, and returns a HTML string.
     */
-  protected lazy val render: String
+  protected def render(update: DObj): String
+
+  protected def render(content: String, context: DObj): String =
+    Layouts.get(layoutName) orElse Layouts.get("empty") match
+      case Some(l) => l.render(context, content)
+      case None    => content

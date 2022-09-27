@@ -33,14 +33,14 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
     * @return
     *   the rendered layout as a string
     */
-  def render(context: DObj, content: String = ""): String
+  protected[layouts] def justRender(context: DObj, content: String = ""): String
 
   /** Wrapped render function, runs the hooks before and after the underlying
     * layout is rendered.
     */
-  def renderWrap(context: DObj, content: String = ""): String =
+  def render(context: DObj, content: String = ""): String =
     val c = context update LayoutHooks.beforeRenders(lang, name)(context, content)
-    val s = render(c, content)
+    val s = justRender(c, content)
     LayoutHooks.afterRenders(lang, name)(s)
 
   /** Parent of this layout, specified in the front matter */

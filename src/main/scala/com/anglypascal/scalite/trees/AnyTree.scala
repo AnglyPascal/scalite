@@ -56,20 +56,14 @@ abstract class AnyTree[A <: Renderable with WithTree[A]](_configs: MObj)
     IObj(temp)
 
   /** Return the rendered html string of this page */
-  protected lazy val render: String =
-    val context = IObj(
+  protected def render(up: IObj = IObj()): String =
+    val context = MObj(
       "site" -> globals,
       "page" -> locals,
       "items" -> DArr(items.map(_.locals).toList),
       "children" -> DArr(children.map(_.locals).toList)
-    )
-    layout match
-      case Some(l) =>
-        logger.trace(s"writing $treeType to $permalink")
-        l.renderWrap(context)
-      case None =>
-        logger.warn(s"${ERROR(treeName)}[$treeType] has no layout")
-        ""
+    ) update up
+    render("", IObj(context))
 
   protected lazy val layoutName: String =
     configs.extractOrElse("layout")(treeType)

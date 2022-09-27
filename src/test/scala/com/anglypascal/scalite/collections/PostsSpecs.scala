@@ -33,10 +33,9 @@ class PostsSpecs extends AsyncFlatSpec:
   Converters(MObj(), globals)
   PostForests(MObj(), globals)
 
-  val posts =
-    Collection(PostConstructor, "posts", pDir + pPth, configs, globals)
-
   it should "read all posts properly" in {
+    val posts =
+      Collection(PostConstructor, "posts", pDir + pPth, configs, globals)
     val future = Future { posts }
 
     future.map(l =>
@@ -46,6 +45,8 @@ class PostsSpecs extends AsyncFlatSpec:
   }
 
   it should "sort and filter the posts properly" in {
+    val posts =
+      Collection(PostConstructor, "posts", pDir + pPth, configs, globals)
     val future = Future { posts }
 
     future.map(l =>
@@ -54,6 +55,8 @@ class PostsSpecs extends AsyncFlatSpec:
   }
 
   it should "create local variables properly" in {
+    val posts =
+      Collection(PostConstructor, "posts", pDir + pPth, configs, globals)
     val future = Future { posts }
 
     future.map(l =>

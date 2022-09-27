@@ -169,9 +169,14 @@ object CollectionItems:
 
   private val _allItems = LinkedHashMap[String, Map[String, Element]]()
 
-  lazy val collectionItems = IObj(
-    _allItems.map(p => (p._1, IObj(p._2.map(t => (t._1, t._2.locals))))).toMap
-  )
+  lazy val collectionItems =
+    println("haha")
+    val i =  IObj(
+      _allItems.map(p => (p._1, IObj(p._2.map(t => (t._1, t._2.locals))))).toMap
+    )
+    println(i)
+    i
+
 
   def addItems(colName: String, items: Map[String, Element]): Unit =
     _allItems += colName -> items
