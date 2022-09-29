@@ -14,13 +14,13 @@ import com.anglypascal.scalite.documents.SourceFile
   */
 trait Element(rType: String) extends Renderable with SourceFile:
 
-  import com.anglypascal.scalite.documents.Reader
+  import com.anglypascal.scalite.utils.DirectoryReader
 
   lazy val identifier = filepath
 
-  protected val frontMatter = Reader.frontMatter(rType, filepath)
+  protected val frontMatter = DirectoryReader.frontMatter(rType, filepath)
 
-  protected lazy val mainMatter = Reader.mainMatter(filepath)
+  protected lazy val mainMatter = DirectoryReader.mainMatter(filepath)
 
   protected lazy val shouldConvert =
     frontMatter.getOrElse("shouldConvert")(true)

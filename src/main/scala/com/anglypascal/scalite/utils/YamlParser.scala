@@ -9,6 +9,7 @@ import com.rallyhealth.weejson.v1.Obj
 import com.rallyhealth.weejson.v1.Value
 import com.rallyhealth.weejson.v1.yaml.FromYaml
 import com.typesafe.scalalogging.Logger
+import com.rallyhealth.weepickle.v1.WeePickle.ToScala
 
 inline def yamlFileParser(inline path: String): Data =
   val logger = Logger("YAML File Parser")
@@ -39,3 +40,15 @@ inline def frontMatterParser(inline yaml: String): DObj =
     case e =>
       logger.error(e.getMessage())
       DObj()
+
+
+@main
+def runYaml =
+  val yaml = """
+haha: 1
+list: 
+  - 1
+  - 2
+  - 3
+"""
+  println(frontMatterParser(yaml))

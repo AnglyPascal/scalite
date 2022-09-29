@@ -22,7 +22,7 @@ trait Renderable:
   /** Renders the contents of this page, using the template in the parent
     * layout, if it exists, and returns a HTML string.
     */
-  protected def render(update: DObj): String
+  protected def render(up: DObj): String
 
   protected def render(content: String, context: DObj): String =
     Layouts.get(layoutName) orElse Layouts.get("empty") match

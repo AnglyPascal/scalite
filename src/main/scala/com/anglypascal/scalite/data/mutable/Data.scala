@@ -235,9 +235,7 @@ object DObj:
     new DObj(_obj.obj.map((k, v) => (k, DataImplicits.fromValue(v))))
 
 /** Mutable wrapper around Arr */
-final class DArr(private val arr: Buffer[Data])
-    extends Data
-    with Buffer[Data]:
+final class DArr(private val arr: Buffer[Data]) extends Data with Buffer[Data]:
 
   def immut: immutable.DArr = immutable.DArr(arr.map(_.immut))
 
@@ -309,8 +307,6 @@ object DArr:
 
   def apply(_arr: Any*) =
     new DArr(ArrayBuffer(_arr.map(DataImplicits.fromAny): _*))
-
-  def apply(_arr: Arr) = new DArr(_arr.arr.map(DataImplicits.fromValue))
 
 /** Wrapper for Str */
 final class DStr(private var _str: String) extends Data:
@@ -442,7 +438,7 @@ object DataImplicits:
   given fromValue: Conversion[Value, Data] =
     _ match
       case v: Obj  => DObj(v.obj)
-      case v: Arr  => DArr(v.arr)
+      case v: Arr  => DArr(v.arr.toArray: _*)
       case v: Str  => DStr(v.str)
       case v: Num  => DNum(v.num)
       case v: Bool => DBool(v.bool)

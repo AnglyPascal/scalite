@@ -95,7 +95,8 @@ class MustacheLayouts(
       .filter(matches(_))
       .map(f => {
         val m =
-          com.anglypascal.scalite.documents.Reader.mainMatter(partialsDir + f)
+          com.anglypascal.scalite.utils.DirectoryReader
+            .mainMatter(partialsDir + f)
         (getFileName(f), new Mustache(m))
       })
       .toMap

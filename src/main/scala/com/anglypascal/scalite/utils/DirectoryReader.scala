@@ -1,6 +1,10 @@
 package com.anglypascal.scalite.utils
 
 import com.typesafe.scalalogging.Logger
+import com.anglypascal.scalite.utils.Colors.*
+import com.anglypascal.scalite.ScopedDefaults
+import com.anglypascal.scalite.utils.frontMatterParser
+import com.anglypascal.scalite.data.mutable.DObj
 
 import java.io.File
 import java.nio.charset.StandardCharsets
@@ -8,8 +12,6 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import scala.io.Source
 import scala.util.matching.Regex
-
-import Colors.*
 
 object DirectoryReader:
 
@@ -82,3 +84,20 @@ object DirectoryReader:
 
   def apply(base: String) =
     writeTo = _writeTo(base)
+
+  private val yaml_regex = raw"\A---\n?([\s\S\n]*?)---\n?([\s\S\n]*)".r
+
+  inline def frontMatter(rType: String, filepath: String): DObj = 
+    val scope = ScopedDefaults.getDefaults(filepath, rType)
+    val src = readFile(filepath)
+    src match
+      case yaml_regex(a, b) =>
+        scope += "shouldConvert" -> true
+        scope update frontMatterParser(a)
+      case _ => scope += "shouldConvert" -> false
+
+  inline def mainMatter(filepath: String): String =
+    val src = readFile(filepath)
+    src match
+      case yaml_regex(a, b) => b.trim
+      case _                => src.trim

@@ -2,7 +2,7 @@ package com.anglypascal.scalite.layouts
 
 import com.anglypascal.scalite.data.immutable.DObj
 import com.anglypascal.scalite.data.mutable.DStr
-import com.anglypascal.scalite.documents.Reader
+import com.anglypascal.scalite.utils.DirectoryReader
 import com.anglypascal.scalite.documents.SourceFile
 import com.anglypascal.scalite.hooks.LayoutHooks
 import com.anglypascal.scalite.utils.Colors.*
@@ -16,11 +16,9 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
 
   protected lazy val shouldConvert = false
 
-  protected val frontMatter =
-    com.anglypascal.scalite.documents.Reader.frontMatter(lang, filepath)
+  protected val frontMatter = DirectoryReader.frontMatter(lang, filepath)
 
-  protected lazy val mainMatter =
-    com.anglypascal.scalite.documents.Reader.mainMatter(filepath)
+  protected lazy val mainMatter = DirectoryReader.mainMatter(filepath)
 
   // FIXME LayoutHooks.beforeInits(lang, name)(filepath)
 
@@ -39,7 +37,8 @@ abstract class Layout(val lang: String, val name: String) extends SourceFile:
     * layout is rendered.
     */
   def render(context: DObj, content: String = ""): String =
-    val c = context update LayoutHooks.beforeRenders(lang, name)(context, content)
+    val c =
+      context update LayoutHooks.beforeRenders(lang, name)(context, content)
     val s = justRender(c, content)
     LayoutHooks.afterRenders(lang, name)(s)
 
