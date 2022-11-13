@@ -36,6 +36,12 @@
 8. Make TagStyle and CategoryStyle into traits, also try to generalize the getPaths
    maybe? We can factor out a few more fields from these two.
 
+9. Found the solution to make Page truly as a Stackable trait. In traits extending
+   Page, we first define a general definition of a renderable, then create the final
+   defintion by extending it with Page
+
+   Check OtherPage and OtherPost. 
+
 
 ## Rewriting ideas:
 
@@ -46,6 +52,11 @@
 
 2. **Composition over inheritance**
     Page and Reader seem like something that should be composed. Look into it more
+
+3. To change the standalone object style, we'll need to 
+    - Write PluginManager as a function, it takes a list of plugin jar files and the
+        time they were loaded the last time, and a configuration MObj. It'll return a
+        tuple of lists containing all the plugins 
 
 
 ## Finished
@@ -112,3 +123,4 @@
 
     Add filters from jekyll in the layouts.helpers module.
     Make this into a pluginable trait
+

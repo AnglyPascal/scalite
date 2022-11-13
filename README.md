@@ -2,12 +2,25 @@
 
 [Under development]
 
-Scalite is a fully customizable blog-aware static site generator in Scala 3. 
+Scalite is a fully customizable blog-aware static site generator written in Scala 3. It
+takes input files in plain text, templates and stylesheets, and creates fully
+functional websites.
 
-Inspired from [Jekyll][jekyll], Scalite takes customizability on a different level. It
-works out of the box, it supports customization to its default behaviour through simple
-YAML configuration files, and each of its functionality can be extended with simple
-plugins.
+Most existing static-site generators force the user down an opinionated path to
+generating static websites, either by restricting the scope of customization or by
+restricting the format of input files. Scalite's vision is to abstract away all the
+low-level requirements for input files and achieve a robust generation process that is
+theoretically able to generate any kind of website. In one sense, Scalite may be
+considered a generator for static site generators, that is, one can emulate any other
+site generator with Scalite by modifying YAML configuration and implementing plugins.
+
+As an example, one of the core features of modern site generators is templates. Most
+languages focus on a specific template and strongly integrate that templating language
+with the rest of the code to optimize the generation runtime. Scalite takes a different
+approach to this by providing an API for custom templating language implementations, at
+a cost of slightly higher runtime. All the other features, like, plain-text inputs,
+stylesheets, scripts, page structure etc. are also implemented abstractly to provide
+full flexibility.
 
 ## Features
 

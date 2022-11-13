@@ -44,6 +44,11 @@ trait Page:
   /** The extension of the output file */
   protected lazy val outputExt: String // this will have to be in urlObj, no?
 
+  /** FIXME could be written as a static method in Pages object. The structure of this
+   *  method is the same for all the pages. So why bother hving an instance of this
+   *  method in every Page object? **FLYWEIGHT** pattern
+   */
+
   /** Method to write the content returned by the render method to the output
     * file at a relative path given by the relative permalink.
     *
