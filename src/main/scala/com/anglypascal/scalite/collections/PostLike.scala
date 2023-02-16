@@ -46,8 +46,8 @@ import com.anglypascal.scalite.documents.Convertible
   * @param collection
   *   the configurations passed to the whole collection
   *
-  * FIXME: showExcerpt should be defaulted by the collection, and elements
-  * should have the ability to turn it off
+  * FIXME: showExcerpt should be defaulted by the collection, and
+  * elements should have the ability to turn it off
   */
 class PostLike(rType: String)(
     val parentDir: String,
@@ -63,41 +63,46 @@ class PostLike(rType: String)(
   logger.debug("source: " + GREEN(filepath))
 
   protected val configs: MObj =
-    val c = MObj() update collection update frontMatter update MObj(
-      "rType" -> rType,
-      "parentDir" -> parentDir,
-      "relativePath" -> relativePath
-    )
+    val c =
+      MObj() update collection update frontMatter update MObj(
+        "rType" -> rType,
+        "parentDir" -> parentDir,
+        "relativePath" -> relativePath
+      )
     c update PostHooks.beforeInits(globals)(IObj(c))
 
-  /** Get the parent layout name, if it exists. Layouts might not have a parent
-    * layout, but each post needs to have one.
+  /** Get the parent layout name, if it exists. Layouts might not
+    * have a parent layout, but each post needs to have one.
     */
   protected lazy val layoutName =
     extractChain(configs, collection)("layout")(rType)
 
-  /** Get the title of the post from the front matter, defaulting back to the
-    * title parsed from the filepath. If the filepath has no title given, simply
-    * name this post "untitled"
+  /** Get the title of the post from the front matter, defaulting
+    * back to the title parsed from the filepath. If the filepath
+    * has no title given, simply name this post "untitled"
     */
   lazy val title: String =
     configs.extractOrElse("title")(
       configs.extractOrElse("name")(
-        titleParser(filename).map(titlify(_)).getOrElse("Untitled")
+        titleParser(filename)
+          .map(titlify(_))
+          .getOrElse("Untitled")
       )
     )
 
-  /** The date in configs may have extra information like time and time-zone.
-    * Nothing is necessary, but if date is being given, it has to be given in
-    * full, if time is given, it has to be given in full.
+  /** The date in configs may have extra information like time and
+    * time-zone. Nothing is necessary, but if date is being given,
+    * it has to be given in full, if time is given, it has to be
+    * given in full.
     */
   lazy val date = urlObj.getOrElse("dateString")("undated")
 
-  /** TODO: Will later add support for getting the modified time values in the
-    * case when the date/time is not specified in either the title name or the
-    * configs
+  /** TODO: Will later add support for getting the modified time
+    * values in the case when the date/time is not specified in
+    * either the title name or the configs
     *
-    * Maybe DraftPost will extend Post overriding this time handling thing
+    * Maybe DraftPost will extend Post overriding this time
+    * handling thing
     */
   private lazy val urlObj: IObj =
     val dateString = configs.extractOrElse("date")(filename)
@@ -106,7 +111,10 @@ class PostLike(rType: String)(
     )(Defaults.dateFormat)
     val obj = dateParseObj(dateString, dateFormat) update MObj(
       "title" -> title,
-      "lastModifiedTime" -> lastModifiedTime(filepath, dateFormat),
+      "lastModifiedTime" -> lastModifiedTime(
+        filepath,
+        dateFormat
+      ),
       "outputExt" -> outputExt,
       "filename" -> filename,
       "collection" -> collection.getOrElse("name")("posts"),
@@ -132,9 +140,10 @@ class PostLike(rType: String)(
       )
     purifyUrl(URL(permalinkTemplate)(urlObj))
 
-  /** Returns whether to render this post or not. Can be set in the the front
-    * matter of the post, in the defaults of its scope, or in the collections as
-    * a global value. Default is true.
+  /** Returns whether to render this post or not. Can be set in
+    * the the front matter of the post, in the defaults of its
+    * scope, or in the collections as a global value. Default is
+    * true.
     */
   val visible = extractChain(configs, collection)("visible")(true)
 
@@ -145,7 +154,8 @@ class PostLike(rType: String)(
 
   lazy val locals =
     val l = _locals
-    if configs.getOrElse("showExcerpt")(false) then l += "excerpt" -> excerpt
+    if configs.getOrElse("showExcerpt")(false) then
+      l += "excerpt" -> excerpt
     IObj(l)
 
   private def _locals =
@@ -163,7 +173,9 @@ class PostLike(rType: String)(
   /** Extract excerpt from the mainMatter */
   private def excerpt: String =
     val separator =
-      extractChain(configs, globals)("separator")(Defaults.separator)
+      extractChain(configs, globals)("separator")(
+        Defaults.separator
+      )
     Excerpt(
       mainMatter,
       filepath,
@@ -173,10 +185,11 @@ class PostLike(rType: String)(
 
   /** Prepares hyperlinks to local pages for use in the templates.
     *
-    * Picks up all maps "link_name" -> "relative or absolute path to the file"
-    * under the hyperlinks section of configs. This link will be available to
-    * the templates in the root context as "link name", and can be used as
-    * {{link_name}} in mustache.
+    * Picks up all maps "link_name" -> "relative or absolute path
+    * to the file" under the hyperlinks section of configs. This
+    * link will be available to the templates in the root context
+    * as "link name", and can be used as {{link_name}} in
+    * mustache.
     *
     * @example
     *   {{{
@@ -184,13 +197,15 @@ class PostLike(rType: String)(
     *   post1: /_posts/2022-04-01-post-name.md
     *   post2: /_posts/cat1/2022-04-01-post-name-2.md
     *   }}}
-    *   These links then can be used as mustache or other tags like {{post1}}
+    *   These links then can be used as mustache or other tags
+    *   like {{post1}}
     */
   private def postUrls: Map[String, String] =
     def f(p: (String, Data)): Option[(String, String)] =
       p._2 match
-        case str: DStr => Pages.findPage(str.str).map(p._1 -> _.permalink)
-        case _         => None
+        case str: DStr =>
+          Pages.findPage(str.str).map(p._1 -> _.permalink)
+        case _ => None
     configs.extractOrElse("hyperlinks")(MObj()).flatMap(f).toMap
 
   private inline def convert: String =
@@ -208,11 +223,14 @@ class PostLike(rType: String)(
         "collectionItems" -> CollectionItems.collectionItems,
         "trees" -> treeObj
       )
-    val context = IObj(PostHooks.beforeRenders(globals)(IObj(c)) update up)
+    val context = IObj(
+      PostHooks.beforeRenders(globals)(IObj(c)) update up
+    )
     val r = render(str, context)
     PostHooks.afterRenders(globals)(context, r)
 
-  /** Return the global settings for the collection-type treeType */
+  /** Return the global settings for the collection-type treeType
+    */
   def getTreesList(treeType: String): Data =
     configs.extractOrElse(treeType)(DNull)
 
@@ -238,4 +256,9 @@ object PostConstructor extends ElemConstructor:
       globals: IObj,
       collection: IObj
   ): Element =
-    new PostLike(rType)(parentDir, relativePath, globals, collection)
+    new PostLike(rType)(
+      parentDir,
+      relativePath,
+      globals,
+      collection
+    )

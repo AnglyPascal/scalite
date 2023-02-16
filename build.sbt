@@ -21,7 +21,7 @@ lazy val root = project
       "org.scala-lang.modules" %% "scala-parallel-collections" % "1.0.4",
       "de.larsgrefer.sass" % "sass-embedded-host" % "1.6.1"
     ),
-    libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.14",
+    /* libraryDependencies += "org.typelevel" %% "cats-effect" % "3.3.14", */
     libraryDependencies ++= Seq(
       "ch.qos.logback" % "logback-classic" % "1.4.0",
       "com.typesafe.scala-logging" %% "scala-logging" % "3.9.4"

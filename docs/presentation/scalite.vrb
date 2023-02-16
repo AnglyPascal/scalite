@@ -1,0 +1,17 @@
+\frametitle{\texttt {Page: write}}
+\begin{lstlisting}[style=myscala]
+trait Page:
+  this: Renderable =>
+
+  def write(dryRun: Boolean = false): Unit =
+    if !visible then return
+    val path = /** destination */
+
+    if !dryRun then
+      val up = PageHooks.beforeRenders(globals)(locals)
+      val str = render(IObj(up))
+      val r = PageHooks.afterRenders(globals)(locals, str)
+      writeTo(path, r)
+      PageHooks.afterWrites(globals)(this)
+    else return
+    \end{lstlisting}

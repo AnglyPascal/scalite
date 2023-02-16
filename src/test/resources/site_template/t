@@ -1,0 +1,42 @@
+.
+├── _assets
+├── _config.yml
+├── _layouts
+│   ├── default.mustache
+│   ├── main.mustache
+│   ├── page.mustache
+│   ├── people.mustache
+│   ├── post.mustache
+│   └── tag.mustache
+├── nerds
+│   ├── n1.md
+│   ├── n2.md
+│   └── n3.md
+├── _partials
+│   ├── footer.mustache
+│   ├── header.mustache
+│   └── head.mustache
+├── _people
+│   ├── p1.md
+│   └── p2.md
+├── _plugins
+├── _posts
+│   ├── 2016-05-19-super-short-article.md
+│   ├── 2016-05-20-my-example-post.md
+│   ├── 2022-08-29-categories-test.md
+│   ├── 2022-09-12-post-with-links.md
+│   ├── 2022-09-19-categories-arr-test.md
+│   ├── 2022-09-19-categories-obj-test.md
+│   └── 2022-09-19-categories-str-test.md
+├── _sass
+│   ├── bar.scss
+│   ├── _baz.scss
+│   └── classpathImport.scss
+├── _scripts
+├── _site
+├── _statics
+│   ├── about.md
+│   └── index.md
+└── t
+
+12 directories, 28 files

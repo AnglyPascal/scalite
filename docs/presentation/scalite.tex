@@ -1,0 +1,536 @@
+\documentclass[compress, aspectratio=169]{beamer}
+\usepackage[noindex, ]{ahsan_new}
+\usepackage{pdfpages}
+
+\title{Scalite}
+\subtitle{A blog-aware static site generator}
+
+\renewcommand{\codefontsize}{\color{BestBlack}\footnotesize}
+\renewcommand{\commentstyle}{\color{DimGray}}
+
+\usepackage[none]{hyphenat}
+
+\setbeamersize{description width=.1em}
+\renewcommand{\imp}[1]{\texttt{\textbf{#1}}}
+\renewcommand{\note}[1]{\textcolor{NordGreen}{#1}}
+
+
+\AtBeginSection[]{
+  \begin{frame}[c,noframenumbering,plain]
+    \tableofcontents[sectionstyle=show/hide,subsectionstyle=show/show/hide]
+  \end{frame}
+}
+
+\AtBeginSubsection[]{
+  \begin{frame}[c,noframenumbering,plain]
+    \tableofcontents[sectionstyle=show/hide,subsectionstyle=show/shaded/hide]
+  \end{frame}
+}
+
+\begin{document}
+
+\begin{frame}[plain,noframenumbering]
+  \maketitle
+\end{frame}
+
+\section{What is it?}
+
+\begin{frame}
+    Scalite is a general purpose static site generator. 
+
+    Inputs are:
+    \begin{itemize}
+        \item Contents of the website
+            \begin{itemize}
+                \item in the form of formatted text files such as Markdown,
+                    reStructuredText, Textile etc.
+            \end{itemize}
+            \pause
+        \item Templates specifying the layout of the webpages
+            \begin{itemize}
+                \item rendered with the contents of text files and other parameters
+            \end{itemize}
+            \pause
+        \item Configuration files
+            \begin{itemize}
+                \item YAML, JSON files specifying configurations, variables etc.
+            \end{itemize}
+            \pause
+        \item Stylesheets: SASS, CSS etc.
+    \end{itemize}
+    \pause
+
+    The output is a static website with the HTML, CSS and JS files in proper directory
+    structure.
+\end{frame}
+
+\begin{frame}[fragile]{How it works}
+    The user sets up a folder with the following folder structure:
+\begin{lstlisting}[style=fonts]
+.
++-- _assets
+|   +-- website assets go here
++-- _layouts
+|   +-- template files go here
++-- _plugins
+|   +-- plugins go here
++-- _posts
+|   +-- posts (in a blog) or other page contents go here
++-- _sass
+|   +-- stylesheets go here
++-- _config.yml
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{How it works}
+    Scalite then finds all the files, loads them in the runtime. It then
+    \begin{itemize}
+        \item Reads the configurations
+            \begin{itemize}
+                \item Loads the specified plugins
+            \end{itemize}
+            \pause
+        \item Converts all formatted text files into HTML files
+            \begin{itemize}
+                \item Users can provide converter plugins to support new formats 
+            \end{itemize}
+            \pause
+        \item Create \imp{Page} objects, and 
+            \begin{itemize}
+                \item handles cross referencing
+                \item creates categories and tags
+                \item and other features the user specifies
+            \end{itemize}
+            \pause
+        \item For each specified page, loads its template, converted contents and
+            compiles the files into final HTML files
+            \pause
+        \item Creates the destination folder, copies the pages and assets to the
+            destination folder
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+    \vspace{-1.4em}
+    \begin{minipage}[t]{.47\linewidth}
+    \begin{lstlisting}[style=mymd, caption={hello_world.md}]
+---
+# YAML header
+# local variables, configs
+title: Front Page
+tag: tag1, tag2
+---
+
+Hello, **World**!
+    \end{lstlisting}
+    \end{minipage}\hfill%
+    \begin{minipage}[t]{.47\linewidth}
+    \begin{lstlisting}[style=myhtml, caption={page.mustache}]
+<html>
+  <body>
+    <header>
+      {{ title }}
+    </header>
+    {{> content}}
+  </body>
+</html>
+    \end{lstlisting}
+    \end{minipage}
+
+    \begin{lstlisting}[style=myhtml, caption={hello_world.html}]
+<html>
+  <body>
+    <header>
+      Front Page
+    </header>
+    Hello, <b>World</b>!
+  </body>
+</html>
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}{Motivation}
+    Scalite is inspired from \textbf{Jekyll}. It's is an attempt to recreate Jekyll
+    while generalizing many of its features. 
+
+    Scalite attempts to identify the core components, and make them as loosely
+    coupled as possible. 
+\end{frame}
+
+\begin{frame}{Motivation}
+    Scalite's core goals are:
+    \begin{itemize}[<+->]
+        \item To be language agnostic:
+            \begin{itemize}
+                \item it should support contents written in any markup language
+                \item it should support any templating language
+            \end{itemize}
+        \item To be easy to use, configurable, and flexible
+            \begin{itemize}
+                \item all the features should be customizable through config files
+            \end{itemize}
+        \item To be extensible and fully customizable
+            \begin{itemize}
+                \item plugins should have a powerful API
+            \end{itemize}
+        \item It should never assume any particular website structure
+            \begin{itemize}
+                \item the website structure should be easily modifyable
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Sacrifices}
+    However, flexibility comes at a cost,
+    \begin{itemize}[<+->]
+        \item Implementation becomes exponentially complex
+            \begin{itemize}
+                \item strong type system of Scala makes it more complicated
+            \end{itemize}
+        \item Class definitions are generalized to be loaded at runtime to simplify
+            plugin implementation
+            \begin{itemize}
+                \item But this incurs heavy runtime overhead
+            \end{itemize}
+        \item Great deal of consideration is needed to define what plugins can and
+            can't control
+            \begin{itemize}
+                \item There might be data leakage bugs unless immutable data structures
+                    are used throughout
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\section{Project Structure}
+
+\begin{frame}[fragile]{Project structure: Basis}
+    Basis modules that are more or less used by all other modules:
+    \begin{itemize}
+        \item \imp{documents}: module defining interfaces for common features 
+            \begin{itemize}
+                \item \imp{Assets}: Class to handle asset files
+                \item \imp{Convertible}: files that need to be converted to some
+                    other format
+                \item \imp{Page, Renderable, SourceFile}: Mixins defining properties
+            \end{itemize}
+            \pause
+        \item \imp{data}: module defining JSON-like data structures
+            \begin{itemize}
+                \item \imp{immutable}: read-only JSON-like structures. 
+                    \begin{itemize}
+                        \item communicating with external plugins 
+                        \item storing global variables
+                    \end{itemize}
+                \item \imp{mutable}: mutable JSON-like structures
+            \end{itemize}
+            \pause
+        \item \imp{util}: utility functions, parsers, logging mechanism etc.
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Project structure: Convertibles}
+    \begin{itemize}[<+->]
+        \item \imp{converters}: module defining source file -> html logic 
+            \begin{itemize}
+                \item \imp{Converter}: defines \imp{Converter} interface
+                \item \imp{Converters}: singleton object contianing all
+                    converters available at runtime
+            \end{itemize}
+            % \pause
+        \item \imp{layouts}: module defining template files
+            \begin{itemize}
+                \item \imp{Layout}: Interface for a single template
+                \item \imp{LayoutGroup}: Set of templates of the same language
+                    \begin{itemize}
+                        \item custom \imp{LayoutGroup}s for other
+                            languages via plugins
+                    \end{itemize}
+                \item \imp{Layouts}: Singleton object with all layouts of various
+                    languages available at runtime
+            \end{itemize}
+
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Project Structure: Website content}
+    Contents of the website are defined as \texttt{Collection}s of \texttt{Element}s.
+    \begin{itemize}[<+->]
+        \item \imp{collections}: collection of contents
+            \begin{itemize}
+                \item \imp{Element}: interface of an element 
+                    \begin{itemize}
+                        \item \imp{PostLike}: blog-post like contents 
+                        \item \imp{PageLike}: static page like content, i.e.
+                            \imp{about, index} pages
+                        \item \imp{ItemLike}: non-page elements to be inserted in
+                            other elements
+                        \item \imp{user_defined}: custom element styles via plugins
+                    \end{itemize}
+                    \pause
+                \item \imp{Collection}: a single collection, typically sourced from a
+                    single folder. 
+                \item \imp{Collections}: Singleton object holding all available
+                    collections
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Project structure: Categorizing}
+    In any website, webpages are stored in the device in a tree like structure.
+    Similarly, blogs typically have categories, tags etc. to structure the posts. We
+    generalize this notion using \texttt{trees} module:
+    \begin{itemize}[<+->]
+        \item \imp{trees}: module defining structure of the pages
+            \begin{itemize}
+                \item \imp{Tree}: Interface defining nodes of a \texttt{Tree} containing
+                    contents
+                \item \imp{AnyTree}: A generic implementation of \texttt{Tree}.
+                    \begin{itemize}
+                        \item \imp{CategoryStyle}: defines a category style tree
+                            structure
+                        \item \imp{TagStyle}: defines shallow trees for Tags
+                    \end{itemize}
+                \item \imp{Forest}: A set of specific type of \texttt{Tree}s
+                \item \imp{PostForests}: Singleton object holding all \texttt{Forest}s
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Project structure: Categorizing}
+    \begin{minipage}[t]{.48\linewidth}
+\begin{lstlisting}[style=fonts]
+             tags
+       _______|_______
+       |      |      |
+      tag1  tag4   tag5
+\end{lstlisting}
+    \end{minipage}\hfill%
+    \begin{minipage}[t]{.48\linewidth}
+\begin{lstlisting}[style=fonts]
+           categories
+     __________|__________
+     |         |         |
+    cat1     cat4      cat5
+  ___|___                |      
+  |     |              cat6 
+ cat2  cat3 
+\end{lstlisting}
+    \end{minipage}
+    
+    Here, each post, page or any other element can belong to any number of tag
+    \texttt{tag}\(_{i}\) and any number of category \texttt{cat}\(_{i}\).
+    \pause
+
+    If the user wishes, these tree nodes can be rendered into seperate webpages to make
+    navigation in the website easier.
+\end{frame}
+
+\begin{frame}{Project structure: Plugins and Hooks}
+    \begin{itemize}
+        \item \imp{Plugin}: An interface for objects that can be provided as plugins
+            \begin{itemize}
+                \item \imp{PluginManager}: Loads all specified plugins from
+                    \texttt{/_plugins}
+            \end{itemize}
+            \pause
+        \item \imp{hooks}: define runtime hooks for fine-grained control. 
+            \begin{itemize}
+                \item Each module has places where hook plugins can anchor to and
+                    modify the data-flow \pause
+                \item For example, 
+                    \begin{itemize}
+                        \item before or after reading source files,
+                        \item before and after conversion, 
+                        \item before or after rending templates etc.
+                    \end{itemize}
+                    \pause
+                \item Hooks are implemented in Publisher-Subscriber pattern \pause
+                \item They are added to the objects at runtime by the
+                    \texttt{PluginManager}.
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{Project structure: Config file}
+    The config file \texttt{/_config.yml} allows the user to set global configurations.
+    It has the structure
+\begin{lstlisting}[style=myyml]
+#-- Global settings and variables --#
+title: My site  # variable
+show_excerpts: false  # setting
+
+#-- Module settings --#
+collections: #-- settings to be passed to Collections object --#
+    posts: true
+    articles: 
+        output: true
+        folder: /_articles
+plugins:
+    textile: #-- settings to be passed to textile plugin --#
+\end{lstlisting}
+\end{frame}
+
+\begin{frame}{Project structure: Putting it together}
+    \imp{Site} class at the root of the project puts all of the components together:
+    \begin{itemize}
+        \item Load global configurations from \texttt{/_config.yml}
+        \item Send configurations to each module and load plugins
+        \item \texttt{build()} command processes all the modules 
+    \end{itemize}
+\end{frame}
+
+\begin{frame}{Libraries}
+    \begin{itemize}
+        \item \imp{weePickle}: To read configurations from YAML files and create
+            internal repsentations of the data
+        \item \imp{nscala-time}: To handle date-time calculation
+        \item \imp{scala-parallel-collections}: For concurrency
+        \item \imp{scala-uri}: To parse/simplify url/uri
+        \item \imp{laika}: For the default Markdown->HTML converter
+        \item \imp{scala-logging} and \imp{logback-classic}: To support logging
+        \item \imp{scala-mustache}: The default compiler for mustache templates
+    \end{itemize}
+\end{frame}
+
+\section{Implementation Details}
+
+\begin{frame}{Design patterns}
+    \begin{itemize}
+        \item Modules are written in builder design pattern. 
+            \begin{itemize}
+                \item The constructors for the objects are specified at the runtime,
+                    based on the plugins provided, or the configuration files
+            \end{itemize}
+        \pause
+        \item Work is done by singleton objects, that
+            \begin{itemize}
+                \item receive configurations
+                \item set up the constructors
+                \item fetches and arranges files
+                \item compilers/renders files
+                \item writes them back to the disk
+            \end{itemize}
+    \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Collections}}
+    \begin{lstlisting}[style=myscala]
+object Collections extends Configurable with Generator:
+  /** section in the configs */
+  val sectionName: String = "collections"
+
+  /** Avaiable Element styles */
+  private val styles = LinkedHashMap[String, ElemConstructor](
+    "post" -> PostConstructor,
+    "page" -> PageConstructor,
+    "item" -> ItemConstructor
+  )
+
+  /** Plugins may add more constructors to this table */
+  def addStyle(elemCons: ElemConstructor): Unit = ...
+  ...
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Collections}: \texttt{apply}}
+    \vspace{.5em}
+    \begin{lstlisting}[style=myscala]
+  ...
+  private val collections = ListBuffer[Collection]()
+  
+  /** process all collections and writes to destination */
+  def process(dryRun: Boolean = false): Unit =
+    for col <- collections.par do col.process(dryRun)
+
+  /** Gets configuration set in "collections" section of
+    * '_configs.yml' and creates necessary Collection objects */
+  def apply(_configs: MObj, globals: IObj): Unit =
+    // update method is provided by data module
+    val configs = defaultConfigs update _configs 
+
+    // get values from the configs
+    val base = /** base directory **/
+    val colsDir = /** relative directory where collections are */
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Collections}: \texttt{apply} cont.}
+    \vspace{.5em}
+    \begin{lstlisting}[style=myscala]
+    // create collection for each name in collecionsDir
+    for (name, config) <- configs do
+      config match
+        case config: MObj =>
+          // what kind of elements we want to make
+          val style = config.extractOrElse("style")("item")
+          val output = /** write the elements to destination? */
+          if !output then logger.debug(s"won't output ${RED(name)}")
+          else
+            val dir = /** absolute directory of elements */
+            val Col = 
+              Collection( styles(style), // element constructor
+                          name, dir, configs, globals )
+            /** handle item collections so that other collections 
+              * have access to the items */
+            collections += Col // add to the collections map
+        case _ => /** log error */
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Collection}}
+    \vspace{.5em}
+    \begin{lstlisting}[style=myscala]
+class Collection(
+    private val elemCons: ElemConstructor, // element constructor
+    val name: String, // name of collection
+    private val directory: String, // absolute directory 
+    _configs: MObj, // configs for this collection
+    protected val globals: IObj // global configs and variables
+) extends Renderable with Page:
+
+  /** fetch all items of this collection */
+  lazy val items: Map[String, Element] =
+    lazy val constructor =  elemCons(name) // create the constructor
+    val files = getListOfFilepaths(directory)
+
+    def f(fn: String) = /** construct fn -> Element object pair */
+    files.filter(Converters.hasConverter).map(f).toMap
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Collection}: \texttt{process}}
+    \begin{lstlisting}[style=myscala]
+  protected[collections] def process(dryrun: Boolean = false) =
+    for item <- items.values do
+      item match
+        case item: Page => item.write(dryrun) // only write Pages
+        case _          => ()
+    write(dryrun) // write the index page of this collection
+    CollectionHooks.afterWrites(globals)(this)  
+    // run after write hooks attached to the collections
+    \end{lstlisting}
+\end{frame}
+
+\begin{frame}[fragile]{\texttt{Page: write}}
+    \begin{lstlisting}[style=myscala]
+trait Page:
+  this: Renderable =>
+
+  def write(dryRun: Boolean = false): Unit =
+    if !visible then return
+    val path = /** destination */
+
+    if !dryRun then
+      val up = PageHooks.beforeRenders(globals)(locals)
+      val str = render(IObj(up))
+      val r = PageHooks.afterRenders(globals)(locals, str)
+      writeTo(path, r)
+      PageHooks.afterWrites(globals)(this)
+    else return
+    \end{lstlisting}
+\end{frame}
+
+% \section{Libraries used}
+
+
+\end{document}
